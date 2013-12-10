@@ -42,29 +42,19 @@
         <script src="js/html5sql.js"></script>
         <script src="js/jquery.autocomplete.min.js"></script>
         <script src='js/fastclick.js'></script>
- 
-        <!--Code is disabled on debugging-->
+
         <script>
-            var p_mobileDevice = true;
-            //debugger
             //Android
             if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
-                document.write("<script src='js/cordova-2.9.0_android.js'><\/script>");                
+                document.write("<script src='js/cordova-2.9.0_android.js'><\/script>");
             }
             // IOS
             else if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
                 document.write("<script src='js/cordova-2.9.0_ios.js'><\/script>");
             }
-            else {
-                p_mobileDevice = false;
-            }
-        </script>
 
-
-        <script>
-            //$.support.cors = true; 
             document.addEventListener("deviceready", onDeviceReady, false);
-            
+            //$.support.cors = true; 
             //p_urlServer = 'http://nkftp.dyndns.org:81/loreal/eService.asmx',
             //http://localhost:64619/eService.asmx
             // Global vars
@@ -87,14 +77,21 @@
                     p_notiid,
                     p_notiInterval = 5 * 1000,
                     p_notiExpiryInterval = 3 * 60 * 60 * 1000;
-            
+
+            // Trigger for webpage
             $(document).ready(function() {
-                if (p_mobileDevice === false){
-                    onDeviceReady();
-                }
+                initPages();
             })
-            //$(document).ready(function() {
+
+            // Trigger for mobile apps
             function onDeviceReady() {
+                initPages();
+            }
+
+            function initPages() {
+                if ($('#pg_firstlog').children().size() > 0) {
+                    return;
+                }
                 //alert('Device Ready');
                 // Notes: Donot refresh page in the main page, this will cause some problems e.g. the main page will be gone if there is a popup
                 $.mobile.popup.prototype.options.history = false;
@@ -163,10 +160,9 @@
                 // Check Login
                 checkFirstLog();
                 // Get Document Height one time
-                p_doch = $(this).height();
+                //p_doch = $(this).height();
+                p_doch = $(document).height();
 
-
-//            }); // End of Document.Read
             }
 
             // Global functions
@@ -590,6 +586,6 @@
         <div id="divContainer" class="divContainer-page">           
             <div data-role="page" id="pg_empty">                 
             </div>           
-        </div>    
+        </div>           
     </body>
 </html>
