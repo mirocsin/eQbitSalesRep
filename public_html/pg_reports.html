@@ -1,0 +1,23 @@
+<!--<link rel="stylesheet" href="css/jpm-page.css" />-->
+<style>
+</style>
+<div data-role="page" id="pg_reports" data-theme="a" class="jpm-page">    
+    <div data-role="header" data-position="fixed">
+        <a id="pgreports_btnBack" href="#" data-icon="home">Back</a>
+        <h1>Reports</h1>
+    </div>    
+    <div data-role="content" >
+        Report contents...
+    </div>
+</div>
+
+<script>
+    $("#pg_reports").on("pagebeforeshow", function(event, ui) {
+        pg_reports_pageInit();
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    });
+    function pg_reports_pageInit(){
+        $('#pgreports_btnBack').attr("href",p_mainpg);
+    }
+</script>

@@ -1,0 +1,76 @@
+<div id="pgemp_dvappt" >
+    <div data-role="header" >
+        <h1>Appointments</h1>
+        <a href="#" data-icon="plug" class="ui-btn-right" id="pgemp_btnnewappt">New Appointment</a>        
+    </div>
+    <div data-role="content">
+        <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false" data-collapsed="false">
+            <h2>Appointments List</h2>                         
+            <ul id='pgemp_ulapplist' data-role="listview"></ul>
+
+            <!--            <h2><div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">3</div>Appointments Today</h2>                         
+                        <ul data-role="listview">
+                            <li data-icon="false"><a href="#" onclick="btnmapopt_click(this)" >
+                                    <img src="img/urgent.png" alt="" style="padding:5px 10px"/>
+                                    <h3 class="autowrap">Sample Urgent Appointment - Guardian-Causeway Point</h3>
+                                    <p class="autowrap">11/10/2013 2:30pm</p>
+                                    <input type='hidden' id='hidlocate1' value='Singapore 738099'/>
+                                </a></li>
+                            <li data-icon="false"><a href="#" onclick="btnmapopt_click(this)" >
+                                    <img src="img/new.png" alt="" style="padding:5px 10px"/>
+                                    <h3 class="autowrap">Sample New Appointment - Watson-Lucky Plaza</h3>
+                                    <p class="autowrap">15/10/2013 10:30am</p>
+                                    <input type='hidden' id='hidlocate2' value='Singapore 238863'/>
+                                </a></li>
+                            <li data-icon="false"><a href="#" onclick="btnmapopt_click(this)" >
+                                    <img src="img/edited.png" alt="" style="padding:5px 10px"/>
+                                    <h3 class="autowrap">Sample Edited Appointment - Tony & Guy Salon-The Star</h3>
+                                    <p class="autowrap">15/10/2013 10:30am</p>
+                                    <input type='hidden' id='hidlocate3' value='Singapore 138617'/>
+                                </a></li>
+                            <li data-icon="false"><a href="#" onclick="btnmapopt_click(this)" >
+                                    <img src="img/visited.png" alt="" style="padding:5px 10px"/>
+                                    <h3 class="autowrap">Sample Visited Appointment - Next ION Orchard</h3>
+                                    <p class="autowrap">15/10/2013 10:30am</p>
+                                    <input type='hidden' id='hidlocate4' value='Singapore 238801'/>
+                                </a></li>
+                        </ul>-->
+        </div>
+    </div>
+
+</div>
+<script>
+    function pgemp_dvappt_pagebeforeshow() {
+        p_db.transaction(function(tx) {
+            tx.executeSql("SELECT * FROM tblappointments WHERE dtype<>'DELETE' ORDER BY dtRecordModed DESC LIMIT 20", [], pgemp_list, pgemp_listfail);
+        });
+    }
+    function pgemp_list(tx, results) {
+        $('#pgemp_ulapplist').empty();
+        var intlist = 0;
+        var strline = '<li data-icon="false"><a href="#" onclick="btnmapopt_click(this)"><img src="img/urgent.png" alt="" style="padding:5px 10px"/><h3 class="autowrap">@customer - @remarks</h3><p class="autowrap">@date @time</p><input type="hidden id=@hidlocate value=@country @zipcode/></a></li>';
+        for (i = 0; i < results.rows.length; i++) {
+            var strline2 = strline;
+            intlist = intlist + i
+            strline2 = strline2.replace('@customer',results.rows.item(i).vchCust_Name);
+            strline2 = strline2.replace('@remarks',results.rows.item(i).vchRemarks);
+            strline2 = strline2.replace('@date',results.rows.item(i).vchAppt_Date);
+            strline2 = strline2.replace('@time',results.rows.item(i).vchAppt_Time);
+            strline2 = strline2.replace('@hidlocate','hidlocate' + intlist.toString());
+            strline2 = strline2.replace('@country',results.rows.item(i).vchAppt_Cntry);
+            strline2 = strline2.replace('@zipcode',results.rows.item(i).vchAppt_Zip);
+           $('#pgemp_ulapplist').append(strline2);
+        }
+        $('#pgemp_ulapplist').listview('refresh');
+    }
+    function pgemp_listfail(tx, err) {
+        alert("Error processing SQL: " + err.message);
+    }
+    $('#pgemp_btnnewappt').on('click', function() {
+        $.mobile.changePage('#pg_appointments', {transition: "slide", reverse: false});
+    });
+    function pgemp_dvappt_onSlideDown() {
+        //alert('slide Down');
+    }
+</script>
+

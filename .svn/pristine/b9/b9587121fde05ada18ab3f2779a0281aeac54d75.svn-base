@@ -1,0 +1,81 @@
+<div id="pgmem_dvorder" >
+    <style scoped>
+        #pgmem_dvorder_subheader .nav-glyphish-example{
+            padding-top: 40px !important; 
+        }
+    </style>
+    <div id="pgmem_dvorder_header" data-role="header">
+        <a href="" data-icon="refresh" class="ui-btn-left" id="pgmem_dvorder_btnsync">Sync</a>
+        <h1>Orders</h1>        
+        <a href="#" data-icon="plus" class="ui-btn-right" id="pgmem_btnneworder">New Order</a>
+        <div id="pgmem_dvorder_subheader" data-role="navbar" class="nav-glyphish-example" data-grid="b"> 
+            <ul id="pgmem_dvordernavbar"> 
+                <li><a href="#" id="pgmem_dvorder_dvpending_btn" data-icon="custom">Pending</a></li> 
+                <li><a href="#" id="pgmem_dvorder_dvclosed_btn" data-icon="custom">Closed</a></li>
+                <li><a href="#" id="pgmem_dvorder_dvapprov_btn" data-icon="custom">Approved</a></li>
+            </ul>             
+        </div>
+    </div>
+</div>
+<script>
+    var l_active_dvmemorder;
+    function pgmem_dvorder_onSlideDown() {
+        //alert('slide Down');
+    }
+    function pgmem_dvorder_pagebeforeshow() {
+        $("#pgmem_dvorder_subheader").width($(window).width()-5);
+        if (navigator.platform === 'Win32') {
+            $("#pgmem_dvorder").height($(window).height() * .88);
+        }
+        else {
+            var intHeight = $(window).height() - ($(window).height() * .13)
+            $("#pgmem_dvorder").height(intHeight);
+        }
+
+        if (l_active_dvmemorder === undefined) {
+            l_active_dvmemorder = "pgmem_dvorder_dvpending";
+        }
+        pgmem_dvorder_showpage(l_active_dvmemorder);
+        $("#" + l_active_dvmemorder + "_btn").addClass('ui-btn-active');
+        pgmem_dvorder_dvpending_pagebeforeshow();        
+    }
+    $('#pgmem_dvordernavbar').on('click', 'a', function(event) {
+        pgmem_dvorder_showpage(this.id.replace("_btn", ""));
+    });
+    function pgmem_dvorder_showpage(pagename) {
+        //debugger;
+        $("#pgmem_dvorder_dvpending").hide();
+        $("#pgmem_dvorder_dvclosed").hide();
+        $("#pgmem_dvorder_dvapprov").hide();
+        $("#" + pagename).slideDown('show', function() {
+            var callback_function = new Function(pagename + '_onSlideDown()');
+            callback_function();
+        });
+        l_active_dvmemorder = pagename;
+    }
+    $('#pgmem_btnneworder').on('click', function() {
+        p_orderaction = "new";
+        $('#pgmem_dvorder_header').removeAttr("data-position");
+        $('#pgmem_dvorder_header').trigger("refresh");
+        $.mobile.changePage('#pgmem_orderentry', {transition: "slide", reverse: false});
+    });
+    $('#pgmem_dvorder_btnsync').on('click', function() {
+        var tables = new p_syncTables;
+        tables.callBackFn = "pgmem_dvorder_syncComplete";
+        tables.addTable('tblpo_headers', "WHERE bitPosted = ?", [1]);
+        tables.addTable('tblpo_details', "WHERE bitPosted = ?", [1]);
+        tables.syncToServer();        
+    });
+    function pgmem_dvorder_syncComplete(msg){
+        // Refresh the list
+        if (msg !== undefined){            
+            commonDialog('Validation', 'Error in Synchronization', msg , 'exclamation', 'pop');
+        }
+        else {
+            commonDialog('Validation', 'Synchronization Complete', 'Data: Sales Order, Items, Category and other settings' , 'information', 'pop');
+        }
+        pgmem_dvorder_dvpending_querylist();
+        pgmem_dvorder_dvclosed_querylist();
+    }
+   
+</script>

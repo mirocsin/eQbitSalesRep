@@ -1,0 +1,317 @@
+<link rel="stylesheet" href="css/jpm-page.css" />
+<div data-role="page" id="pg_customers" data-theme="d" class="jpm-page">
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_empmain" data-icon="home">Back</a>
+        <h1>Customers</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>
+    <div data-role="content" data-theme="">
+        <form>
+            <ul data-role="listview" data-inset="true">
+                <li data-role="list-divider" id="pgcust_lidvtitle">New Customer</li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtcode">Customer Code</label>
+                    <input type="text" id ="pgcust_txtcode" class="code" style="color:graytext"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtcustnm">Customer Name</label>
+                    <input type="text" id ="pgcust_txtcustnm" placeholder="Customer Name" class="person" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtadd1">Address 1</label>
+                    <input type="text" id ="pgcust_txtadd1" placeholder="Address 1" class="address" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtadd2">Address 2</label>
+                    <input type="text" id ="pgcust_txtadd2" placeholder="Address 2" class="address" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtcntry">Country</label>
+                    <input type="text" id ="pgcust_txtcntry" placeholder="Country" class="country" value="Singapore" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtzip">Zip Code</label>
+                    <input type="text" id ="pgcust_txtzip" placeholder="Zip Code" class="zipcode" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txthphone">Home Phone</label>
+                    <input type="text" id ="pgcust_txthphone" placeholder="Home Phone" class="homephone" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtmphone">Mobile Phone</label>
+                    <input type="text" id ="pgcust_txtmphone" placeholder="Mobile Phone" class="mobilephone" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgcust_txtemail">Email Address</label>
+                    <input type="text" id ="pgcust_txtemail" placeholder="Email Address" class="email" onclick="$(this).select();"/>
+                </li>
+                <li class="ui-body ui-body-b">
+                    <fieldset class="ui-grid-c">
+                        <div class="ui-block-a">
+                            <a id="pgcust_btnsave" data-role="button" href="" data-theme="e" data-icon="check" data-inline="true" class="jpm-cornerstyle" style="width:98%"  >Save Customer</a>
+                        </div>
+                        <div class="ui-block-b">
+                            <a id="pgcust_btnsearch" data-role="button" href="" onclick="pg_customers_btnsrc_click();" data-theme="b" data-icon="search" data-inline="true" class="jpm-cornerstyle" style="width:98%">Search </a>                              
+                        </div>
+                        <div class="ui-block-c">
+                            <a id="pgcust_btnnew" data-role="button" href="" data-theme="a" data-icon="plus" data-inline="true" class="jpm-cornerstyle" style="width:98%">New </a>
+                        </div>
+                        <div class="ui-block-d">
+                            <a id="pgcust_btndelete" data-role="button" href="" onclick="pg_customers_btndelete_click();" data-theme="a" data-icon="delete" data-inline="true" class="jpm-cornerstyle" style="width:98%" >Delete </a>
+                        </div>
+                    </fieldset>
+                </li>
+            </ul>
+        </form>
+    </div>
+
+    <!--Pop-up Dialog Search Customer option-->
+    <div data-role="popup" id="popup_searchcust" data-overlay-theme="a" data-theme="c" style="width:1000px!important;" >        
+        <div data-role="header" data-theme="a" >
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            <h1>Search Customer</h1>
+        </div>
+        <div data-role="content" data-theme="d">
+            <h2>Customers</h2>
+            <ul data-role="listview" style="padding:5px">
+                <li data-role="content" data-theme="c" >
+                    <table style="width:100%">
+                        <tr>
+                            <td><p><span>Search Criteria - text containing for Customer Name and Address, exact match for Customer Code, Zip Code and Mobile Phone</span><input type="text" id ="pgcust_txtsrccust" placeholder="Text to search..." class="search" onclick="$(this).select();"/></p>
+                            </td>
+                            <td><a href="#" data-role="button" data-icon="search" data-theme="b" data-inline="true" class="jpm-cornerstyle" style="display:block;" onclick="pg_customers_searchCust()">Search</a></td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            <input type='hidden' id='hid_searchcust' value=''/>
+            <div style="padding:5px"><p id="pgcust_dvcustlst"></p>
+            </div>
+            <div style="padding:5px; text-align: right">
+                <div data-role="controlgroup" data-type="horizontal" class="jpm-cornerstyle">
+                    <a href="#" data-rel="back" data-role="button" data-icon="check" data-inline='true' data-theme="e" onclick="pg_customers_getCust()">Select</a>
+                    <a href="#" data-rel="back" data-role="button" data-icon="delete" data-inline='true' data-theme="b" >Cancel</a>
+                </div>
+            </div>
+        </div>         
+    </div>
+    
+    <script>
+        $("#pgcust_btnnew").on("click", function(e) {
+            p_custaction = 'new';
+            $('#pgcust_lidvtitle').text('New Customer');            
+            pg_customers_pageInit();            
+        });
+        $("#pg_customers").on("pagebeforeshow", function(event, ui) {
+            pg_customers_pageInit();
+            insertDialogs(this);
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        $("#pg_customers").on("pageshow", function(event, ui) {
+            event.preventDefault();            
+            event.stopImmediatePropagation();
+        });        
+        function pg_customers_pageInit() {
+            $("#pgcust_txtcustnm").val("");
+            $("#pgcust_txtadd1").val("");
+            $("#pgcust_txtadd2").val("");
+            $("#pgcust_txtcntry").val("Singapore");
+            $("#pgcust_txtzip").val("");
+            $("#pgcust_txthphone").val("");
+            $("#pgcust_txtmphone").val("");
+            $("#pgcust_txtemail").val("");
+            pg_customers_qryNextApptCode();
+            p_enableControl('pgcust_txtcode', 'disable');
+            p_enableControl('pgcust_btndelete', 'disable');
+            p_enableControl('pgcust_btnnew', 'disable');
+        }        
+        function pg_customers_qryNextApptCode() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT Max(Cast(vchCust_Code as int)) as vchCust_Code FROM tblcustomers", [], pg_customers_getnextcustcode, pg_customers_qryempty);
+            });
+        }
+        function pg_customers_getnextcustcode(tx, results) {
+            var l_custcode = "";
+            var pad = "0000";
+            if (results.rows.length === 0) {
+                l_custcode = "0001";
+            }
+            l_custcode = results.rows.item(0).vchCust_Code + 1;
+            l_custcode = pad.substring(0, pad.length - l_custcode.toString.length) + l_custcode;
+            $("#pgcust_txtcode").val(l_custcode);
+        }
+        function pg_customers_qryempty() {
+            $("#pgcust_txtcode").val("0001");
+        }
+        function pg_customers_qryListfail(tx, results) {
+            pg_customers_fillCustList(tx, results);
+        }
+        $('#pgcust_btnsave').click(function(e) {
+            //debugger;
+            var p1 = $("#pgcust_txtcode").val(),
+                p2 = $("#pgcust_txtcustnm").val(),
+                p3 = $("#pgcust_txtadd1").val(),
+                p4 = $("#pgcust_txtadd2").val(),
+                p5 = $("#pgcust_txtcntry").val(),
+                p6 = $("#pgcust_txtzip").val(),
+                p7 = $("#pgcust_txthphone").val(),
+                p8 = $("#pgcust_txtmphone").val(),
+                p9 = $("#pgcust_txtemail").val();                   
+
+            if (p2 === "" || p3 === "" || p6 === "" || p8 === "" || p9 === "") {
+                commonDialog('Save Customer','There are some blank fields in the entry.',
+                             'Important fields are Customer Name, Address1, Zip Code, Mobile Phone and Email Address.',
+                             'exclamation','pop');
+                return;
+            } else {
+                p_db.transaction(function(tx) {
+                    //debugger;
+                    if (p_custaction === 'new') {
+                        tx.executeSql('INSERT INTO tblcustomers (vchCust_Code,vchCust_Name,vchCust_Add1,vchCust_Add2,vchCust_Cntry,vchCust_Zip,vchHomePhone,vchMobilePhone,vchEmail,dtype,dtRecordModed) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [p1, p2, p3, p4, p5, p6, p7, p8, p9, 'NEW', new Date()], pg_customers_addsuccess, pg_customers_errorTX);
+                    }
+                    if (p_custaction === 'edit') {
+                        tx.executeSql('UPDATE tblcustomers SET vchCust_Name=?,vchCust_Add1=?,vchCust_Add2=?,vchCust_Cntry=?,vchCust_Zip=?,vchHomePhone=?,vchMobilePhone=?,vchEmail=?,dtype=?,dtRecordModed=? WHERE vchCust_Code=?', [p2, p3, p4, p5, p6, p7, p8, p9, "EDIT", new Date(), p1], pg_customers_editsuccess, pg_customers_errorTX);
+                    }
+                }, pg_customers_errorTA);
+            }
+            //e.preventDefault();
+            //e.stopImmediatePropagation();
+        });
+        function pg_customers_addsuccess() {
+            pg_customers_pageInit();
+            commonDialog('New Customer','Customer was added successfully.',
+                         'Click Ok to proceed on a new Customer entry form.',
+                         'information','pop');
+        }
+        function pg_customers_errorTX(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_customers_errorTA(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_customers_editsuccess() {
+            commonDialog('Edit Customer','Customer was updated successfully.',
+                         '','information','pop');
+        }
+        function pg_customers_qryCustList() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblcustomers WHERE dtype<>'DELETE' ORDER BY dtRecordModed DESC LIMIT 20", [], pg_customers_fillCustList, pg_customers_qryListfail);
+            });
+        }
+        function pg_customers_fillCustList(tx, results) {
+            var ultag, ulopentag, ulclosetag;
+            var list = "";
+            var liheader = "";
+
+            $('#pgcust_dvcustlst').text("");
+            var uls = $();
+            ulopentag = "<ul id='pgcust_lstvw1' data-role='listview' >";
+            liheader = "<li data-role='list-divider'><table data-role='table' align='center' column='5' width='100%'><tr>";
+            liheader = liheader + "<td width='10%'>Cust.Code</td>";
+            liheader = liheader + "<td width='30%'>Customer Name</td>";
+            liheader = liheader + "<td width='35%'>Address</td>";
+            liheader = liheader + "<td width='10%'>Zip Code</td>";
+            liheader = liheader + "<td width='15%'>Mobile Phone</td>";
+            liheader = liheader + "</tr></table></li>";
+            ulclosetag = "</ul>";
+
+            if (results.rows.hasOwnProperty("length")) {
+                l_address = "";
+                for (i = 0; i < results.rows.length; i++) {
+                    //debugger;
+                    l_address = results.rows.item(i).vchCust_Add1.trim() +
+                            (results.rows.item(i).vchCust_Add2.trim() === "" ? "" : ", " + results.rows.item(i).vchCust_Add2.trim()) +
+                            (results.rows.item(i).vchCust_Cntry.trim() === "" ? "" : ", " + results.rows.item(i).vchCust_Cntry.trim()) +
+                            ", " + results.rows.item(i).vchCust_Zip.trim();
+                    list = list + "<li id='lstcust" + (i + 1).toString() + "' class='lstcust' data-icon='false'><a href='#' onclick=pg_customers_lstAppt_click('" + results.rows.item(i).vchCust_Code.toString() + "'," + (i + 1).toString() + ")>";
+                    list = list + "<table width='100%'><tr>";
+                    list = list + "<td class='vchCust_Code' width='10%'>" + results.rows.item(i).vchCust_Code.trim() + "</td>";
+                    list = list + "<td class='vchCust_Name' width='30%'>" + results.rows.item(i).vchCust_Name.trim() + "</td>";
+                    list = list + "<td class='vchCust_Add' width='35%'>" + l_address + "</td>";
+                    list = list + "<td class='vchCust_Zip' width='10%'>" + results.rows.item(i).vchCust_Zip.trim() + "</td>";
+                    list = list + "<td class='vchMobilePhone' width='15%'>" + results.rows.item(i).vchMobilePhone.trim() + "</td>";
+                    list = list + "</tr></table> </a></li>";
+                }
+            }
+            ultag = ulopentag + liheader + list + ulclosetag;
+            uls = uls.add(ultag);
+            $('#pgcust_dvcustlst').append(uls);
+            uls.listview();
+        }
+
+        $('#popup_searchcust').on('popupbeforeposition', function(event, ui) {
+            pg_customers_qryCustList();
+        });
+
+        function pg_customers_btnsrc_click() {
+            $('#popup_searchcust').popup('open', {transition: 'slideup'});
+        }
+        function pg_customers_lstAppt_click(code, index) {
+            //debugger;
+            $('#pgcust_lstvw1').find('li').removeClass('ui-btn-active');
+            $('#' + $('#pgcust_lstvw1').children()[index].id).addClass('ui-btn-active');
+            $("#hid_searchcust").val(code);
+        }
+        function pg_customers_getCust() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblcustomers WHERE dtype<>? AND vchCust_Code=?", ["DELETE", $("#hid_searchcust").val()], pg_customers_loadAppt, pg_customers_loadfail);
+            });
+        }
+        function pg_customers_loadAppt(tx, results) {
+            $("#pgcust_txtcode").val(results.rows.item(0).vchCust_Code);
+            $("#pgcust_txtcustnm").val(results.rows.item(0).vchCust_Name);
+            $("#pgcust_txtadd1").val(results.rows.item(0).vchCust_Add1);
+            $("#pgcust_txtadd2").val(results.rows.item(0).vchCust_Add2);
+            $("#pgcust_txtcntry").val(results.rows.item(0).vchCust_Cntry);
+            $("#pgcust_txtzip").val(results.rows.item(0).vchCust_Zip);
+            $("#pgcust_txthphone").val(results.rows.item(0).vchHomePhone);
+            $("#pgcust_txtmphone").val(results.rows.item(0).vchMobilePhone);
+            $("#pgcust_txtemail").val(results.rows.item(0).vchEmail);
+            $("#pgcust_lidvtitle").text("Edit Customer");
+            p_custaction = 'edit';
+            p_enableControl('pgcust_btndelete');
+            p_enableControl('pgcust_btnnew');
+        }
+        function pg_customers_loadfail(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_customers_btndelete_click() {
+            commonDialog('Delete Customer','Are you sure to delete this Customer?',
+                         '','question','pop');
+        }
+//        function pg_customers_confirmeddelete() {
+//            p_db.transaction(function(tx) {
+//                tx.executeSql('UPDATE tblcustomers SET dtype=? WHERE vchCust_Code=?', ["DELETE", $("#pgcust_txtcode").val()], pg_customers_delsuccess, pg_customers_errorTX);
+//            }, pg_customers_errorTA);
+//        }
+        function pg_customers_popQues_btnYes_click() {
+            p_db.transaction(function(tx) {
+                tx.executeSql('UPDATE tblcustomers SET dtype=? WHERE vchCust_Code=?', ["DELETE", $("#pgcust_txtcode").val()], pg_customers_delsuccess, pg_customers_errorTX);
+            }, pg_customers_errorTA);
+        }
+        function pg_customers_delsuccess() {
+            pg_customers_pageInit();
+            commonDialog('Delete Customer','Customer was deleted successfully.',
+                         'Click Ok to proceed on a new Customer entry form.',
+                         'information','pop');
+        }
+        function pg_customers_searchCust() {
+            l_valsrc = $("#pgcust_txtsrccust").val();
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblcustomers WHERE dtype<>? AND (UPPER(vchCust_Code)=? OR vchCust_Name LIKE ? OR vchCust_Add1 LIKE ? OR vchCust_Add2 LIKE ? OR vchCust_Zip=? OR vchMobilePhone=?)", ["DELETE", l_valsrc, '%' + l_valsrc + '%', '%' + l_valsrc + '%', '%' + l_valsrc + '%', l_valsrc, l_valsrc], pg_customers_fillCustList, pg_customers_qryListfail);
+            });
+        }        
+    </script>
+</div>       
+
+
+<!--Notes - Button Inset (Group button)
+<li data-role="fieldcontain">
+    <div data-role="controlgroup" data-type="horizontal" >
+        <a id="pgcust_btnsave" data-role="button" href="" data-theme="e" data-icon="check" data-inline="true"  >Save Customer</a>
+        <a id="pgcust_btnnew" data-role="button" href="" data-theme="a" data-icon="plus" data-inline="true" >New </a>
+        <a id="pgcust_btnsearch" data-role="button" href="" onclick="pg_customers_btnsrc_click();" data-theme="b" data-icon="search" data-inline="true"  >Search </a>                    
+        <a id="pgcust_btndelete" data-role="button" href="" onclick="pg_customers_btndelete_click();" data-theme="a" data-icon="delete" data-inline="true"  >Delete </a>
+    </div>
+</li>-->

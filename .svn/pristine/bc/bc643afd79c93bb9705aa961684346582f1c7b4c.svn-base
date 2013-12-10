@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="urn:schemas-microsoft-com:windows:storage:mapping:CS">
+  <EntityContainerMapping StorageEntityContainer="customer_loreal_backendModelStoreContainer" CdmEntityContainer="customer_loreal_backendEntities">
+    <EntitySetMapping Name="tblemployees">
+      <EntityTypeMapping TypeName="customer_loreal_backendModel.tblemployee">
+        <MappingFragment StoreEntitySet="tblemployees">
+          <ScalarProperty Name="vchEmployee_Code" ColumnName="vchEmployee_Code" />
+          <ScalarProperty Name="vchEmployee_Name" ColumnName="vchEmployee_Name" />
+          <ScalarProperty Name="vchLoginID" ColumnName="vchLoginID" />
+          <ScalarProperty Name="vchLoginPassword" ColumnName="vchLoginPassword" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tblitems">
+      <EntityTypeMapping TypeName="customer_loreal_backendModel.tblitem">
+        <MappingFragment StoreEntitySet="tblitems">
+          <ScalarProperty Name="vchItem_Code" ColumnName="vchItem_Code" />
+          <ScalarProperty Name="vchItem_Description" ColumnName="vchItem_Description" />
+          <ScalarProperty Name="vchBarcode" ColumnName="vchBarcode" />
+          <ScalarProperty Name="mnyCost" ColumnName="mnyCost" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="tblmembers">
+      <EntityTypeMapping TypeName="customer_loreal_backendModel.tblmember">
+        <MappingFragment StoreEntitySet="tblmembers">
+          <ScalarProperty Name="vchMember_Code" ColumnName="vchMember_Code" />
+          <ScalarProperty Name="vchMember_Name" ColumnName="vchMember_Name" />
+          <ScalarProperty Name="vchLoginID" ColumnName="vchLoginID" />
+          <ScalarProperty Name="vchLoginPassword" ColumnName="vchLoginPassword" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping>

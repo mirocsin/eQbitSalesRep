@@ -1,0 +1,28 @@
+<div data-role="dialog" id="pg_stockqtyentry" >
+    <div data-role="header" data-position="fixed">                  
+    </div>
+    <div data-role="content"  >
+        <div id="div_entryqty"></div>
+        <script>
+            var strhtml;
+            $('#pg_stockqtyentry').on("pageshow", function()
+            {
+               $('#ulqtyentry').html(strhtml);
+               $("#ulqtyentry").trigger('create');
+               $("#ulqtyentry").listview('refresh');      
+            });
+
+            function btnqty_entry(e) {
+                //$('#div_entryqty').empty();
+                $('#div_entryqty').append('<ul id="ulqtyentry" data-role="listview" data-inset="true" data-theme="c" style="margin:0;" />');
+                strhtml = '<li data-role="list-divider">Enter Qty</li>';
+                strhtml = strhtml + '<li data-icon="arrow-r">@tablelayout</li>';
+                strhtml = strhtml.replace('@tablelayout','<table border="0" cellspacing="0" cellpadding="0"> <tr> <td>Ordered Qty:</td> <td> <input type="text" id="txtqty_@element_id" value="0" style="width:50px" /> </td> </tr> <tr> <td> <a href="" data-theme="b" type="button" id="btnadd_@element_id" data-inline="true" onClick="btnAddQty(this)" data-icon="plus">Qty</a> </td> <td> <a href="" data-theme="b" type="button" id="btnminus_@element_id" data-inline="true" onClick="btnSubQty(this)" data-icon="minus">Qty</a> </td> </tr> <tr> <td colspan="2"> <a href="" data-theme="b" type="button" id="btnaddtocart_@element_id" data-inline="true" class="button button-link" onClick="btnOkQty(this)" style="width:100%">OK</a> </td> </tr> </table>');
+                strhtml = replaceAll(strhtml,"@element_id",e.id.substring(7));
+                $.mobile.changePage('#pg_stockqtyentry', {transition: 'pop', role: 'dialog'});       
+            }
+        </script>
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist">                
+    </div>      
+</div>

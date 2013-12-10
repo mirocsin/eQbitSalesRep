@@ -1,0 +1,13 @@
+<div id="pgemp_dvnoti" >
+    <div data-role="header" data-position="fixed">
+        <h1>Notifications</h1>
+    </div>    
+    <div id="pgempdvnoti_dvcontent" data-role="content">
+        Notification content...
+    </div>
+</div>
+<script>
+    function pgemp_dvnoti_onSlideDown() {
+        //alert('slide Down');
+    }
+</script>

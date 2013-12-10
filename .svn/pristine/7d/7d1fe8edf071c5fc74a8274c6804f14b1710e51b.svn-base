@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="customer_loreal_backendModel.Store" Alias="Self" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.6" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2006/04/edm/ssdl">
+  <EntityContainer Name="customer_loreal_backendModelStoreContainer">
+    <EntitySet Name="tblemployees" EntityType="customer_loreal_backendModel.Store.tblemployees" store:Type="Tables" Schema="customer_loreal_backend" />
+    <EntitySet Name="tblitems" EntityType="customer_loreal_backendModel.Store.tblitems" store:Type="Tables" Schema="customer_loreal_backend" />
+    <EntitySet Name="tblmembers" EntityType="customer_loreal_backendModel.Store.tblmembers" store:Type="Tables" Schema="customer_loreal_backend" />
+  </EntityContainer>
+  <EntityType Name="tblemployees">
+    <Key>
+      <PropertyRef Name="vchEmployee_Code" />
+    </Key>
+    <Property Name="vchEmployee_Code" Type="varchar" Nullable="false" MaxLength="10" />
+    <Property Name="vchEmployee_Name" Type="varchar" MaxLength="50" />
+    <Property Name="vchLoginID" Type="varchar" MaxLength="20" />
+    <Property Name="vchLoginPassword" Type="varchar" MaxLength="50" />
+  </EntityType>
+  <EntityType Name="tblitems">
+    <Key>
+      <PropertyRef Name="vchItem_Code" />
+    </Key>
+    <Property Name="vchItem_Code" Type="varchar" Nullable="false" MaxLength="20" />
+    <Property Name="vchItem_Description" Type="varchar" MaxLength="50" />
+    <Property Name="vchBarcode" Type="varchar" MaxLength="20" />
+    <Property Name="mnyCost" Type="double" />
+  </EntityType>
+  <EntityType Name="tblmembers">
+    <Key>
+      <PropertyRef Name="vchMember_Code" />
+    </Key>
+    <Property Name="vchMember_Code" Type="varchar" Nullable="false" MaxLength="10" />
+    <Property Name="vchMember_Name" Type="varchar" MaxLength="50" />
+    <Property Name="vchLoginID" Type="varchar" MaxLength="20" />
+    <Property Name="vchLoginPassword" Type="varchar" MaxLength="50" />
+  </EntityType>
+</Schema>

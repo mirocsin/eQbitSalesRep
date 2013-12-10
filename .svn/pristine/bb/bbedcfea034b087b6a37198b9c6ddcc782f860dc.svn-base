@@ -1,0 +1,99 @@
+<div id="pgemp_dvnoti" >
+    <div data-role="header">
+        <h1>Notifications</h1>
+    </div>    
+    <div id="pgempdvnoti_dvcontent" data-iscroll="" data-role="content">
+        <ul id='pgemp_dvnoti_ullist' data-role="listview" data-theme="c">              
+        </ul>
+    </div>
+</div>
+<script>
+    function pgemp_dvnoti_onSlideDown() {
+        //alert('slide Down');
+        $('#pg_empmain_btnnoti_indicator').hide();
+    }
+    $("#pg_empmain").on("pagebeforeshow", function(event, ui) {
+        //debugger
+        if (navigator.platform === 'Win32') {
+            $("#pgempdvnoti_dvcontent").height($(window).height() * .88);
+        }
+        else {
+            var intHeight = $(window).height() - ($(window).height() * .20)
+            $("#pgempdvnoti_dvcontent").height(intHeight);
+        }
+    });
+    function pgemp_dvnoti_employeeNotifications() {
+        p_empNotification = window.setInterval(
+                function() {
+                    var strid = p_settings.vchId
+                    var strPOCode = '';
+                    if ($('#pgemp_dvnoti_ullist').children().size() > 0) {
+                        var intCnt = $('#pgemp_dvnoti_ullist').children().size() - 1;
+                        strPOCode = $('#hidpo_notify' + $('#pgemp_dvnoti_ullist').find('li')[intCnt].id.replace('pgemp_dvnoti_li_', '')).val()
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: p_urlServer + "/getEmployeeNotification",
+                        async: true,
+                        dataType: "json",
+                        cache: false,
+                        data: {id: strid, vchPO_Code: strPOCode},
+                        crossDomain: true,
+                        beforeSend: function() {
+                            //$.mobile.showPageLoadingMsg("b", "Loading from server...");
+                        },
+                        complete: function() {
+                            //$.mobile.hidePageLoadingMsg();
+                        },
+                        success: function(data) {
+                            if (data.length !== 0) {
+                                // PO Approval List
+                                if (data.for_approval !== undefined) {
+                                    var intCnt = 0;
+                                    var intlist = $('#pgemp_dvnoti_ullist').children().size()
+                                    var strline = '<li id="@lineid" data-icon="false" ><a href="#" id="@btnid" onclick="btnnotilist_click(this)"><img src="img/@icon" alt="" style="padding:10px 20px;height:64px;width:64px"/><h3 class="autowrap">For Approval: @customer </h3><p>PO#: @pocode &nbsp;&nbsp; Date: @podate &nbsp;&nbsp; Total: @nTotAmt</p><p>Ship to: @shipto on @deldate</p><input type="hidden" id="@hidpo_notify" value="@hidpo_noti_value" /></a></li>';
+                                    intCnt = intCnt + data.for_approval.length;
+                                    for (n in data.for_approval) {
+                                        var odata = data.for_approval
+                                        intlist = intlist + 1;
+                                        var strline2 = strline;
+                                        strline2 = strline2.replace('@lineid', 'pgemp_dvnoti_li_' + intlist.toString());
+                                        strline2 = strline2.replace('@icon', "approvnoti.png");
+                                        strline2 = strline2.replace('@customer', odata[n].vchCust_Name);
+                                        strline2 = strline2.replace('@pocode', odata[n].vchPO_Code);
+                                        strline2 = strline2.replace('@hidpo_notify', "hidpo_notify" + intlist.toString());
+                                        strline2 = strline2.replace('@hidpo_noti_value', odata[n].vchPO_Code);
+                                        strline2 = strline2.replace('@shipto', odata[n].vchShipTo);
+                                        strline2 = strline2.replace('@deldate', odata[n].vchDelDate);
+                                        strline2 = strline2.replace('@podate', odata[n].vchPODate);
+                                        strline2 = strline2.replace('@nTotAmt', "$" + odata[n].mnyTotOrderAmt);
+                                        strline2 = strline2.replace('@btnid', 'btnponotify' + intlist.toString());
+                                        $('#pgemp_dvnoti_ullist').append(strline2);
+                                    }
+                                    $('#pgemp_dvnoti_ullist').listview('refresh');
+                                }
+                                if (intCnt > 0) {
+                                    $('#pg_empmain_btnnoti_indicator').show();
+                                    $('#pg_empmain_btnnoti_indicator').text('new!');
+                                }
+                                else {
+                                }
+                            }
+                            else {
+                                //$('#pg_empmain_btnnoti_indicator').listview('refresh');                                
+                            }
+                        },
+                        error: function(err) {
+                            //$('#pg_empmain_btnnoti_indicator').listview('refresh');                            
+                        }
+                    });
+                }, 2000); // Sync every N seconds
+
+    }
+    function btnnotilist_click(e) {
+        var hidpocd_closed = '#hidpo_notify' + e.id.replace("btnponotify", "");
+        p_pocode = $(hidpocd_closed).val();
+        p_orderaction = "view";
+        $.mobile.changePage('#pgemp_poclosed', {transition: "slide", reverse: false});
+    }
+</script>

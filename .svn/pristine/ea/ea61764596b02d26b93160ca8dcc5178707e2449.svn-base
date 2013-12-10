@@ -1,0 +1,95 @@
+<style>
+    #pgemp_dvorder_dvpending_btn .ui-icon { 
+        background:  url('img/orderpending.png') 50% 50% no-repeat; 
+        background-size: 34px 34px; 
+    }
+    #pgemp_dvorder_dvclosed_btn .ui-icon { 
+        background:  url('img/orderclosed.png') 50% 50% no-repeat; 
+        background-size: 36px 34px; 
+    }
+    #pgemp_dvorder_dventry_btn .ui-icon { 
+        background:  url('img/orderentry.png') 50% 50% no-repeat; 
+        background-size: 38px 34px;
+    }
+</style>
+<div id="pgemp_dvorder" >
+    <div id="pgemp_dvorder_header" data-role="header" data-position="fixed" data-theme="a">        
+        <a href="#" data-icon="delete" id="pgemp_dvorder_btncancel" style="display:none">Cancel Order Entry</a>
+        <h1 id="pgemp_dvorder_title" >Orders</h1>
+        <a href="#" data-icon="plus" class="ui-btn-right" id="pgemp_dvorder_btnneworder">New Order</a>
+        <div id="pgemp_dvorder_subheader" data-role="navbar" class="nav-glyphish-example" data-grid="a"> 
+            <ul id="pgemp_dvordernavbar"> 
+                <li><a href="#" id="pgemp_dvorder_dvpending_btn" data-icon="custom">Pending</a></li> 
+                <li><a href="#" id="pgemp_dvorder_dvclosed_btn" data-icon="custom">Closed</a></li>
+                <li><a href="#" id="pgemp_dvorder_dventry_btn" data-icon="custom" style="display:none">Entry</a></li>
+            </ul>             
+        </div> 
+    </div>    
+</div>
+<script>
+    function pgemp_dvorder_onSlideDown() {
+        //alert('slide Down');
+    }
+    $("#pg_empmain").on("pagebeforeshow", function(event, ui) {
+        l_activebtn="pgemp_dvorder_dvpending_btn";
+        pgemp_dvorder_showpage('pgemp_dvorder_dvpending');
+        $("#pgemp_dvorder_dvpending_btn").addClass('ui-btn-active');
+        pgemp_dvorder_dvpending_pagebeforeshow();
+    });
+    $('#pgemp_dvordernavbar').on('click', 'a', function(event) {
+        if (this.id!=="pgemp_dvorder_dventry_btn"){
+            l_activebtn = this.id;
+        }               
+        pgemp_dvorder_showpage(this.id.replace("_btn", ""));
+    });    
+    function pgemp_dvorder_showpage(pagename) {
+        //debugger;
+        $("#pgemp_dvorder_dvpending").hide();
+        //$("#pgemp_dvorder_btncancel").hide();
+        $("#pgemp_dvorder_dvclosed").hide();
+        $("#pgemp_dvorder_dventry").hide();
+        $("#" + pagename).slideDown('slow', function() {
+            var callback_function = new Function(pagename + '_onSlideDown()');
+            callback_function();
+        });
+    }
+    $('#pgemp_dvorder_btnneworder').on('click', function(event) {        
+//        $('#pgemp_dvordernavbar li').each(function( index ) {   
+//            var loopLi = $(this);
+//            if(loopLi.find('a').hasClass('ui-btn-active')) {                                  
+//                $(this).find('a').removeClass('ui-btn-active');
+//            }
+//        });        
+        $("#pgemp_dvordernavbar").find('a').removeClass("ui-btn-active");
+        pgemp_dvorder_showOrderEntry(true);
+    }); 
+    function pgemp_dvorder_showOrderEntry(value){
+        if (value){
+            $('#pgemp_dvorder_subheader').attr("data-grid","b");
+            $('#pgemp_dvorder_dventry_btn').show();
+            $('#pgemp_dvordernavbar').removeClass("ui-grid-a").addClass("ui-grid-b");
+            $('#pgemp_dvorder_dventry_btn').parent().removeClass("ui-block-a").addClass("ui-block-c");
+            $('#pgemp_dvordernavbar').trigger("create");
+            $('#pgemp_dvorder_subheader').trigger("refresh");
+            
+            pgemp_dvorder_showpage('pgemp_dvorder_dventry');
+            $("#pgemp_dvorder_dventry_btn").addClass('ui-btn-active');            
+            pgemp_dvorder_dventry_pagebeforeshow();
+            $("#pgemp_dvorder_btncancel").show();
+        } else {
+            $('#pgemp_dvorder_subheader').attr("data-grid","a");
+            $('#pgemp_dvorder_dventry_btn').hide();            
+            $('#pgemp_dvordernavbar').removeClass("ui-grid-b").addClass("ui-grid-a");
+            $('#pgemp_dvorder_dventry_btn').parent().removeClass("ui-block-c");            
+            $('#pgemp_dvordernavbar').trigger("create");
+            $('#pgemp_dvorder_subheader').trigger("refresh");
+        }       
+    }
+    $("#pgemp_dvorder_btncancel").on('click', function(event) {
+        pgemp_dvorder_showOrderEntry(false);
+        pgemp_dvorder_showpage(l_activebtn.replace("_btn", ""));
+        $("#"+l_activebtn).addClass('ui-btn-active');
+        $(this).css("display","none");
+        //pgemp_dvorder_dvpending_pagebeforeshow();
+    }); 
+</script>

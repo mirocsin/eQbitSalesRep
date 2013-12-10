@@ -1,0 +1,83 @@
+<div id="pgemp_dvnoti" >
+    <div data-role="header">
+        <h1>Notifications</h1>
+    </div>    
+    <div id="pgempdvnoti_dvcontent" data-iscroll="" data-role="content">
+        <ul id='pgemp_dvnoti_ullist' data-role="listview" data-theme="c">              
+        </ul>
+    </div>
+</div>
+<script>
+    function pgemp_dvnoti_onSlideDown() {
+        //alert('slide Down');
+    }
+    $("#pg_empmain").on("pagebeforeshow", function(event, ui) {
+        //debugger
+        if (navigator.platform === 'Win32') {
+            $("#pgempdvnoti_dvcontent").height($(window).height() * .88);
+        }
+        else {
+            var intHeight = $(window).height() - ($(window).height() * .20)
+            $("#pgempdvnoti_dvcontent").height(intHeight);
+        }
+    });
+    function pgemp_dvnoti_employeeNotifications() {
+        p_empNotification = window.setInterval(
+                function() {
+                    // PO Code Checking
+                    //debugger
+                    var strid = p_settings.vchId
+                    var strPOCode = '';
+                    if ($('#pgemp_dvnoti_ullist').children().size() > 0) {
+                         var intCnt = $('#pgemp_dvnoti_ullist').children().size() - 1;
+                         strPOCode = $('#hidpo_notify' + $('#pgemp_dvnoti_ullist').find('li')[intCnt].id.replace('pgemp_dvnoti_li_', '')).val()
+                         //debugger
+                    }
+        
+                    $.ajax({
+                        type: "POST",
+                        url: p_urlServer + "/getEmployeeNotification",
+                        async: false,
+                        dataType: "json",
+                        cache: false,
+                        data: {id: strid, vchPO_Code: strPOCode},
+                        crossDomain: true,
+                        beforeSend: function() {
+                            $.mobile.showPageLoadingMsg("b", "Loading from server...");
+                        },
+                        complete: function() {
+                            $.mobile.hidePageLoadingMsg();
+                        },
+                        success: function(data) {
+                            if (data.length !== 0) {
+                                var intlist = $('#pgemp_dvnoti_ullist').children().size()
+                                var strline = '<li id="@lineid" data-icon="false" ><a href="#" ><img src="img/@icon" alt="" style="padding:10px 20px;height:64px;width:64px"/><h3 class="autowrap">@customer </h3><p>PO#: @pocode</p><input type="hidden" id="@hidpo_notify" value="@hidpo_noti_value" /></a></li>';
+
+                                for (n in data) {
+                                    //debugger
+                                    intlist = intlist + 1;
+                                    var strline2 = strline;
+                                    strline2 = strline2.replace('@lineid', 'pgemp_dvnoti_li_' + intlist.toString());
+                                    strline2 = strline2.replace('@customer', data[n].vchCust_Name);
+                                    strline2 = strline2.replace('@pocode', data[n].vchPO_Code);
+                                    strline2 = strline2.replace('@hidpo_notify', "hidpo_notify" + intlist.toString());
+                                    strline2 = strline2.replace('@hidpo_noti_value',data[n].vchPO_Code);
+                                    $('#pgemp_dvnoti_ullist').append(strline2);
+                                }
+                                $('#pgemp_dvnoti_ullist').listview('refresh');
+                                //clearInterval(p_empNotification);
+                            }
+                            else {
+                                //$('#pgemp_dvorder_ulclosedlist').listview('refresh');
+                            }
+                        },
+                        error: function(err) {
+                            //$('#pgemp_dvorder_ulclosedlist').listview('refresh');
+                            //commonDialog('Validation', 'Error in connection', 'Server is down or Error in connection', 'exclamation', 'pop');
+                        }
+                    });
+                }, 5000); // Sync every 30 seconds
+
+    }
+
+</script>

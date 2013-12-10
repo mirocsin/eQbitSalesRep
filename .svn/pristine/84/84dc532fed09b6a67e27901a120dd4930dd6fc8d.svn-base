@@ -1,0 +1,313 @@
+<link rel="stylesheet" href="css/jpm-page.css" />
+<div data-role="page" id="pg_items" data-theme="d" class="jpm-page">
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_empmain" data-icon="home">Back</a>
+        <h1>Items</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>
+    <div data-role="content" data-theme="">
+        <form>
+            <ul data-role="listview" data-inset="true">
+                <li data-role="list-divider" id="pgitems_lidvtitle">New Item</li>
+                <li data-role="fieldcontain">
+                    <label for="pgitems_txtcode">Item Code</label>
+                    <input type="text" id ="pgitems_txtcode" placeholder="Item Code" class="code" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgitems_txtdesc">Item Description</label>
+                    <input type="text" id ="pgitems_txtdesc" placeholder="Item Description" class="itmdesc" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgitems_txtbarcode">Bar Code</label>
+                    <input type="text" id ="pgitems_txtbarcode" placeholder="Bar Code" class="barcode" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgitems_txtsize">Size</label>
+                    <input type="text" id ="pgitems_txtsize" placeholder="Size" class="size" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgitems_txtprc">Price</label>
+                    <input type="text" id ="pgitems_txtprc" placeholder="Price" class="price" onclick="$(this).select();"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgitems_txtcat" class="select">Category</label>
+                    <select name="pgitems_txtcat" id="pgitems_txtcat" data-theme="d">
+                    </select>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgitems_txtothrdet">Other Details</label>
+                    <input type="text" id ="pgitems_txtothrdet" placeholder="Other Details" class="itmdesc" onclick="$(this).select();"/>
+                </li>
+                <li class="ui-body ui-body-b">
+                    <fieldset class="ui-grid-c">
+                        <div class="ui-block-a">
+                            <a id="pgitems_btnsave" data-role="button" href="" data-theme="e" data-icon="check" data-inline="true" class="jpm-cornerstyle" style="width:98%"  >Save Item</a>
+                        </div>
+                        <div class="ui-block-b">
+                            <a id="pgitems_btnsearch" data-role="button" href="" onclick="pg_items_btnsrc_click();" data-theme="b" data-icon="search" data-inline="true" class="jpm-cornerstyle" style="width:98%">Search </a>                              
+                        </div>
+                        <div class="ui-block-c">
+                            <a id="pgitems_btnnew" data-role="button" href="" data-theme="a" data-icon="plus" data-inline="true" class="jpm-cornerstyle" style="width:98%">New </a>
+                        </div>
+                        <div class="ui-block-d">
+                            <a id="pgitems_btndelete" data-role="button" href="" onclick="pg_items_btndelete_click();" data-theme="a" data-icon="delete" data-inline="true" class="jpm-cornerstyle" style="width:98%" >Delete </a>
+                        </div>
+                    </fieldset>
+                </li>
+            </ul>
+        </form>
+    </div>
+
+    <!--Pop-up Dialog Search Item option-->
+    <div data-role="popup" id="popup_searchitem" data-overlay-theme="a" data-theme="c" style="width:1000px!important;" >        
+        <div data-role="header" data-theme="a" >
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            <h1>Search Items</h1>
+        </div>
+        <div data-role="content" data-theme="d">
+            <h2>Items</h2>
+            <ul data-role="listview" style="padding:5px">
+                <li data-role="content" data-theme="c" >
+                    <table style="width:100%">
+                        <tr>
+                            <td><p><span>Search Criteria - text containing for Item Description and Category, exact match for Item Code, Barcode and Price</span><input type="text" id ="pgitems_txtsrcitem" placeholder="Text to search..." class="search" onclick="$(this).select();"/></p>
+                            </td>
+                            <td><a href="#" data-role="button" data-icon="search" data-theme="b" data-inline="true" class="jpm-cornerstyle" style="display:block;" onclick="pg_items_searchItem()">Search</a></td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            <input type='hidden' id='hid_searchitem' value=''/>
+            <div style="padding:5px"><p id="pgitems_dvitemlst"></p>
+            </div>
+            <div style="padding:5px; text-align: right">
+                <div data-role="controlgroup" data-type="horizontal" class="jpm-cornerstyle">
+                    <a href="#" data-rel="back" data-role="button" data-icon="check" data-inline='true' data-theme="e" onclick="pg_items_getItem()">Select</a>
+                    <a href="#" data-rel="back" data-role="button" data-icon="delete" data-inline='true' data-theme="b" >Cancel</a>
+                </div>
+            </div>
+        </div>         
+    </div>
+    
+    <script>
+        $("#pgitems_btnnew").on("click", function(e) {
+            p_itemaction = 'new';
+            $('#pgitems_lidvtitle').text('New Item');
+            $("#pgitems_txtcode").removeAttr("readonly");            
+            $("#pgitems_txtcode").css("color","auto");
+            pg_items_pageInit();            
+        });        
+        $("#pg_items").on("pagebeforeshow", function(event, ui) {
+            pg_items_pageInit();
+            insertDialogs(this);
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        function pg_items_pageInit() {
+            $("#pgitems_txtcode").val("");
+            $("#pgitems_txtdesc").val("");
+            $("#pgitems_txtbarcode").val("");
+            $("#pgitems_txtsize").val("");
+            $("#pgitems_txtprc").val("0.00");
+            $("#pgitems_txtzip").val("");
+            $("#pgitems_txtcat").val("");
+            $("#pgitems_txtothrdet").val("");
+            p_enableControl('pgitems_btndelete', 'disable');
+            p_enableControl('pgitems_btnnew', 'disable');
+            pg_items_getCategory();
+        }
+        function pg_items_getCategory(){
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblcategory WHERE dtype<>'DELETE' ORDER BY vchCat_Name", [], pg_items_fillCategory);
+            });            
+        }
+        function pg_items_fillCategory(tx, results){
+            var option='';
+            $("#pgitems_txtcat").text("");
+            for (i = 0; i < results.rows.length; i++) {                
+                option = option + "<option value='"+ results.rows.item(i).vchCat_Name.trim() +"'>"+ results.rows.item(i).vchCat_Name.trim() +"</option>";
+            }            
+            $("#pgitems_txtcat").html(option).selectmenu("refresh");
+        }
+        function pg_items_qryListfail(tx, results) {
+            pg_items_fillItemList(tx, results);
+        }
+        $('#pgitems_btnsave').click(function(e) {
+            //debugger;
+            var p1 = $("#pgitems_txtcode").val(),
+                p2 = $("#pgitems_txtdesc").val(),
+                p3 = $("#pgitems_txtbarcode").val(),
+                p4 = $("#pgitems_txtsize").val(),
+                p5 = $("#pgitems_txtprc").val(),
+                p6 = $("#pgitems_txtcat").val(),
+                p7 = $("#pgitems_txtothrdet").val();
+
+            if (p2 === "" || p3 === "" || p4 === "" || p5 === "" || p6 === "") {                
+                commonDialog('Save Item','There are some blank fields in the entry.',
+                             'Important fields are Item Code, Item Description, Barcode, Size, Price and Category.',
+                             'exclamation','pop');
+                return;
+            } else {
+                p_db.transaction(function(tx) {
+                    //debugger;
+                    if (p_itemaction === 'new') {                        
+                        pg_items_checkItmCd();                        
+                    }
+                    if (p_itemaction === 'edit') {                        
+                        tx.executeSql('UPDATE tblitems SET vchItem_Description=?,vchBarcode=?,vchSize=?,mnyPrice=?,vchItem_Category=?,vchItem_ExtendedDesc=?,vchEmail=?,dtype=?,dtRecordModed=? WHERE vchItem_Code=?', [p2, p3, p4, p5, p6, p7, "EDIT", new Date(), p1], pg_items_editsuccess, pg_items_errorTX);
+                    }
+                }, pg_items_errorTA);
+            }
+            //e.preventDefault();
+            //e.stopImmediatePropagation();
+        });
+        function pg_items_checkItmCd(){
+            var itmcode = $("#pgitems_txtcode").val();            
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblitems WHERE vchItem_Code=?", [itmcode], pg_items_saveNewItem);
+            });
+        }
+        function pg_items_saveNewItem(tx, results){
+            if (results.rows.length > 0){
+                commonDialog('Save Item','Item Code already exists.',
+                             '','exclamation','pop');
+            } else {
+                var p1 = $("#pgitems_txtcode").val(),
+                p2 = $("#pgitems_txtdesc").val(),
+                p3 = $("#pgitems_txtbarcode").val(),
+                p4 = $("#pgitems_txtsize").val(),
+                p5 = $("#pgitems_txtprc").val(),
+                p6 = $("#pgitems_txtcat").val(),
+                p7 = $("#pgitems_txtothrdet").val();
+
+                tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category,vchItem_ExtendedDesc,dtype,dtRecordModed) VALUES (?,?,?,?,?,?,?,?,?)', [p1, p2, p3, p4, p5, p6, p7, 'NEW', new Date()], pg_items_addsuccess, pg_items_errorTX);
+            }
+        }
+        function pg_items_addsuccess() {
+            pg_items_pageInit();
+            commonDialog('New Item','Item was added successfully.',
+                         'Click Ok to proceed on a new Item entry form.',
+                         'information','pop');
+        }
+        function pg_items_errorTX(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_items_errorTA(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_items_editsuccess() {
+            commonDialog('Edit Item','Item was updated successfully.',
+                         '','information','pop');
+        }
+        function pg_items_qryCustList() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblitems WHERE dtype<>'DELETE' ORDER BY dtRecordModed DESC LIMIT 20", [], pg_items_fillItemList, pg_items_qryListfail);
+            });
+        }
+        function pg_items_fillItemList(tx, results) {
+            var ultag, ulopentag, ulclosetag;
+            var list = "";
+            var liheader = "";
+
+            $('#pgitems_dvitemlst').text("");
+            var uls = $();
+            ulopentag = "<ul id='pgitems_lstvw1' data-role='listview' >";
+            liheader = "<li data-role='list-divider'><table align='center' width='100%'><tr>";
+            liheader = liheader + "<td width='12%'>Item Code</td>";
+            liheader = liheader + "<td width='18%'>Item Description</td>";
+            liheader = liheader + "<td width='15%'>Bar Code</td>";
+            liheader = liheader + "<td width='10%'>Size</td>";
+            liheader = liheader + "<td width='10%'>Price</td>";
+            liheader = liheader + "<td width='35%'>Category</td>";
+            liheader = liheader + "</tr></table></li>";
+            ulclosetag = "</ul>";
+
+            if (results.hasOwnProperty("rows")) {
+                for (i = 0; i < results.rows.length; i++) {
+                    list = list + "<li id='lstitem" + (i + 1).toString() + "' class='lstitem' data-icon='false'><a href='#' onclick=pg_items_lstItem_click('" + results.rows.item(i).vchItem_Code.toString() + "'," + (i + 1).toString() + ")>";
+                    list = list + "<table width='100%'><tr>";
+                    list = list + "<td class='vchItem_Code' width='12%'>" + results.rows.item(i).vchItem_Code.trim() + "</td>";
+                    list = list + "<td class='vchItem_Description' width='18%'>" + results.rows.item(i).vchItem_Description.trim() + "</td>";
+                    list = list + "<td class='vchBarcode' width='15%'>" + results.rows.item(i).vchBarcode.trim() + "</td>";
+                    list = list + "<td class='vchSize' width='10%'>" + results.rows.item(i).vchSize.trim() + "</td>";
+                    list = list + "<td class='mnyPrice' width='10%'>" + results.rows.item(i).mnyPrice.toFixed(2) + "</td>";
+                    list = list + "<td class='vchItem_Category' width='35%'>" + results.rows.item(i).vchItem_Category.trim() + "</td>";
+                    list = list + "</tr></table> </a></li>";
+                }
+            }
+            ultag = ulopentag + liheader + list + ulclosetag;
+            uls = uls.add(ultag);
+            $('#pgitems_dvitemlst').append(uls);
+            uls.listview();
+        }
+
+        $('#popup_searchitem').on('popupbeforeposition', function(event, ui) {
+            pg_items_qryCustList();
+        });
+
+        function pg_items_btnsrc_click() {
+            $('#popup_searchitem').popup('open', {transition: 'slideup'});
+        }
+        function pg_items_lstItem_click(code, index) {
+            //debugger;
+            $('#pgitems_lstvw1').find('li').removeClass('ui-btn-active');
+            $('#' + $('#pgitems_lstvw1').children()[index].id).addClass('ui-btn-active');
+            $("#hid_searchitem").val(code);
+        }
+        function pg_items_getItem() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblitems WHERE dtype<>? AND vchItem_Code=?", ["DELETE", $("#hid_searchitem").val()], pg_items_loadAppt, pg_items_loadfail);
+            });
+        }
+        function pg_items_loadAppt(tx, results) {
+            $("#pgitems_txtcode").attr("readonly","true");
+            $("#pgitems_txtcode").css("color","graytext");
+            $("#pgitems_txtcode").val(results.rows.item(0).vchItem_Code);
+            $("#pgitems_txtdesc").val(results.rows.item(0).vchItem_Description);
+            $("#pgitems_txtbarcode").val(results.rows.item(0).vchBarcode);
+            $("#pgitems_txtsize").val(results.rows.item(0).vchSize);
+            $("#pgitems_txtprc").val(results.rows.item(0).mnyPrice.toFixed(2));            
+            p_setSelectionOptionValue('pgitems_txtcat', results.rows.item(0).vchItem_Category.trim());            
+            $("#pgitems_txtothrdet").val(results.rows.item(0).vchItem_ExtendedDesc);
+            $("#pgitems_lidvtitle").text("Edit Item");
+            p_itemaction = 'edit';
+            p_enableControl('pgitems_btndelete');
+            p_enableControl('pgitems_btnnew');
+        }
+        function pg_items_loadfail(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_items_btndelete_click() {
+            commonDialog('Delete Item','Are you sure to delete this Item?',
+                         '','question','pop');
+        }
+        function pg_items_popQues_btnYes_click() {
+            p_db.transaction(function(tx) {
+                tx.executeSql('UPDATE tblitems SET dtype=? WHERE vchItem_Code=?', ["DELETE", $("#pgitems_txtcode").val()], pg_items_delsuccess, pg_items_errorTX);
+            }, pg_items_errorTA);
+        }
+        function pg_items_delsuccess() {
+            pg_items_pageInit();
+//            commonDialog('Delete Item','Item was deleted successfully.',
+//                         'Click Ok to proceed on a new Item entry form.',
+//                         'information','pop');
+        }
+        function pg_items_searchItem() {
+            var l_valsrc = $("#pgitems_txtsrcitem").val();            
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblitems WHERE dtype<>? AND (UPPER(vchItem_Code)=? OR vchItem_Description LIKE ? OR UPPER(vchBarcode)=? OR vchSize LIKE ? OR mnyPrice=? OR vchItem_Category LIKE ?)", ["DELETE", l_valsrc, '%' + l_valsrc + '%', l_valsrc, '%' + l_valsrc + '%', l_valsrc, '%' + l_valsrc + '%'], pg_items_fillItemList, pg_items_qryListfail);
+            });
+        }
+    </script>
+</div>       
+
+
+<!--Notes - Button Inset (Group button)
+<li data-role="fieldcontain">
+    <div data-role="controlgroup" data-type="horizontal" >
+        <a id="pgitems_btnsave" data-role="button" href="" data-theme="e" data-icon="check" data-inline="true"  >Save Item</a>
+        <a id="pgitems_btnnew" data-role="button" href="" data-theme="a" data-icon="plus" data-inline="true" >New </a>
+        <a id="pgitems_btnsearch" data-role="button" href="" onclick="pg_items_btnsrc_click();" data-theme="b" data-icon="search" data-inline="true"  >Search </a>                    
+        <a id="pgitems_btndelete" data-role="button" href="" onclick="pg_items_btndelete_click();" data-theme="a" data-icon="delete" data-inline="true"  >Delete </a>
+    </div>
+</li>-->

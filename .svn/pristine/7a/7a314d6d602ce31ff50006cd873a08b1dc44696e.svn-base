@@ -1,0 +1,45 @@
+<style>
+    #pop_searchorder_txtsrcorder {
+        color:black!important;
+    }
+    #pop_searchorder_dvsrc .ui-input-text:not(label) {
+        background-color: #FFF;
+    }
+    #pop_searchorder_dvsrc {
+        background: transparent!important;
+    }
+</style>
+<div data-role="popup" id="pop_searchorder" data-overlay-theme="a" data-theme="c" >
+    <div id="pop_searchorder_header" data-role="header" data-theme="a" >
+        <div id="pop_searchorder_dvsrc">
+            <table style="width:100%">
+                <tr>
+                    <td width="50%">
+                        <input type="text" id ="pop_searchorder_txtsrcorder" placeholder="Search Order No..." class="search"/>
+                    </td>
+                    <td width="25%">
+                        <a href="#" data-icon="search" data-role="button" id="pop_searchorder_btndsrcorder" class="jpm-cornerstyle">Search</a>
+                    </td>
+                    <td width="25%">
+                        <a href="#" data-icon="delete" data-role="button" id="pop_searchorder_btndsrcclear" class="jpm-cornerstyle">Clear</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>    
+</div>
+<script>
+    $("#pop_searchorder").on("popupbeforeposition", function() {
+        $(this).width($(document).width()-30);        
+    });
+    $('#pop_searchorder_btndsrcorder').on('click', function() {
+        var srcorderno = $("#pop_searchorder_txtsrcorder").val();
+        pgmem_dvorder_dvclosed_querylist(undefined,srcorderno);
+        $("#pop_searchorder").popup("close");
+    });
+    $('#pop_searchorder_btndsrcclear').on('click', function() {
+        $("#pop_searchorder_txtsrcorder").val("");
+        pgmem_dvorder_dvclosed_querylist();
+        $("#pop_searchorder").popup("close");
+    });
+</script>

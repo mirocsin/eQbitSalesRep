@@ -1,0 +1,24 @@
+<!--data-dom-cache="true"-->
+<div data-role="page" id="pg_getcustomer" data-theme="d" >
+    <div data-role="header">
+        <a href="" id="btn_cancel1" data-icon="delete" >Cancel</a>
+        <h1>Select Customer</h1>  
+        <table>
+            <tr>
+                <td>
+                    <input type="hidden" id="txtcode" />
+                    <input type="search" id ="txtcustomer" placeholder="Search Customer"/>
+                </td>
+                <td>
+                    <a id="btnsearchcust" data-role="button" href="" data-theme="b" data-inline="true" >Search</a>
+                </td>                        
+            </tr>
+        </table>
+    </div>
+    <div data-role="content" data-theme="">
+        <div id="ulresultcustomer"></div>
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist">                
+    </div>
+    <script src="js/app/pg_getcustomer.js"></script>
+</div>

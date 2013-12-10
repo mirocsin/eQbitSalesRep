@@ -1,0 +1,15 @@
+<link rel="stylesheet" href="css/jpm-page.css" />
+<style>
+</style>
+<div data-role="page" id="pg_reports" data-theme="a" class="jpm-page">    
+    <div data-role="header" data-position="fixed">
+        <a href="#" data-rel="back" data-icon="home">Back</a>
+        <h1>Reports</h1>
+    </div>    
+    <div data-role="content" >
+        Report contents...
+    </div>
+</div>
+
+<script>
+</script>

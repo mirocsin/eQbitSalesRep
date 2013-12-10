@@ -1,0 +1,179 @@
+<style>
+    .custom-count-pos{
+        font-size: 11px;
+        font-weight: bold;
+        padding: 0.2em 0.5em;
+        float: right;
+    } 
+    .nav-glyphish-example .ui-btn .ui-btn-inner {
+        padding-top: 40px !important; 
+    }
+    .nav-glyphish-example .ui-btn .ui-icon { 
+        width: 45px!important; 
+        height: 35px!important; 
+        margin-left: -24px !important; 
+        box-shadow: none!important; 
+        -moz-box-shadow: none!important; 
+        -webkit-box-shadow: none!important;
+        -webkit-border-radius: none!important;
+        border-radius: none!important; 
+    }
+    #pgemp_dvappt_btn .ui-icon { 
+        background:  url('img/appointment.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgemp_dvorder_btn .ui-icon { 
+        background:  url('img/order.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgemp_dvnoti_btn .ui-icon { 
+        background:  url('img/notifications.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgemp_dvmore_btn .ui-icon { 
+        background:  url('img/more.png') 50% 50% no-repeat; 
+        background-size: 32px 32px;
+    }
+    #pgemp_dvorder_dvpending_btn .ui-icon { 
+        background:  url('img/orderpending.png') 50% 50% no-repeat; 
+        background-size: 34px 34px; 
+    }
+    #pgemp_dvorder_dvclosed_btn .ui-icon { 
+        background:  url('img/orderclosed.png') 50% 50% no-repeat; 
+        background-size: 36px 34px; 
+    }
+    #pgemp_dvorder_dventry_btn .ui-icon { 
+        background:  url('img/orderentry.png') 50% 50% no-repeat; 
+        background-size: 38px 34px;
+    }
+/*    #popupPanel {
+        width:450px;
+        border-radius: 0;
+        -moz-border-radius: 0;
+        -webkit-border-radius: 0;
+        float: left!important;
+    }*/
+    #popupPanel .ui-listview .ui-btn-icon-left .ui-btn-inner {padding-left: 35px;}
+    #popupPanel ul > li .ui-li {
+        height : 65px!important;        
+    }
+    #popupPanel ul > li .ui-li .ui-btn-text  {
+        top: 10px!important;
+    }
+    #popupPanel-popup {
+        right: 0 !important;
+        left: auto !important;        
+    }
+    #popupPanel {
+        width: 450px;
+        border: 1px solid #000;
+        border-right: none;
+        background: rgba(0,0,0,.5);
+        margin: -1px 0;
+    }
+    #popupPanel .ui-btn {
+        margin: 5px 5px;
+    }
+    
+</style>
+<div data-role="page" id="pg_empmain" data-theme="a">
+    <div id="loctest"></div>
+    <div id="pg_empmain_footer" data-role="footer" class="nav-glyphish-example" data-position="fixed" > 
+        <div data-role="navbar" class="nav-glyphish-example" data-grid="c"> 
+            <ul id="pg_empnavbar"> 
+                <li><a href="#" id="pgemp_dvappt_btn" data-icon="custom">Appointments</a></li> 
+                <li><a href="#" id="pgemp_dvorder_btn" data-icon="custom">Orders</a></li> 
+                <li><a href="#" id="pgemp_dvnoti_btn" data-icon="custom">Notifications</a></li> 
+                <li><a href="#" id="pgemp_dvmore_btn" data-icon="custom">More</a></li> 
+            </ul> 
+        </div> 
+    </div>    
+<!--    <div data-role="popup" id="popupPanel" data-theme="a">
+        <ul data-role="listview" >
+            <li class="ui-btn-icon-left" data-icon="arrow-l"><a id="menu-item-1" href="#">Customers</a></li>
+            <li class="ui-btn-icon-left" data-icon="arrow-l"><a id="menu-item-2" href="#">Items</a></li>
+            <li class="ui-btn-icon-left" data-icon="arrow-l"><a id="menu-item-2" href="#">Settings</a></li>
+       </ul>
+    </div>		-->
+    <div data-role="popup" id="popupPanel" data-corners="false" data-theme="none" data-shadow="false" data-tolerance="0,0">
+        <ul data-role="listview" >
+            <li class="ui-btn-icon-left" data-icon="arrow-l"><a id="menu-item-1" href="#">Customers</a></li>
+            <li class="ui-btn-icon-left" data-icon="arrow-l"><a id="menu-item-2" href="#">Items</a></li>
+            <li class="ui-btn-icon-left" data-icon="arrow-l"><a id="menu-item-2" href="#">Settings</a></li>
+       </ul>
+<!--        <button data-theme="a" data-icon="back" data-mini="true">Back</button>
+        <button data-theme="a" data-icon="grid" data-mini="true">Menu</button>
+        <button data-theme="a" data-icon="search" data-mini="true">Search</button>-->
+
+    </div>
+</div>
+
+<script>
+    var l_active_empnavbar;
+    $("#pg_empmain").on("pagebeforeshow", function(event, ui) {
+        if (l_active_empnavbar === undefined) {
+            l_active_empnavbar = "pgemp_dvappt";
+        }
+        pg_empmain_showpage(l_active_empnavbar);
+        $("#"+l_active_empnavbar+"_btn").addClass('ui-btn-active');
+        pgemp_dvappt_pagebeforeshow();
+    });
+    $('#pg_empnavbar').on('click', 'a', function(event) {        
+        if (this.id !== 'pgemp_dvmore_btn'){
+            pg_empmain_showpage(this.id.replace("_btn", ""));
+        } else {            
+            $('#popupPanel').popup('open', {transition: 'slideup'});
+        }
+    });
+    function pg_empmain_showpage(pagename) {
+        //debugger;
+        $("#pgemp_dvappt").hide();        
+        $("#pgemp_dvorder").hide();
+        $("#pgemp_dvnoti").hide();
+        $("#pgemp_dvmore").hide();
+        $("#" + pagename).slideDown('slow', function() {
+            var callback_function = new Function(pagename + '_onSlideDown()');
+            callback_function();
+        });
+        l_active_empnavbar=pagename;
+    }
+    $(document).ready(function() {
+        $("#menu-item-1, #menu-item-2").click( function () {
+            $('#popupPanel').popup('close', {transition: 'slidedown'});
+        });
+    });
+    $( "#popupPanel" ).on({
+        popupbeforeposition: function() {
+//        var wh = $( window ).height();
+//        var btn = $( "#pgemp_dvmore_btn" );        
+//        var btnw = $( "#pgemp_dvmore_btn" ).width();
+//        var btnt = btn.offset().top ;
+//        var btnh = btn.height() ;
+//        var panelh = 225 ;
+//        var panelm = 5 ;
+//        var adj = 2 ;
+//        //var panelt = btnt - btnh -(panelh*2)-(panelm*2)-(adj*2);        
+//        var panelt = p_doch - btnh - panelh;        
+//        
+//        $( "#popupPanel" )
+//            .css( "height", panelh )
+//            .css( "top", panelt)
+//            .css( "width", btnw - adj );
+//        $("#loctest").text('document(wh)-'+p_doch+', panel top(btnt - btnh - (panelh*2);)-'+panelt+', panel height(panelh)-'+panelh+', button top(btnt)-'+btnt+', button height(btnh)-'+btnh);
+        
+//        var h = $( window ).height();
+//        var btnw = $( "#pgemp_dvmore_btn" ).width();
+//        var adj = 2 ;
+//        $( "#popupPanel" )
+//            .css( "height", h )
+//            .css( "width", btnw - adj );
+
+        var h = $( window ).height();
+        var btnw = $( "#pgemp_dvmore_btn" ).width();
+        var panelh = $( "#popupPanel" ).height();
+        var adj = 2 ;
+        $( "#popupPanel" )
+            .css( "width", btnw - adj );
+        }    
+    });
+</script>

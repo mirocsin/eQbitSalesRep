@@ -1,0 +1,73 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Data
+Imports Newtonsoft.Json
+Imports System.IO
+
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+' <System.Web.Script.Services.ScriptService()> _
+<WebService(Namespace:="http://microsoft.com/webservices/")> _
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+Public Class eService
+    Inherits System.Web.Services.WebService
+
+    '<WebMethod()> _
+    'Public Function HelloWorld() As String
+    '    Return "Hello World123"
+    'End Function
+
+    ', tblMembers_Edit As String, tblMembers_Delete As String
+    <WebMethod()> _
+    Public Sub syncToServer(tblEmployees As String)
+        Dim strMessage As String = "Sync Successfully"
+        Dim ds As New DataSetService
+        Dim tblAdapter_Employee As New DataSetServiceTableAdapters.tblemployeesTableAdapter
+        Try
+            Dim oEmployees As DataSetService.tblemployeesDataTable = DirectCast(JsonConvert.DeserializeObject(tblEmployees, (GetType(DataSetService.tblemployeesDataTable))), DataSetService.tblemployeesDataTable)
+            For Each oRecord As DataRow In oEmployees.Rows
+                If oRecord("dtype") = "NEW" Then
+                    ' NEW RECORD
+                    ds.tblemployees.ImportRow(oRecord)
+                ElseIf oRecord("dtype") = "EDIT" Then
+                    ' EDIT RECORD
+                    ds.tblemployees.LoadDataRow(oRecord.ItemArray, True)
+                    ds.tblemployees(ds.tblemployees.Rows.Count - 1).SetModified()
+                ElseIf oRecord("dtype") = "DELETE" Then
+                    ' DELETE RECORD
+                    ds.tblemployees.LoadDataRow(oRecord.ItemArray, True)
+                    ds.tblemployees(ds.tblemployees.Rows.Count - 1).Delete()
+                End If
+                'oRecord("dtype") = ""
+            Next
+            tblAdapter_Employee.Update(ds.tblemployees)
+        Catch ex As Exception
+            strMessage = "Error SyncToServer: " + ex.Message
+        End Try
+
+        'Dim tblUsers = From t In dbtest.Users
+        'Context.Response.ClearHeaders()
+        'Context.Response.Clear()
+        'Context.Response.ContentType = "application/json"
+        'Context.Response.Write("Ext.util.JSONP.callback(" + JsonConvert.SerializeObject(tblUsers) + ");")
+
+        ds.Dispose()
+        ds = Nothing
+
+    End Sub
+
+    <WebMethod()> _
+    Public Sub verifyAccessCode(accesscode As String)
+        Dim tblAdapter_Access As New DataSetServiceTableAdapters.tblacessTableAdapter
+        Dim dtAccess As New DataSetService.tblacessDataTable
+        tblAdapter_Access.Fill(dtAccess, accesscode)
+        Dim jsSettings As New JsonSerializerSettings
+        jsSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        Context.Response.AddHeader("Access-Control-Allow-Origin", "*")
+        Context.Response.ContentType = "application/json"
+        Context.Response.Write(JsonConvert.SerializeObject(dtAccess, Formatting.None, jsSettings))
+    End Sub
+
+End Class

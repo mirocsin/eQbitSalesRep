@@ -1,0 +1,27 @@
+<div data-role="page" id="pg_customers" data-theme="c" >
+    <div data-role="header" data-position="fixed">
+        <a href="" id="btn_cancel3" data-icon="delete" >Cancel</a>
+        <h1>ALL Customers-JTest</h1>           
+        <a href="" data-icon="" class="ui-btn-right">Sync</a>
+        <table style="width:100%">
+            <tr>
+                <td style="width:50%;text-align:left">
+                    <input type="hidden" id="txtcustcode" />
+                    <input type="search" id ="txtcustname" placeholder="Search Customer"/>
+                </td>
+                <td style="width:50%">
+                    <label>A-Z</label>
+                    <a id="btnsearchcust" data-role="button" href="" data-theme="b" data-inline="true" >Search</a>
+                    <a id="btnnewcustomer" data-role="button" href="" data-theme="e" data-inline="true" >Create New Customer</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div data-role="content"  >
+        <div id="div_customers"></div>
+    </div>
+    <!-- style="overflow-x:scroll ; overflow-y: hidden; padding-bottom:5px;"  -->
+    <div data-role="footer" data-position="fixed" data-id="TestPersist">                
+    </div>
+    <script src="js/app/pg_customers.js"></script>
+</div>

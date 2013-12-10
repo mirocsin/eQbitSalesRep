@@ -1,0 +1,359 @@
+<div data-role="page" id="pgemp_poclosed" data-theme="a" >
+    <style scoped>
+        #pgemp_poclosed_itmheader {
+            border-radius: 0;
+            -moz-border-radius: 0;
+            -webkit-border-radius: 0;
+        }
+        #pgemp_poclosed_ulhead .ui-input-text {
+            border-radius: .3em!important;
+            box-shadow: none !important;
+            border: none!important;
+        }
+    </style>
+    <div data-role="header" data-position="fixed">        
+        <a href="#pg_empmain" data-icon="arrow-l" >Back</a>
+        <h1>Customer Purchase Order</h1>
+        <a href="#" id='pgemp_poclosed_btnapprove' data-icon="check" data-theme="e" >Approve PO</a>
+    </div>
+    <div data-role="content" >
+        <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2>Order</h2>   
+            <ul id='pgmemorderclosed_ulhead' data-role="listview" data-inset="false">
+
+                <li data-role="fieldcontain">
+                    <label for="pgemp_poclosed_txtpocode">Sales Order Code</label>
+                    <input type="text" id="pgemp_poclosed_txtpocode" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgemp_poclosed_txtcustnm">Customer Name</label>
+                    <input type="text" id="pgemp_poclosed_txtcustnm" readonly="readonly"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgemp_poclosed_txtshipto">Ship To</label>
+                    <input type="text" id="pgemp_poclosed_txtshipto" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgemp_poclosed_txtpodate">Sales Order Date</label>
+                    <input type="text" id="pgemp_poclosed_txtpodate" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgemp_poclosed_txtdeldate">Delivery Date</label>
+                    <input type="text" id="pgemp_poclosed_txtdeldate" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgemp_poclosed_txtrem">Special Instructions</label>
+                    <!--<input type="text" id="pgmemorderclosed_txtrem" disabled="disabled" />-->
+                    <textarea cols="40" rows="8" name="textarea" id="pgemp_poclosed_txtrem" readonly="readonly"></textarea>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgemp_poclosed_txttotamt">Total Order Amount</label>
+                    <input type="text" id="pgemp_poclosed_txttotamt" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <div>
+                        <a href="#" id="btnaddfreebie" data-icon="plus" data-inline='true' class="jpm-cornerstyle" data-role="button" data-theme="b">Add Free Item</a>
+                    </div>
+
+                </li>
+            </ul >            
+        </div>        
+        <div data-role="collapsible" data-theme="b" data-collapsed-icon="false" data-expanded-icon="false" data-collapsed="false" style="height:30px">
+            <h2><table align='center' width='100%' data-inset="true">
+                    <tr>
+                        <td width='16%'>ItemCode</td>
+                        <td width='30%'>Description</td>
+                        <td width='16%'>Size</td>
+                        <td width='14%'>U/Price</td>
+                        <td width='12%'>Qty</td>
+                        <td width='12%'>Amount</td>
+                    </tr>
+                </table>
+            </h2>
+        </div>
+        <div data-role="collapsible" data-theme="c" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">            
+            <ul id='pgemp_poclosed_ulitm' data-role="listview" data-inset="false">
+            </ul>           
+        </div>
+
+        <div data-role="popup" id="popup_poclosed" data-overlay-theme="a" data-theme="c" class="ui-corner-all" >
+            <div data-role="header" data-theme="a" class="ui-corner-top">
+                <h1>Options</h1>
+            </div>
+            <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content"> 
+                <ul data-role="listview" data-inset="true">
+                    <li data-role="fieldcontain">
+                        <label for="pgemp_poclosed_txtqty">New Qty</label>
+                        <input type="text" id ="pgemp_poclosed_txtqty" name='pgemp_poclosed_txtqty'  placeholder="New Qty"/>                    
+                    </li>
+                    <li data-role="fieldcontain">
+                        <label for="pgemp_poclosed_txtprice">New Price</label>
+                        <input type="text" id ="pgemp_poclosed_txtprice" name='pgemp_poclosed_txtprice' placeholder="New Price"/>                    
+                    </li>
+                    <li class="ui-body ui-body-b">
+                        <fieldset class="ui-grid-a">
+                            <div class="ui-block-a"> <a href="#" onclick='pgemp_poclosed_updrec(this)' data-inset='true' data-role="button" data-icon="check" data-theme="b">Update</a> </div>
+                            <div class="ui-block-b"><a href="#" onclick='pgemp_poclosed_delfree(this)' data-inset='true' data-role="button" data-icon="delete"  data-theme="a">Delete</a> </div>
+                        </fieldset>
+                    </li>
+                </ul>
+                <input type='hidden' id='hidden_itemcode' />                
+                <input type='hidden' id='hidden_qtyorig' />                
+            </div>         
+        </div>
+
+    </div>    
+
+    <script>
+        $("#pgemp_poclosed").on("pagebeforeshow", function(event, ui) {
+            insertDialogs(this);
+            pgemp_poclosed_getOrderHeader();
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        function pgemp_poclosed_getOrderHeader() {
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/getPOHeader",
+                async: true,
+                dataType: "json",
+                cache: false,
+                data: {vchPO_Code: p_pocode, vchStatus: 'CLOSED'},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    if (data.length !== 0) {
+                        pgemp_poclosed_loadHeader(data)
+                    }
+                }
+            });
+        }
+        function pgemp_poclosed_loadHeader(results) {
+            //debugger;
+            $("#pgemp_poclosed_txtpocode").val(":   " + results[0].vchPO_Code);
+            $("#pgemp_poclosed_txtcustnm").val(":   " + results[0].vchCust_Name);
+            $("#pgemp_poclosed_txtshipto").val(":   " + results[0].vchShipTo);
+            $("#pgemp_poclosed_txtpodate").val(":   " + results[0].vchPODate);
+            $("#pgemp_poclosed_txtdeldate").val(":   " + results[0].vchDelDate);
+            $("#pgemp_poclosed_txtrem").val(":   " + results[0].vchRemarks);
+            $("#pgemp_poclosed_txttotamt").val(":   " + results[0].mnyTotOrderAmt.toFixed(2));
+
+            pgemp_poclosed_getOrderDetails();
+        }
+        function pgemp_poclosed_getOrderDetails() {
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/getPODetails",
+                async: true,
+                dataType: "json",
+                cache: false,
+                data: {vchPO_Code: p_pocode, vchStatus: 'CLOSED'},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    if (data.length !== 0) {
+                        pgemp_poclosed_loadDetails(data)
+                    }
+                }
+            });
+        }
+        function pgemp_poclosed_loadDetails(results) {
+            var list = "";
+            var uls = $("#pgemp_poclosed_ulitm");
+            var l_liitmcategory = "";
+            uls.text("");
+            for (i in results) {
+                if (l_liitmcategory !== results[i].vchItem_Category) {
+                    //list = list + "<li data-role='list-divider' data-theme='b'>"+results.rows.item(i).vchItem_Category+"</li>";
+                    l_liitmcategory = results[i].vchItem_Category;
+                }
+                list = list + "<li id='pgemp_poclosed_liitm" + (i + 1).toString() + "' class='pgmemorderclosed_liitm' data-icon='false'>";
+                list = list + "<a href='#' onclick=pgemp_poclosed_liitm_click($(this),'@itemcode','@entrytype',@qty,@price)> <table width='100%' style='margin:0px'><tr>";
+                list = list + "<td class='vchItem_Code' width='16%'>" + results[i].vchItem_Code.trim() + "</td>";
+                list = list + "<td class='vchItem_Description' width='30%'>" + results[i].vchItem_Description.trim() + "</td>";
+                list = list + "<td class='vchSize' width='16%'>" + results[i].vchSize.trim() + "</td>";
+                list = list + "<td class='mnyPrice' width='14%'>" + results[i].mnyPrice.toFixed(2) + "</td>";
+                list = list + "<td class='intQty' width='12%'>" + results[i].intQty.toString() + "</td>";
+                list = list + "<td class='mnyAmount' width='12%'>" + results[i].mnyAmount.toFixed(2) + "</td>";
+                list = list + "</tr></table></a></li>";
+                list = list.replace("@itemcode", results[i].vchItem_Code.trim());
+                list = list.replace("@entrytype", results[i].vchEntry_Type);
+                list = list.replace("@qty", results[i].intQty.toString());
+                list = list.replace("@price", results[i].mnyPrice.toString());
+            }
+            uls = uls.append(list);
+            uls.listview('refresh');
+        }
+        function pgemp_poclosed_liitm_click(e, itemcode, entrytype, qty, price) {
+            if (entrytype !== 'FOC') {
+                return;
+            }
+            $('#pgemp_poclosed_txtqty').val(qty);
+            $('#pgemp_poclosed_txtprice').val(price);
+            $('#hidden_itemcode').val(itemcode);
+            var itemdesc = e.children().find('.vchItem_Description').text();
+            $('#popup_poclosed_title').text(itemcode + " - " + itemdesc)
+            $('#popup_poclosed').popup('open', {transition: 'slideup'});
+        }
+        function pgemp_poclosed_updrec(e) {
+            var inqty = parseInt($('#pgemp_poclosed_txtqty').val());
+            var price = parseInt($('#pgemp_poclosed_txtprice').val());
+            var itemcode = $('#hidden_itemcode').val();
+            if (inqty <= 0) {
+                commonDialog('Validation', 'Error in Qty', 'Qty should not be zero', 'exclamation', 'pop');
+                $('#popup_poclosed').popup('close');
+                return false;
+            }
+            if (price < 0) {
+                commonDialog('Validation', 'Error in Price', 'Price should not be zero', 'exclamation', 'pop');
+                $('#popup_poclosed').popup('close');
+                return false;
+            }
+            var data = {name: "tblpo_details", data: [{vchPO_Code: p_pocode, vchItem_Code: itemcode, vchStatus: 'CLOSED', intQty: inqty, mnyPrice: price, dtype: 'EDIT'}]};
+            data = JSON.stringify(data);
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/updatePODetails",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {tableobj: data},
+                crossDomain: true,
+                success: function(data) {
+                    if (data.length !== 0) {
+                        //debugger
+                        if (data.tblservermsg[0].message === "SUCCESS") {
+                            pgemp_poclosed_getOrderHeader();
+                        }
+                        else if (data.tblservermsg[0].message.indexOf('ERROR') > -1) {
+                            commonDialog('Validation', 'Error in saving', data.tblservermsg[0].message, 'exclamation', 'pop');
+                        }
+                    }
+                },
+                error: function(data) {
+                    commonDialog('Validation', 'Error in connection', data.statusText, 'exclamation', 'pop');
+                }
+            });
+            $('#popup_poclosed').popup('close');
+        }
+        function pgemp_poclosed_delfree(e) {
+            var itemcode = $('#hidden_itemcode').val();
+            var data = {name: "tblpo_details", data: [{vchPO_Code: p_pocode, vchItem_Code: itemcode, vchStatus: 'CLOSED', dtype: 'DELETE'}]};
+            data = JSON.stringify(data);
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/updatePODetails",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {tableobj: data},
+                crossDomain: true,
+                success: function(data) {
+                    if (data.length !== 0) {
+                        //debugger
+                        if (data.tblservermsg[0].message === "SUCCESS") {
+                            pgemp_poclosed_getOrderHeader();
+                        }
+                        else if (data.tblservermsg[0].message.indexOf('ERROR') > -1) {
+                            commonDialog('Validation', 'Error in saving', data.tblservermsg[0].message, 'exclamation', 'pop');
+                        }
+                    }
+                },
+                error: function(data) {
+                    commonDialog('Validation', 'Error in connection', data.statusText, 'exclamation', 'pop');
+                }
+            });
+            $('#popup_poclosed').popup('close');
+        }
+        $('#btnaddfreebie').on('click', function(e) {
+            //$('#pgemp_poclosed_pop_searchitem').popup('open', {transition: 'slideup'});
+            $('#pgemp_poclosed_pop_searchitem').popup('open', {transition: 'slidedown', positionTo: "origin", x: 0, y: 0});
+        })
+        function pgemp_poclosed_pop_searchitem_li_click(code, description, category, size, brand) {
+            $('#pgemp_poclosed_pop_searchitem').popup('close', {transition: 'slidedown'});
+            var otableobj = {name: 'tblpo_details', data: [{vchPO_Code: p_pocode, vchStatus: 'CLOSED', vchItem_Code: code, vchItem_Description: description + ' (FOC)', vchItem_Category: category, vchSize: size, dtype: 'NEW', vchBrand: brand, bitPosted: 1, mnyPrice: 0, intQty: 1, mnyAmount: 0, vchEntry_Type: 'FOC', dtRecordAdded: p_getDateTime()}]};
+            otableobj = JSON.stringify(otableobj);
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/insertRecord",
+                async: true,
+                dataType: "json",
+                cache: false,
+                data: {tableobj: otableobj},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    //debugger
+                    if (data.length !== 0) {
+                        if (data.tblservermsg[0].message === 'SUCCESS') {
+                            pgemp_poclosed_getOrderDetails();
+                        }
+                        else {
+                            commonDialog('Validation', 'Error in entry', data.tblservermsg[0].message, 'exclamation', 'pop');
+                        }
+                    }
+                },
+                error: function(err) {
+                    commonDialog('Validation', 'Error in connection', err.statusText, 'exclamation', 'pop');
+                }
+            });
+        }
+        $('#pgemp_poclosed_btnapprove').on('click', function(e) {
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/approvePO",
+                async: true,
+                dataType: "json",
+                cache: false,
+                data: {vchPO_Code: p_pocode},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    //debugger
+                    if (data.length !== 0) {
+                        if (data[0].message === 'SUCCESS') {
+                            $('#pgemp_dvnoti_ullist').empty();
+                            $.mobile.changePage('#pg_empmain', {transition: "slide", reverse: true});
+                        }
+                        else {
+                            commonDialog('Validation', 'Error in PO Approval', data[0].message, 'exclamation', 'pop');
+                        }
+                    }
+                },
+                error: function(err) {
+                    commonDialog('Validation', 'Error in connection', err.statusText, 'exclamation', 'pop');
+                }
+            });
+        })
+        $("#popup_poclosed").on("popupbeforeposition", function() {
+            var style = "width:@width"
+            var id = '#' + $(this).attr('id') + '-popup'
+            var width //= parseFloat($(id).css("max-width").replace('px',''));
+            width = $(window).width().toString() + 'px'
+            style = style.replace('@width', width);
+            $(id).attr('style', style);
+            $("#pop_searchitem").popup("reposition", {positionTo: 'window'});
+        });
+    </script>
+</div>
+

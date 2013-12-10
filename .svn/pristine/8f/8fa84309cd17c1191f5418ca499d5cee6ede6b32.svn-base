@@ -1,0 +1,222 @@
+<div id="pgmem_dvnoti" >
+    <div data-role="header" >
+        <h1>Notifications</h1>
+    </div>
+    <div data-iscroll="" data-role="content" id="pgmemdvnoti_dvcontent" class='pgmemdvnoti_dvcontent_iscroll-wrapper' >
+        <ul id='pgmem_dvnoti_ullist' data-role="listview" data-theme="c">              
+        </ul>
+    </div>
+        
+<!--    <div id="pgmemdvnoti_dvcontent" data-role="content" data-theme='c'>
+        
+    </div>-->
+<!--    <div data-role="content" data-theme='d'>
+        <ul data-role="listview">
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/autoreplenish.png" alt="" style="padding:11px 10px"/>
+                    <h3>Auto Replenish 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/autoreplenish.png" alt="" style="padding:11px 10px"/>
+                    <h3>Auto Replenish 2</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/promotions.png" alt="" style="padding:10px 10px"/>
+                    <h3>Promotions 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/announcements.png" alt="" style="padding:8px 10px"/>
+                    <h3>Announcements 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/activities.png" alt="" style="padding:10px 10px"/>
+                    <h3>Activities 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/announcements.png" alt="" style="padding:8px 10px"/>
+                    <h3>Announcements 2</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+        </ul>
+    </div>-->
+</div>
+<script>
+    function pgmem_dvnoti_onSlideDown() {
+        //alert('slide Down');
+        $('#pg_memmain_btnnoti_indicator').text('');
+        $('#pg_memmain_btnnoti_indicator').hide();
+    }
+//    $("#pg_memmain").on("pagebeforeshow", function(event, ui) {
+//        //debugger
+//        if (navigator.platform === 'Win32') {
+//            $("#pgmemdvnoti_dvcontent").height($(window).height() * .85);
+//        }
+//        else {
+//            var intHeight = $(window).height() - ($(window).height() * .20);
+//            $("#pgmemdvnoti_dvcontent").height(intHeight);
+//        }
+//    });
+    function pgmem_dvnoti_memberNotifications() {
+        p_memNotification = window.setInterval(
+                function() {
+                    var strid = p_settings.vchCustCode;
+                    var strdtRecAdded = '';
+                    if ($('#pgmem_dvnoti_ullist').children().size() > 0) {
+                        var intCnt = $('#pgmem_dvnoti_ullist').children().size() - 1;
+                        strdtRecAdded = $('#hiddtrecadd_notify' + $('#pgmem_dvnoti_ullist').find('li')[intCnt].id.replace('pgmem_dvnoti_li_', '')).val();
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: p_urlServer + "/getMemberNotification",
+                        async: true,
+                        dataType: "json",
+                        cache: false,
+                        data: {id: strid, dtRecordAdded: strdtRecAdded},
+                        crossDomain: true,
+                        beforeSend: function() {
+                            //$.mobile.showPageLoadingMsg("b", "Loading from server...");
+                        },
+                        complete: function() {
+                            //$.mobile.hidePageLoadingMsg();
+                        },
+                        success: function(data) {                            
+                            if (data.length !== 0) {
+                                if (data.mem_notification !== undefined) {
+                                    var intCnt = 0;
+                                    var intlist = $('#pgmem_dvnoti_ullist').children().size();
+                                    var strline = '<li id="@lineid" data-icon="false" ><a href="#" id="@btnid" onclick="pgmemdvnoti_list_click(this)"><img src="img/@icon" alt="" style="@style"/><h3 class="autowrap">@type</h3><p>@info</p><input type="hidden" id="@hiddtrecadd_notify" value="@hiddtrecadd_noti_value" /></a></li>';
+                                    intCnt = intCnt + data.mem_notification.length;
+                                    for (n in data.mem_notification) {
+                                        var odata = data.mem_notification;
+                                        intlist = intlist + 1;
+                                        var strline2 = strline;
+                                        strline2 = strline2.replace('@lineid', 'pgmem_dvnoti_li_' + intlist.toString());
+                                        strline2 = strline2.replace('@hiddtrecadd_notify', "hiddtrecadd_notify" + intlist.toString());
+                                        strline2 = strline2.replace('@hiddtrecadd_noti_value', odata[n].dtRecordAdded);
+                                        strline2 = strline2.replace('@btnid', 'btnmemponotify' + intlist.toString());
+                                        strline2 = strline2.replace('@info', odata[n].vchInfo);
+                                        switch (odata[n].vchType){
+                                            case 'replenishment':
+                                                l_noti_id = odata[n].tblnoti_id;
+                                                strline2 = strline2.replace('@icon', "autoreplenish.png");
+                                                strline2 = strline2.replace('@style', "padding:11px 10px");
+                                                strline2 = strline2.replace('@type', "Auto Replenish");
+                                                break;
+                                            case 'promotions':
+                                                strline2 = strline2.replace('@icon', "promotions.png");
+                                                strline2 = strline2.replace('@style', "padding:10px 10px");
+                                                strline2 = strline2.replace('@type', "Promotions");
+                                                break;
+                                            case 'activities':
+                                                strline2 = strline2.replace('@icon', "activities.png");
+                                                strline2 = strline2.replace('@style', "padding:10px 10px");
+                                                strline2 = strline2.replace('@type', "Activities");
+                                                break;
+                                            case 'announcements':                                      
+                                                strline2 = strline2.replace('@icon', "announcements.png");
+                                                strline2 = strline2.replace('@style', "padding:8px 10px");
+                                                strline2 = strline2.replace('@type', "Announcements");
+                                                break;
+                                        }
+                                        $('#pgmem_dvnoti_ullist').append(strline2);
+                                    }
+                                    $('#pgmem_dvnoti_ullist').listview('refresh');
+                                }
+                                if (intCnt > 0) {
+                                    var txtindicator = intCnt.toString();
+                                    if (intCnt > 10 || $('#pg_memmain_btnnoti_indicator').text() !== "") {
+                                        txtindicator = "10+";
+                                    }
+                                    $('#pg_memmain_btnnoti_indicator').show();
+                                    $('#pg_memmain_btnnoti_indicator').text(txtindicator);
+                                }
+                                else {
+                                    $("#pgmem_dvnoti_ullist").text("");
+                                    $("#pgmem_dvnoti_ullist").listview('refresh');
+                                }
+                            }
+                            else {                                
+                            }
+                        },
+                        error: function(err) {
+                            //$('#pg_empmain_btnnoti_indicator').listview('refresh');                            
+                        }
+                    });
+                }, 2000); // Sync every N seconds
+
+    }
+    function pgmemdvnoti_list_click(e) {
+        $.ajax({
+            type: "POST",
+            url: p_urlServer + "/createMemAutoReplenish",
+            async: true,
+            dataType: "json",
+            cache: false,
+            data: {vchCust_Code: p_settings.vchCustCode},
+            crossDomain: true,
+            beforeSend: function() {
+                //$.mobile.showPageLoadingMsg("b", "Loading from server...");
+            },
+            complete: function() {
+                //$.mobile.hidePageLoadingMsg();
+            },
+            success: function(data) {
+                if (data.length !== 0) {
+                    if (data.mem_autoreplenish !== undefined) {
+                        p_replnshItemData = data.mem_autoreplenish; 
+                        l_active_memnavbar = 'pgmem_dvnoti';
+                        
+                        $.ajax({
+                            type: "POST",
+                            url: p_urlServer + "/updateNotiRead",
+                            async: true,
+                            dataType: "json",
+                            cache: false,
+                            data: {tblnoti_id: l_noti_id},
+                            crossDomain: true,
+                            beforeSend: function() {
+                                //$.mobile.showPageLoadingMsg("b", "Loading from server...");
+                            },
+                            complete: function() {
+                                //$.mobile.hidePageLoadingMsg();
+                            },
+                            success: function(data) {
+                                if (data.length !== 0) {
+                                    if (data[0].message === 'SUCCESS') {
+                                        p_orderaction = 'replenish';
+                                        $.mobile.changePage('#pgmem_orderentry', {transition: "slide", reverse: false});
+                                    }
+                                    else {
+                                        commonDialog('Validation', 'Error in Notification Update', data[0].message, 'exclamation', 'pop');
+                                        p_replnshItemData = null;
+                                    }
+                                }
+                            },
+                            error: function(err) { 
+                            }
+                        }); 
+                    }
+                }
+            },
+            error: function(err) {
+            }
+        });        
+    }
+</script>

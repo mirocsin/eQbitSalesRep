@@ -1,0 +1,47 @@
+<div data-role="page" id="pg_page1" data-theme="d">
+    <div data-role="header" data-position="fixed">
+        <a href="" data-role="button" data-rel="back">Back</a>
+        <h1>Page 1 Header</h1>
+        <a href="" data-role="button" id="btnrefresh1">Refresh Records</a>
+    </div>    
+    <div data-role="content" data-theme="">                                               
+        <ul data-role="listview" id='listview1'> 
+        </ul>
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist" >                   
+        Page 1 Footer
+    </div>
+    <script>
+        $("#pg_page1").on("pageshow", function(event, ui) {
+            alert('Variable Test: ' + test);
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        $('#btnrefresh1').click(function(e) {
+            //debugger;
+            var strName = 'Mike' + ($('#listview1').children().size()).toString()
+            db.transaction(function(tx) {
+                tx.executeSql('INSERT INTO tblemployees(vchEmployee_Code,vchEmployee_Name,vchLoginID,vchLoginPassword,dtype) VALUES ("001",?,"001","321","NEW")', [strName]);
+                var sql = "SELECT * FROM tblemployees";
+                tx.executeSql(sql, [], querySuccess_employees, errorCB_employee)
+            }, errorTA_employees)
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+        function querySuccess_employees(tx, results) {
+            //debugger;
+            $('#listview1 li').remove()
+            for (var i = 0; i < results.rows.length; i++) {
+                var strValue = '<li><a>@vchEmployee_Name</a></li>'
+                strValue = strValue.replace('@vchEmployee_Name', results.rows.item(i).vchEmployee_Name)
+                $('#listview1').append(strValue).listview('refresh');
+            }
+        }
+        function errorCB_employee(err) {
+            alert('Error: ' + err.message);
+        }
+        function errorTA_employees(err) {
+            alert("Error processing SQL: " + err.code);
+        }
+    </script>
+</div>

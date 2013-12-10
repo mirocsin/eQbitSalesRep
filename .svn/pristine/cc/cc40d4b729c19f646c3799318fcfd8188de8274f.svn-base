@@ -1,0 +1,75 @@
+<style>    
+    #pgmem_dvorder_btn .ui-icon { 
+        background:  url('img/order.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgmem_dvdeli_btn .ui-icon { 
+        background:  url('img/delivery.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgmem_dvnoti_btn .ui-icon { 
+        background:  url('img/notifications.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgmem_dvmore_btn .ui-icon { 
+        background:  url('img/more.png') 50% 50% no-repeat; 
+        background-size: 32px 32px;
+    }
+    #pgmem_dvorder_dvpending_btn .ui-icon { 
+        background:  url('img/orderpending.png') 50% 50% no-repeat; 
+        background-size: 34px 34px; 
+    }
+    #pgmem_dvorder_dvclosed_btn .ui-icon { 
+        background:  url('img/orderclosed.png') 50% 50% no-repeat; 
+        background-size: 36px 34px; 
+    }
+    #pgmem_dvorder_dvapprov_btn .ui-icon { 
+        background:  url('img/orderapprov.png') 50% 50% no-repeat; 
+        background-size: 36px 34px;
+    }
+</style>
+<div data-role="page" id="pg_memmain" data-theme ="a" class="jpm-page">   
+    <div id="pg_memmain_footer" data-role="footer" class="nav-glyphish-example" data-position="fixed" > 
+        <div data-role="navbar" class="nav-glyphish-example" data-grid="c"> 
+            <ul id="pg_memnavbar"> 
+                <li><a href="#" id="pgmem_dvorder_btn" data-icon="custom">Orders</a></li> 
+                <li><a href="#" id="pgmem_dvdeli_btn" data-icon="custom">Delivery</a></li> 
+                <li><a href="#" id="pgmem_dvnoti_btn" data-icon="custom">Notifications</a></li> 
+                <li><a href="#" id="pgmem_dvmore_btn" data-icon="custom">More</a></li> 
+            </ul> 
+        </div> 
+    </div>    
+</div>
+<script>
+    var l_active_memnavbar;
+    $("#pg_memmain").on("pagebeforeshow", function(event, ui) {
+        $("#pg_memmain_footer").width($(window).width()-2);
+        if (l_active_memnavbar === undefined) {
+            l_active_memnavbar = "pgmem_dvorder";
+        }
+        pg_memmain_showpage(l_active_memnavbar);
+        $("#"+l_active_memnavbar+"_btn").addClass('ui-btn-active');
+        pgmem_dvorder_pagebeforeshow();
+//        pgmem_dvorder_dvclosed_pagebeforeshow();
+    });
+    $("#pg_memmain").on("pagebeforeshow", function(event, ui) {
+        insertDialogs(this);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    });
+    $('#pg_memnavbar').on('click', 'a', function(event) {
+        pg_memmain_showpage(this.id.replace("_btn", ""));
+    });
+    function pg_memmain_showpage(pagename) {
+        //debugger;
+        $("#pgmem_dvorder").hide();        
+        $("#pgmem_dvdeli").hide();
+        $("#pgmem_dvnoti").hide();
+        $("#pgmem_dvmore").hide();
+        $("#" + pagename).slideDown('show', function() {
+            var callback_function = new Function(pagename + '_onSlideDown()');
+            callback_function();
+        });
+        l_active_memnavbar=pagename;
+    }    
+</script>

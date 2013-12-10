@@ -1,0 +1,330 @@
+<div data-role="page" id="pgmem_orderclosed" data-theme="a">
+    <style scoped>
+        #pgmemorderclosed_itmheader {
+            border-radius: 0;
+            -moz-border-radius: 0;
+            -webkit-border-radius: 0;
+        }
+        #pgmemorderclosed_ulhead .ui-input-text {
+            border-radius: .3em!important;
+            box-shadow: none !important;
+            border: none!important;
+        }
+    </style>
+    <div data-role="header" data-position="fixed">        
+        <a href="#pg_memmain" data-icon="arrow-l" onclick="l_active_empnavbar = 'pgmem_dvorder';">Back</a>
+        <h1>Purchase Order</h1>
+        <a href="#" data-icon="check" class="ui-btn-right" id="pgmemorderclosed_btnrecv">Receive Delivery</a>
+    </div>
+    <div data-role="content" >
+        <div data-role="collapsible" data-theme="c" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2>Order</h2>   
+            <ul id='pgmemorderclosed_ulhead' data-role="listview" data-inset="false">
+
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderclosed_txtpocode">Sales Order Code</label>
+                    <input type="text" id="pgmemorderclosed_txtpocode" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderclosed_txtcustnm">Customer Name</label>
+                    <input type="text" id="pgmemorderclosed_txtcustnm" readonly="readonly"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderclosed_txtshipto">Ship To</label>
+                    <input type="text" id="pgmemorderclosed_txtshipto" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderclosed_txtpodate">Sales Order Date</label>
+                    <input type="text" id="pgmemorderclosed_txtpodate" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderclosed_txtdeldate">Delivery Date</label>
+                    <input type="text" id="pgmemorderclosed_txtdeldate" readonly="readonly" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderclosed_txtrem">Special Instructions</label>
+                    <!--<input type="text" id="pgmemorderclosed_txtrem" disabled="disabled" />-->
+                    <textarea cols="40" rows="8" name="textarea" id="pgmemorderclosed_txtrem" readonly="readonly"></textarea>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderclosed_txttotamt">Total Order Amount</label>
+                    <input type="text" id="pgmemorderclosed_txttotamt" readonly="readonly" />
+                </li>
+            </ul >            
+        </div>
+        <div data-role="collapsible" data-theme="c" data-collapsed-icon="false" data-expanded-icon="false" data-collapsed="false" style="height:30px">
+            <h2><table align='center' width='100%' data-inset="true"><tr>
+                        <td width='16%'>ItemCode</td>
+                        <td width='28%'>Description</td>
+                        <td width='14%'>Size</td>
+                        <td width='12%'>U/Price</td>
+                        <td width='10%'>Order Qty</td>                       
+                        <td width='10%'>Amount</td>
+                        <td width='10%'>Received Qty</td>
+                    </tr></table></h2>
+        </div>
+        <div data-role="collapsible" data-theme="c" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false" class="jpm-page">
+            <ul id='pgmemorderclosed_ulitm' data-role="listview" data-inset="false">
+            </ul>
+        </div>
+    </div>    
+
+    <script>
+        $("#pgmem_orderclosed").on("pagebeforeshow", function(event, ui) {
+            insertDialogs(this);
+            pgmem_orderclosed_getOrderHeader();
+            if (p_pocode.status2 !== 'APPROVED') {
+                $('#pgmemorderclosed_btnrecv').attr('style', 'display:none')
+            }
+            else {
+                $('#pgmemorderclosed_btnrecv').attr('style', '')
+            }
+            // variables
+            $(this).attr('dummyvar', '')
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        function pgmem_orderclosed_getOrderHeader() {
+//            p_db.transaction(function(tx) {
+//                tx.executeSql("SELECT * FROM tblso_headers WHERE vchStatus<>? AND dtype<>? AND vchSO_Code=?", ["FIRST","DELETE",p_pocode], pgmem_orderclosed_loadHeader, pgmem_orderclosed_loadFail);
+//            });
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/getPOHeader",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {vchPO_Code: p_pocode.pocode, vchStatus: 'CLOSED'},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    //debugger
+                    if (data.length !== 0) {
+                        if (data[0].message === undefined) {
+                            //--- APPROVED
+                            if (p_pocode.status2 === "APPROVED") {
+                                pgmem_orderclosed_loadLocalHeader(data);
+                            }
+                            else {
+                                pgmem_orderclosed_loadHeader(data);
+                            }
+                        }
+                        else {
+                            commonDialog('Validation', 'Error in PO Header', data[0].message, 'exclamation', 'pop');
+                        }
+                    }
+                },
+                error: function(err) {
+                    //commonDialog('Validation', 'Error in PO Header Connection', err.statusText, 'exclamation', 'pop');
+                    pgmem_orderclosed_loadLocalHeader();
+                }
+            });
+        }
+        function pgmem_orderclosed_loadHeader(results) {
+            $("#pgmemorderclosed_txtpocode").val(":   " + results[0].vchPO_Code);
+            $("#pgmemorderclosed_txtcustnm").val(":   " + results[0].vchCust_Name);
+            $("#pgmemorderclosed_txtshipto").val(":   " + results[0].vchShipTo);
+            $("#pgmemorderclosed_txtpodate").val(":   " + results[0].vchPODate);
+            $("#pgmemorderclosed_txtdeldate").val(":   " + results[0].vchDelDate);
+            $("#pgmemorderclosed_txtrem").val(":   " + results[0].vchRemarks);
+            $("#pgmemorderclosed_txttotamt").val(":   " + results[0].mnyTotOrderAmt.toFixed(2));
+            pgmem_orderclosed_getOrderDetails();
+        }
+        function pgmem_orderclosed_loadFail(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pgmem_orderclosed_getOrderDetails() {
+//            p_db.transaction(function(tx) {
+//                tx.executeSql("SELECT * FROM tblso_details WHERE vchStatus<>? AND dtype<>? AND vchSO_Code=?", ["FIRST","DELETE",p_pocode], pgmem_orderclosed_loadDetails, pgmem_orderclosed_loadFail);
+//            });
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/getPODetails",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {vchPO_Code: p_pocode.pocode, vchStatus: 'CLOSED'},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    //debugger
+                    if (data.length !== 0) {
+                        if (data[0].message === undefined) {
+                            //--- APPROVED
+                            if (p_pocode.status2 === "APPROVED") {
+                                pgmem_orderclosed_loadLocalDetail(data);
+                            }
+                            else {
+                                pgmem_orderclosed_loadDetails(data);
+                            }
+                        }
+                        else {
+                            commonDialog('Validation', 'Error in PO Details', data[0].message, 'exclamation', 'pop');
+                        }
+                    }
+                },
+                error: function(err) {
+                    pgmem_orderclosed_loadLocalDetail();
+                    //commonDialog('Validation', 'Error in PO Details Connection', err.statusText, 'exclamation', 'pop');
+                }
+//                success: function(data) {
+//                    if (data.length !== 0) {
+//                        pgmem_orderclosed_loadDetails(data)
+//                    }
+//                }
+            });
+
+        }
+        function pgmem_orderclosed_loadDetails(results) {
+            var list = "";
+            var uls = $("#pgmemorderclosed_ulitm");
+            var l_liitmcategory = "";
+            uls.text("");
+            for (i in results) {
+                if (l_liitmcategory !== results[i].vchItem_Category) {
+                    //list = list + "<li data-role='list-divider' data-theme='b'>"+results.rows.item(i).vchItem_Category+"</li>";
+                    l_liitmcategory = results[i].vchItem_Category;
+                }
+                list = list + "<li id='pgmemorderclosed_liitm" + (i + 1).toString() + "' class='pgmemorderclosed_liitm' data-icon='false'>";
+                list = list + "<table width='100%' style='margin:0px'><tr>";
+                list = list + "<td class='vchItem_Code' width='16%'>" + results[i].vchItem_Code.trim() + "</td>";
+                list = list + "<td class='vchItem_Description' width='28%'>" + results[i].vchItem_Description.trim() + "</td>";
+                list = list + "<td class='vchSize' width='14%'>" + results[i].vchSize.trim() + "</td>";
+                list = list + "<td class='mnyPrice' width='12%'>" + results[i].mnyPrice.toFixed(2) + "</td>";
+                list = list + "<td class='intQty' width='10%'>" + results[i].intQty.toString() + "</td>";
+                list = list + "<td class='mnyAmount' width='10%'>" + results[i].mnyAmount.toFixed(2) + "</td>";
+                //list = list + "<td class='intRecvQty' width='5%'></td><td class='RecvQtySpacer' width='5%'></td>";
+                list = list + "<td class='intRecvQty' width='5%'>@inputtextbox</td><td class='RecvQtySpacer' width='5%'></td>";
+                if (p_pocode.status2 === "APPROVED") {
+                    list = list.replace('@inputtextbox', "<input type='text' class='pgmemorderclosed_txtrecvqty' value='@receiveqty'/>");
+                    list = list.replace('@receiveqty', results[i].intQty_Received)
+                }
+                else {
+                    list = list.replace('@inputtextbox', p_convert(results[i].intQty_Received,'0'));
+                }
+                list = list + "</tr></table></li>";
+            }
+            uls = uls.append(list);
+            uls.listview('refresh');
+            $('#pgmemorderclosed_ulitm').trigger("create")
+
+//                $('#pgmemorderclosed_ulitm').find('.intRecvQty')
+//                        .append("<input type='text' class='pgmemorderclosed_txtrecvqty' value='0'/>")
+//                        .trigger("create");
+
+//            $("#pgmemorderclosed_ulitm li").each(function(index) {
+//                var txtrecvqty = $(this).find('.intRecvQty').find('.pgmemorderclosed_txtrecvqty');
+//                var orderqty = $(this).find('.intQty').text();
+//                txtrecvqty.val( orderqty);
+//            });
+
+        }
+        function pgmem_orderclosed_loadLocalHeader(data) {
+            p_executeSql_cb('SELECT * FROM tblpo_headers WHERE vchPO_Code = ?', [p_pocode.pocode], data,
+                    function(results, data) {
+                        if (results.rows.length === 0) {
+                            data[0].dtype = "EDIT"
+                            var oInsert = new p_insertDataToLocal();
+                            oInsert.process("tblpo_headers", data);
+                            pgmem_orderclosed_loadHeader(oInsert.data);
+                        }
+                        else {
+                            //debugger
+                            pgmem_orderclosed_loadHeader([results.rows.item(0)]);
+                        }
+                    })
+        }
+        function pgmem_orderclosed_loadLocalDetail(data) {
+            p_executeSql_cb('SELECT * FROM tblpo_details WHERE vchPO_Code = ?', [p_pocode.pocode], data,
+                    function(results, data) {
+                        //debugger
+                        if (results.rows.length === 0) {
+                            for (n in data) {
+                                data[n].dtype = "EDIT";
+                                data[n].intQty_Received = data[n].intQty;
+                            }
+                            var oInsert = new p_insertDataToLocal();
+                            oInsert.process("tblpo_details", data);
+                            pgmem_orderclosed_loadDetails(oInsert.data);
+                        }
+                        else {
+                            //debugger
+                            var odata = []
+                            for (i = 0; i < results.rows.length; i++) {
+                                odata.push(results.rows.item(i))
+                            }
+                            pgmem_orderclosed_loadDetails(odata);
+                        }
+                    })
+        }
+        $('#pgmemorderclosed_btnrecv').on('click', function(e) {
+            commonDialog('Validation', 'Received delivery now?', 'Proceed to finalize delivery', 'question', 'pop');
+        })
+
+        function pgmem_orderclosed_popQues_btnYes_click() {
+            var aSQL = [];
+            // Validate entry
+            $("#pgmemorderclosed_ulitm li").each(function(index) {
+                var intqty = parseInt($(this).find('.intQty').text());
+                var intqty_entry = parseInt($(this).find('.pgmemorderclosed_txtrecvqty').val());
+                //debugger
+                if (intqty_entry > intqty) {
+                    $("#pgmem_orderclosed").attr('dummyvar', 'invalid')
+                    //commonDialog('Validation', 'Invalid entry', 'Receive Qty is greater than Ordered Qty', 'exclamation', 'pop');
+                    return false;
+                }
+            })
+            if ($("#pgmem_orderclosed").attr('dummyvar') === "invalid") {
+                commonDialog('Validation', 'Invalid entry', 'Receive Qty is greater than Ordered Qty', 'exclamation', 'pop');
+                $("#pgmem_orderclosed").attr('dummyvar', '')
+
+            }
+            else {
+                // proceed updates                
+                aSQL.push("UPDATE tblpo_headers SET vchStatus2 = 'RECEIVED' WHERE vchPO_Code = '" + p_pocode.pocode + "'");
+                $("#pgmemorderclosed_ulitm li").each(function(index) {
+                    var itemcode = $(this).find('.vchItem_Code').text();
+                    var intqty_entry = parseInt($(this).find('.pgmemorderclosed_txtrecvqty').val());
+                    aSQL.push("UPDATE tblpo_details SET intQty_Received = " + intqty_entry.toString() + " WHERE vchItem_Code = '" + itemcode + "';");
+                })
+                html5sql.process(
+                        aSQL,
+                        function() {
+                            // Success                            
+                            var tables = new p_syncTables;
+                            tables.callBackFn = "pgmem_orderclosed_syncComplete";
+                            tables.addTable('tblpo_headers', "WHERE bitPosted = ?", [1]);
+                            tables.addTable('tblpo_details', "WHERE bitPosted = ?", [1]);
+                            tables.syncToServer();
+                            //
+                            $('#pgmem_dvorder_ulclosedlist').empty();                                                        
+                        },
+                        function(error, statement) {
+                            // Error
+                            commonDialog('Validation', 'SQL Error', error.message, 'exclamation', 'pop');
+                        }
+                )
+            }
+        }
+        function pgmem_orderclosed_syncComplete(msg) {
+            if (msg !== undefined) {
+                commonDialog('Validation', 'Error in Synchronization', msg + ' data is saved locally', 'exclamation', 'pop');
+            }
+            else {
+                commonDialog('Validation', 'Synchronization Complete', 'Data: Purchase Order, Items, Category and other settings', 'information', 'pop');
+            }
+            $.mobile.changePage('#pg_memmain', {transition: "slide", reverse: true});
+        }
+    </script>
+</div>
+

@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Schema Namespace="customer_loreal_backendModel" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2006/04/edm">
+  <EntityContainer Name="customer_loreal_backendEntities">
+    <EntitySet Name="tblemployees" EntityType="customer_loreal_backendModel.tblemployee" />
+    <EntitySet Name="tblitems" EntityType="customer_loreal_backendModel.tblitem" />
+    <EntitySet Name="tblmembers" EntityType="customer_loreal_backendModel.tblmember" />
+  </EntityContainer>
+  <EntityType Name="tblemployee">
+    <Key>
+      <PropertyRef Name="vchEmployee_Code" />
+    </Key>
+    <Property Name="vchEmployee_Code" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+    <Property Name="vchEmployee_Name" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+    <Property Name="vchLoginID" Type="String" MaxLength="20" Unicode="false" FixedLength="false" />
+    <Property Name="vchLoginPassword" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+  </EntityType>
+  <EntityType Name="tblitem">
+    <Key>
+      <PropertyRef Name="vchItem_Code" />
+    </Key>
+    <Property Name="vchItem_Code" Type="String" Nullable="false" MaxLength="20" Unicode="false" FixedLength="false" />
+    <Property Name="vchItem_Description" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+    <Property Name="vchBarcode" Type="String" MaxLength="20" Unicode="false" FixedLength="false" />
+    <Property Name="mnyCost" Type="Double" />
+  </EntityType>
+  <EntityType Name="tblmember">
+    <Key>
+      <PropertyRef Name="vchMember_Code" />
+    </Key>
+    <Property Name="vchMember_Code" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+    <Property Name="vchMember_Name" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+    <Property Name="vchLoginID" Type="String" MaxLength="20" Unicode="false" FixedLength="false" />
+    <Property Name="vchLoginPassword" Type="String" MaxLength="50" Unicode="false" FixedLength="false" />
+  </EntityType>
+</Schema>

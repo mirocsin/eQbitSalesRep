@@ -1,0 +1,127 @@
+<div id="pgmem_dvorder" >
+    <style scoped>
+        #pgmem_dvorder_subheader .nav-glyphish-example{
+            padding-top: 40px !important; 
+        }
+/*        #pgmemdvorder_txtsrcorder {
+            color:black!important;
+        }*/
+/*        #pgmemdvorder_dvsrc .ui-input-text:not(label) {
+            background-color: #FFF;
+        }
+        #pgmemdvorder_dvsrc {
+            background: transparent!important;
+        }*/
+    </style>
+    <div id="pgmem_dvorder_header" data-role="header">
+        <!--<a href="" data-icon="refresh" class="ui-btn-left" id="pgmem_dvorder_btnsync">Sync</a>-->
+        <a href="" data-icon="search" class="ui-btn-left" id="pgmem_dvorder_btnsrcorder" style="display:none">Search Order</a>
+        <h1>Orders</h1>        
+        <a href="#" data-icon="plus" class="ui-btn-right" id="pgmemdvorder_btnneworder">New Order</a>
+        <div id="pgmem_dvorder_subheader" data-role="navbar" class="nav-glyphish-example" data-grid="a"> 
+            <ul id="pgmem_dvordernavbar"> 
+                <li><a href="#" id="pgmem_dvorder_dvpending_btn" data-icon="custom">Pending</a></li> 
+                <li><a href="#" id="pgmem_dvorder_dvclosed_btn" data-icon="custom">Closed</a></li>
+                <!--<li><a href="#" id="pgmem_dvorder_dvapprov_btn" data-icon="custom">Approved</a></li>-->
+            </ul>
+        </div>
+<!--        <div id="pgmemdvorder_dvsrc" style="margin:2px;display:none">
+            <table style="width:100%">
+                <tr>
+                    <td width="50%" style="padding-right:5px">
+                        <input type="text" id ="pgmemdvorder_txtsrcorder" placeholder="Search Order No..." class="search"/>
+                    </td>
+                    <td width="25%" style="padding-right:5px">
+                        <a href="#" data-icon="search" data-role="button" id="pgmemdvorder_btndsrcorder" class="jpm-cornerstyle">Search</a>
+                    </td>
+                    <td width="25%">
+                        <a href="#" data-icon="delete" data-role="button" id="pgmemdvorder_btndsrcclear" class="jpm-cornerstyle">Clear</a>
+                    </td>
+                </tr>
+            </table>
+        </div>-->
+    </div>
+</div>
+<script>
+    var l_active_dvmemorder;
+    function pgmem_dvorder_onSlideDown() {
+        //alert('slide Down');
+    }
+    function pgmem_dvorder_pagebeforeshow() {
+        $("#pgmem_dvorder_subheader").width($(window).width()-5);
+        if (navigator.platform === 'Win32') {
+            $("#pgmem_dvorder").height($(window).height() * .88);
+        }
+        else {
+            var intHeight = $(window).height() - ($(window).height() * .13);
+            $("#pgmem_dvorder").height(intHeight);
+        }
+
+        if (l_active_dvmemorder === undefined) {
+            l_active_dvmemorder = "pgmem_dvorder_dvpending";
+        }
+        pgmem_dvorder_showpage(l_active_dvmemorder);
+        $("#" + l_active_dvmemorder + "_btn").addClass('ui-btn-active');
+        pgmem_dvorder_dvpending_pagebeforeshow();        
+    }
+    $('#pgmem_dvordernavbar').on('click', 'a', function(event) {
+        var pgname = this.id.replace("_btn", "");
+        if (pgname === "pgmem_dvorder_dvclosed") {
+            //$("#pgmemdvorder_dvsrc").show();
+            $("#pgmem_dvorder_btnsrcorder").show();            
+        } else {
+            //$("#pgmemdvorder_dvsrc").css("display","none");
+            $("#pgmem_dvorder_btnsrcorder").css("display","none");
+        }   
+        pgmem_dvorder_showpage(pgname);
+    });
+//    $('#pgmemdvorder_btndsrcorder').on('click', function() {
+//        var srcorderno = $("#pgmemdvorder_txtsrcorder").val();
+//        pgmem_dvorder_dvclosed_querylist(undefined,srcorderno);
+//    });
+//    $('#pgmemdvorder_btndsrcclear').on('click', function() {
+//        $("#pgmemdvorder_txtsrcorder").val("");
+//        pgmem_dvorder_dvclosed_querylist();
+//    });
+    function pgmem_dvorder_showpage(pagename) {
+        //debugger;
+        $("#pgmem_dvorder_dvpending").hide();
+        $("#pgmem_dvorder_dvclosed").hide();
+//        $("#pgmem_dvorder_dvapprov").hide();
+        $("#" + pagename).slideDown('show', function() {
+            var callback_function = new Function(pagename + '_onSlideDown()');
+            callback_function();
+        });
+        l_active_dvmemorder = pagename;
+    }
+    $('#pgmemdvorder_btnneworder').on('click', function() {
+        p_orderaction = "new";
+        $('#pgmem_dvorder_header').removeAttr("data-position");
+        $('#pgmem_dvorder_header').trigger("refresh");
+        $.mobile.changePage('#pgmem_orderentry', {transition: "slide", reverse: false});
+    });
+//    $('#pgmem_dvorder_btnsync').on('click', function() {
+//        var tables = new p_syncTables;
+//        tables.callBackFn = "pgmem_dvorder_syncComplete";
+//        tables.addTable('tblpo_headers', "WHERE bitPosted = ?", [1]);
+//        tables.addTable('tblpo_details', "WHERE bitPosted = ?", [1]);
+//        tables.syncToServer();        
+//    });
+    $('#pgmem_dvorder_btnsrcorder').on('click', function() {
+//        $('#pgmem_dvorder_pop_searchorder').popup('open', {x:-100, y:0, transition: 'pop'});
+        //$('#pgmem_dvorder_pop_searchorder').popup('open', {transition: 'pop', positionTo: '#pgmem_dvorder_header', x: 0, y: 0});        
+        $('#pgmem_dvorder_pop_searchorder').popup('open', {transition: 'slidedown', positionTo: "origin", x: 0, y: 0});        
+    });
+    function pgmem_dvorder_syncComplete(msg){
+        // Refresh the list
+        if (msg !== undefined){            
+            commonDialog('Validation', 'Error in Synchronization', msg , 'exclamation', 'pop');
+        }
+        else {
+            commonDialog('Validation', 'Synchronization Complete', 'Data: Sales Order, Items, Category and other settings' , 'information', 'pop');
+        }
+        pgmem_dvorder_dvpending_querylist();
+        pgmem_dvorder_dvclosed_querylist();
+    }
+   
+</script>

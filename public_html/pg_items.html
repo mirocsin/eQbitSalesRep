@@ -1,0 +1,111 @@
+<!--<link rel="stylesheet" href="css/jpm-page.css" />-->
+<style>
+    #pgitems_divsrc .ui-input-text:not(label) {
+        background-color: #FFF;
+    }
+    #pgitems_txtsrcitm {
+        color:black!important;
+    }
+    #pgitems_imgItem {
+        max-height: 400px;
+        max-width: 400px;  
+    }
+</style>
+<div data-role="page" id="pg_items" data-theme="a" class="jpm-page">    
+    <div data-role="header" data-position="fixed">
+        <a id="pgitems_btnBack" href="#" data-icon="home">Back</a>
+        <h1>Items</h1>        
+        <div data-theme="a" class="ui-widget-content" data-role="content" id="pgitems_divsrc">            
+            <input type="text" id ="pgitems_txtsrcitm" placeholder="Search Items..." class="search" style="display:block"/>
+        </div>
+        <div data-theme="c" data-content-theme="d">
+            <h4 style="margin:0px 0px 10px 0px"><table align='center' width='100%' data-inset="true" style="padding-left:110px"><tr>
+                <!--<td width='6%'></td>-->
+                <td width='12%'>Item Code</td>
+                <td width='18%'>Item Description</td>
+                <td width='12%'>Size</td>
+                <td width='10%'>Price</td>
+                <td width='16%'>Barcode</td>
+                <td width='20%'>Brand</td>
+            </tr></table></h4>
+        </div>
+    </div>    
+    <div data-role="content" >
+        <ul id='pgitems_ulitm' data-theme="d" data-role="listview" data-inset="true" data-filter='true' data-filter-placeholder='Search Items...'>
+        </ul>
+    </div>
+    <div data-role="popup" id="pgitems_popupPhoto" data-overlay-theme="a" data-theme="d" data-corners="false">
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <img id="pgitems_imgItem" class="popphoto" src="" alt="" >
+    </div>
+</div>
+
+<script>
+    function pgemp_dvmore_onSlideDown(){
+        //alert('slide Down');
+    }
+    $("#pg_items").on("pagebeforeshow", function(event, ui) {
+        pg_items_pageInit();
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    });
+    $(document).on("pageshow", function(e) {
+        $('#pgitems_txtsrcitm').bind("input", function(e) {
+            $('#pgitems_ulitm').prev().find(".ui-input-search .ui-input-text").val($(this).val());
+            $('#pgitems_ulitm').prev().find(".ui-input-search .ui-input-text").trigger("input", e);
+        });
+        $('#pgitems_ulitm').prev().find(".ui-input-search .ui-input-text").bind("input", function(e) {      
+        });
+    });
+    function pg_items_pageInit(){
+        pg_items_qryItmList();
+        $('#pgitems_ulitm').prev().find(".ui-input-search .ui-input-text").parent().hide();
+        $('#pgitems_btnBack').attr("href",p_mainpg);
+    }
+    function pg_items_qryItmList() {
+        p_db.transaction(function(tx) {
+            //tx.executeSql("SELECT vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category,Coalesce(vchItem_ExtendedDesc,'') as vchItem_ExtendedDesc,Coalesce(vchBrand,'') as vchBrand FROM tblitems ORDER BY vchItem_Category, vchItem_Description", [], pg_items_fillItmList);
+            tx.executeSql("SELECT * FROM tblitems ORDER BY vchItem_Category, vchItem_Description", [], pg_items_fillItmList);
+        });
+    }
+    function pg_items_fillItmList(tx, results) {
+        var list = "";
+        var uls = $("#pgitems_ulitm");
+        var l_liitmcategory = "";
+        uls.text("");
+        if (results.rows.hasOwnProperty("length")) {
+            for (i = 0; i < results.rows.length; i++) {
+                var l_filtertxt,l_imgpath;
+                if (l_liitmcategory !== results.rows.item(i).vchItem_Category) {
+                    list = list + "<li data-role='list-divider' data-theme='b' data-filtertext='" + results.rows.item(i).vchItem_Category.trim() + "'>" + results.rows.item(i).vchItem_Category + "</li>";
+                    l_liitmcategory = results.rows.item(i).vchItem_Category;
+                }
+                l_filtertxt = results.rows.item(i).vchItem_Category.trim() + results.rows.item(i).vchItem_Code.trim() + results.rows.item(i).vchItem_Description.trim() + results.rows.item(i).vchSize.trim() + results.rows.item(i).mnyPrice.toFixed(2);                
+                list = list + "<li id='pgitems_liitm" + (i + 1).toString() + "' class='pgitems_liitm' data-icon='false' data-filtertext='" + l_filtertxt + "'>";
+                l_imgpath = "data:image/jpg;base64," + results.rows.item(i).vbnItem_Picture.trim();
+                list = list + "<a href='#' onclick=pg_items_lstItm_click(this) data-slide='" + results.rows.item(i).vchItem_Code.trim() + "'>";                
+                list = list + "<img src='"+ l_imgpath +"' class='ui-li-thumb' onError='pg_items_changeSrc(this);'/>";
+                list = list + "<table width='100%' style='margin:0px'><tr>";                
+                list = list + "<td class='vchItem_Code' width='12%'>" + results.rows.item(i).vchItem_Code.trim() + "</td>";                
+                list = list + "<td class='vchItem_Description' width='18%'>" + results.rows.item(i).vchItem_Description.trim() + "</td>";
+                list = list + "<td class='vchSize' width='12%'>" + results.rows.item(i).vchSize.trim() + "</td>";
+                list = list + "<td class='mnyPrice' width='9%'>" + results.rows.item(i).mnyPrice.toFixed(2) + "</td>";
+                list = list + "<td class='vchItem_Category' width='1%'><input type='hidden' value='" + results.rows.item(i).vchItem_Category.trim() + "'/></td>";
+                list = list + "<td class='vchBarcode' width='16%'>" + results.rows.item(i).vchBarcode.trim() + "</td>";
+                list = list + "<td class='vchBrand' width='20%'>" + results.rows.item(i).vchBrand.trim() + "</td>";
+                list = list + "</tr></table><h3 style='font-size:12px'>" + results.rows.item(i).vchItem_ExtendedDesc.trim() + "</h3></a></li>";
+            }                
+        }
+        uls = uls.append(list);
+        uls.listview('refresh');
+    }    
+    function pg_items_changeSrc(ithis){
+        ithis.src = "img/items.png";
+    }
+    function pg_items_lstItm_click(ithis) {           
+        $("#pgitems_imgItem").attr("src",$(ithis).find("img").attr("src"));
+        if ($(ithis).find("img").attr("src") !== "img/items.png"){            
+            $("#pgitems_popupPhoto").popup('open', {transition: "pop"}, {positionTo: 'window'});            
+        }        
+    }
+</script>

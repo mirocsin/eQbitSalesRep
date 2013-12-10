@@ -1,0 +1,173 @@
+<div data-iscroll="" data-role="content" id="pgmem_dvorder_dvclosed" class='pgmem_dvorder_dvclosed_iscroll-wrapper' >    
+    <div id="div_iscroll-pulldown3" class="iscroll-pulldown" style="background-color:#262626" ><span class="iscroll-pull-icon"></span><span class="iscroll-pull-label" data-iscroll-loading-text="Loading latest..." data-iscroll-pulled-text="Loading latest...">Load latest</span></div>
+    <ul id='pgmem_dvorder_ulclosedlist' data-role="listview" data-theme="c">              
+    </ul>
+    <div id="div_iscroll-pullup3" class="iscroll-pullup" style="background-color:#262626" ><span class="iscroll-pull-icon"></span><span class="iscroll-pull-label" data-iscroll-loading-text="Loading..." data-iscroll-pulled-text="Loading...">Load more</span></div>
+</div>
+
+<script>
+    $(document).delegate("div.divContainer-page", "pageinit",
+            function bindPullPagePullCallbacks(event) {
+                $(".pgmem_dvorder_dvclosed_iscroll-wrapper", this).bind({
+                    iscroll_onpulldown: onPullDownPurchOrders,
+                    iscroll_onpullup: onPullUpPurchOrders
+                });
+            });
+    function onPullDownPurchOrders(event, data) {
+        pgmem_dvorder_dvclosed_querylist('pulldown');
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
+    function onPullUpPurchOrders(event, data) {
+        pgmem_dvorder_dvclosed_querylist('pullup');
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
+    function pgmem_dvorder_dvclosed_resizeDiv() {
+        var intHeight;
+        if (navigator.platform === 'Win32') {
+            $("#pgmem_dvorder_dvclosed").height($(window).height() * .80);
+        }
+        else {
+            intHeight = $(window).height() - ($(window).height() * .20);
+            $("#pgmem_dvorder_dvclosed").height(intHeight);
+        }
+    }
+    function pgmem_dvorder_dvclosed_onSlideDown() {
+        if ($('#pgmem_dvorder_ulclosedlist').children().size() === 0) {
+            pgmem_dvorder_dvclosed_querylist();
+        }
+    }
+    function pgmem_dvorder_dvclosed_querylist(pulltype, srcorderno) {
+        // Hide div Pull up        
+        if ($('#pgmem_dvorder_ulclosedlist').children().size() < 10) {
+            $('#div_iscroll-pullup3').hide();
+        }
+        var strPOCode = '';
+        if ($('#pgmem_dvorder_ulclosedlist').children().size() > 0) {
+            if (pulltype === "pullup") {
+                var intCnt = $('#pgmem_dvorder_ulclosedlist').children().size() - 1;
+                strPOCode = $('#hidpocode_closed' + $('#pgmem_dvorder_ulclosedlist').find('li')[intCnt].id.replace('pgmem_dvorder_dvclosed_li_', '')).val();
+            }
+            else if (pulltype === "pulldown") {
+                strPOCode = $('#hidpocode_closed' + $('#pgmem_dvorder_ulclosedlist').find('li')[0].id.replace('pgmem_dvorder_dvclosed_li_', '')).val();
+            }
+        }
+        if (pulltype === undefined) {
+            pulltype = "";
+            $('#pgmem_dvorder_ulclosedlist').empty();
+        }
+        if (srcorderno === undefined) {
+            srcorderno = "";
+        }
+        p_dummyvar = pulltype;
+        var strid = p_settings.vchId;
+        if (window.navigator.onLine) {
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/getPOListClosed",
+                async: true,
+                dataType: "json",
+                cache: false,
+                data: {id: strid, vchPO_Code: strPOCode, scrolltype: pulltype, searchPO: srcorderno},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg("b", "Loading from server...");
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    var pulltype = p_dummyvar;
+                    p_dummvar = "";
+                    if (data.length !== 0) {
+                        pgmem_dvorder_dvclosed_drawlist(data, pulltype);
+                    }
+                    else {
+                        $('#pgmem_dvorder_ulclosedlist').listview('refresh');
+                    }
+                },
+                error: function(err) {
+                    p_executeSql_cb('SELECT * FROM tblpo_headers WHERE vchStatus = ?', ['CLOSED'], [],
+                            function(results, vars) {
+                                var odata = []
+                                for (i = 0; i < results.rows.length; i++) {
+                                    odata.push(results.rows.item(i))
+                                }
+                                pgmem_dvorder_dvclosed_drawlist(odata, "");
+                            });
+
+                    $('#pgmem_dvorder_ulclosedlist').listview('refresh');
+                    commonDialog('Validation', 'Error in connection', 'Server is down or Error in connection, Loading from local...', 'exclamation', 'pop');
+                }
+            });
+        }
+    }
+    function pgmem_dvorder_dvclosed_list(tx, results) {
+        var intlist = 1;
+        pgmem_dvorder_dvclosed_drawlist(results, intlist);
+    }
+    function pgmem_dvorder_dvclosed_drawlist(results, pulltype) {
+        var intlist = $('#pgmem_dvorder_ulclosedlist').children().size();
+        var strline = '<li id="@lineid" data-icon="false" ><a href="#" id="@btnid" onclick="@onclick"><img src="img/@icon" alt="" style="@style"/><h3 class="autowrap">Order No: @disppocode &nbsp;&nbsp; Order Date: @podate</h3><p>Total Order Amount: @nTotAmt</p><p>Ship To: @shipto on @deldate</p><input type="hidden" id="@hidclosedpocode" value="@valclosedpocode" /><input type="hidden" id="@hidmempoclosed_dtype" value="@poclosed_dtype" /></a></li>';
+        for (var n in results) {
+            var strline2 = strline;
+            intlist = intlist + 1;
+            strline2 = strline2.replace('@lineid', 'pgmem_dvorder_dvclosed_li_' + intlist.toString());
+            strline2 = strline2.replace('@customer', results[n].vchCust_Name);
+            strline2 = strline2.replace('@podate', results[n].vchPODate);
+            strline2 = strline2.replace('@deldate', results[n].vchDelDate);
+            strline2 = strline2.replace('@shipto', results[n].vchShipTo);
+            strline2 = strline2.replace('@btnid', 'btnpoclosed' + intlist.toString());
+            strline2 = strline2.replace('@hidclosedpocode', 'hidpocode_closed' + intlist.toString());
+            strline2 = strline2.replace('@disppocode', results[n].vchPO_Code);
+            strline2 = strline2.replace('@valclosedpocode', results[n].vchPO_Code);
+            strline2 = strline2.replace('@hidmempoclosed_dtype', 'hidmempoclosed_dtype' + intlist.toString());
+            strline2 = strline2.replace('@poclosed_dtype', results[n].dtype);
+            strline2 = strline2.replace('@nTotAmt', "$" + results[n].mnyTotOrderAmt);
+            strline2 = strline2.replace('@onclick', "btnpoclosedopt_click(this,'@status2')");
+            strline2 = strline2.replace('@status2', results[n].vchStatus2);
+            if (results[n].vchStatus2 === 'RECEIVED') {
+                strline2 = strline2.replace('@icon', 'received.png');
+                strline2 = strline2.replace('@style', 'padding:10px 20px;height:64px;width:64px');
+            } else if (results[n].vchStatus2 === 'APPROVED') {
+                strline2 = strline2.replace('@icon', 'approved.png');
+                strline2 = strline2.replace('@style', 'padding:15px 10px;height:64px;width:64px');
+            } else {
+                strline2 = strline2.replace('@icon', 'closedorder.png');
+                strline2 = strline2.replace('@style', 'padding:10px 20px;height:64px;width:64px');
+            }
+            if (pulltype === "pullup" || pulltype === "") {
+                $('#pgmem_dvorder_ulclosedlist').append(strline2);
+            }
+            else {
+                $('#pgmem_dvorder_ulclosedlist').prepend(strline2);
+            }
+        }
+        $('#pgmem_dvorder_ulclosedlist').listview('refresh');
+
+        // Hide div Pull up
+        if ($('#pgmem_dvorder_ulclosedlist').children().size() < 10) {
+            $('#div_iscroll-pullup3').hide();
+        }
+        else {
+            $('#div_iscroll-pullup3').show();
+        }
+        pgmem_dvorder_dvclosed_resizeDiv();
+    }
+    function pgmem_dvorder_dvclosed_listfail(tx, err) {
+        alert("Error processing SQL: " + err.message);
+    }
+    function btnpoclosedopt_click(e, status2) {
+        //debugger;
+        if (status2 === "null"){
+            status2 = "PENDING";
+        }
+        //debugger
+        var hidpocd_closed = '#hidpocode_closed' + e.id.replace("btnpoclosed", "");
+        var oparam = [{pocode: $(hidpocd_closed).val(), status2: status2}];
+        p_pocode = oparam[0];
+        p_orderaction = "view";
+        $.mobile.changePage('#pgmem_orderclosed', {transition: "slide", reverse: false});
+    }
+</script>

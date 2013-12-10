@@ -1,0 +1,67 @@
+<div data-role="page" id="pg_viewcart" data-theme="c" class="ui-corner-all" >
+    <div data-role="header" data-theme="a" class="ui-corner-top">
+        <h1>View Cart</h1>
+    </div>
+    <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+        <div id="div_popupViewCart"></div>
+        <table style="width:100%;text-align: right">
+            <tr>
+                <td>
+                    <a href="" data-role="button" id="btnvcart_cancel" data-inline="true" data-theme="c">Cancel</a>    
+                    <a href="" data-role="button" id="btnvcart_checkout" data-inline="true" data-transition="flow" data-theme="b">Checkout</a>              
+                </td>
+            </tr>
+        </table>
+        <script>
+            $("#pg_viewcart").on("pageshow", function(event, ui) {
+                $('#div_popupViewCart').empty();
+                $('#div_popupViewCart').append('<ul id="ulviecart" data-role="listview" data-inset="true" data-theme="c" style="margin:0;" />').trigger('create');
+                var strhtml; //= '<li data-role="list-divider">Cart list</li>'
+                var totalamt = 0;
+                strhtml = '<li data-role="list-divider" >@tablelayout</li>';
+                strhtml = replaceAll(strhtml,"@tablelayout",'<table style="width:100%"><tr><td style="width:10%">Code</td><td style="width:50%">Desc</td><td style="width:10%">Qty</td><td style="width:10%;text-align:right">Price</td><td style="width:10%;text-align:right">Total</td></tr></table>');
+                $('#div_items li').each(function(i, li) {
+                    var id = $(this).attr('id');
+                    if (id !== "divider") {
+                        //alert($('#orderqty_' + id).text());
+                        var strjson = $('#hidrowval_' + id).val();
+                        var data = JSON.parse(decodeURIComponent(strjson));
+                        if (data.qty > 0) {
+                            var strline = '<li data-icon="arrow-r">@tablelayout</li>';
+                            strline = replaceAll(strline, "@tablelayout", '<table style="width:100%"><tr><td style="width:10%">@code</td><td style="width:50%">@desc</td><td style="width:10%">@qty</td><td style="width:10%;text-align:right">@price</td><td style="width:10%;text-align:right">@total</td></tr></table>');
+                            strline = replaceAll(strline, "@qty", data.qty);
+                            strline = replaceAll(strline, "@code", data.code);
+                            strline = replaceAll(strline, "@desc", data.desc);
+                            strline = replaceAll(strline, "@price", parseFloat(data.price).toFixed(2));
+                            strline = replaceAll(strline, "@total", parseFloat(data.qty * data.price).toFixed(2));
+                            strhtml = strhtml + strline;
+                            totalamt = totalamt + (data.qty * data.price);
+                        }
+                    }
+                });
+                strhtml = strhtml + '<li data-icon="arrow-r">@tablelayout</li>';
+                strhtml = replaceAll(strhtml,'@tablelayout','<table style="width:100%"><tr><td colspan="5" style="text-align:right;font-size:x-large">Total: &nbsp;&nbsp; <b>@totalamt </b></td></tr></table>');
+                strhtml = replaceAll(strhtml,'@totalamt',totalamt.toFixed(2));
+                $('#ulviecart').html(strhtml);
+                $("#ulviecart").trigger('create'); 
+                $("#ulviecart").listview('refresh');
+            });
+
+            $("#btnvcart_cancel").click(function() {
+                //$('#pg_viewcart').popup('close');
+                //$('#pg_viewcart').dialog('close');
+                parent.history.back();
+            });
+
+            $('#btn_viewcart').click(function() {
+                dummyvar = "viewcart";
+                //$.mobile.changePage('#pg_viewcart', {transition: 'pop', role: 'dialog'});
+                $.mobile.changePage('#pg_viewcart', {transition: 'slide'});
+            });
+
+            $('#btnvcart_checkout').click(function(){
+                $.mobile.changePage(mainpg, {transition: 'slide'});
+            });
+        </script>
+    </div>                
+</div>

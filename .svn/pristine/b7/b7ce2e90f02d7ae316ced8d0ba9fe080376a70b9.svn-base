@@ -1,0 +1,163 @@
+<div data-role="page" id="pg_getItems" data-theme="c" >
+    <div data-role="header" data-position="fixed">
+        <a href="" id="btn_cancel2" data-icon="delete" >Cancel</a>
+        <h1>Order Stock Items</h1>           
+        <a href="#popupMenu_options" id="btn_orderoptions" data-icon="grid" class="ui-btn-right"  data-rel="popup" data-role="button" data-inline="true" data-transition="slideup" data-theme="e">Options</a>
+        <table style="width:100%">
+            <tr>
+                <td style="width:10%">
+                    <label for="txtcustomer2">Customer:</label>
+                </td>
+                <td style="width:50%">
+                    <input type="text" id="txtcustomer2" readonly="true"/>
+                </td>
+                <td style="width:40%;text-align:right">
+                    <input type="hidden" id="txtitcode" />
+                    <input type="search" id ="txtitdesc" placeholder="Search Stock"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div data-role="content" data-theme="c">
+        <div id="div_items" >                            
+        </div> 
+        <div data-role="popup" id="popupQtyEntry" data-theme="a" class="ui-corner-all">
+            <!--<form>-->
+            <div style="padding:10px 20px;">
+                <h3>Please Enter Qty</h3>
+                <label for="txtqtyentry" class="ui-hidden-accessible">Order Qty:</label>
+                <input type="text" name="txtqtyentry" id="txtqtyentry" value="0" placeholder="Qty" data-theme="a" />
+                <p>
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="" data-theme="b" type="button" id="btnadd" data-inline="true" onClick="btnAddQty(this)" data-icon="plus">Qty</a>
+                            </td>
+                            <td>
+                                <a href="" data-theme="b" type="button" id="btnminus" data-inline="true" onClick="btnSubQty(this)" data-icon="minus">Qty</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2"> <a href="" data-theme="b" type="button" id="btnaddtocart" data-inline="true" class="button button-link" onClick="btnOkQty(this)" style="width:100%">OK</a> </td>
+                        </tr>
+                    </table>
+                </p>
+            </div>
+            <!--</form>-->
+        </div>
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist">                
+    </div>
+    
+    <!--Pop-up Options--> 
+    <div data-role="popup" id="popupMenu_options" data-theme="a">
+        <ul data-role="listview" data-inset="true" style="min-width:210px;" data-theme="d">
+            <li data-role="divider" data-theme="e">Choose Options</li>
+            <li><a href="" id="btn_viewcart">View Cart</a></li>
+            <li><a href="">Checkout</a></li>
+        </ul>
+    </div>  
+    <script >
+        var stritcode;
+
+        $("#pg_getItems").on("pageshow", function(event, ui) {
+            if (dummyvar !== "viewcart") {
+                var sql = "SELECT * FROM tblitems ";
+                db.transaction(function(tx) {
+                    tx.executeSql(sql, [], querySuccess_items, errorCB_items);
+                }, errorTA_items);
+                $('#txtqtyentry').val("0");
+            }
+            dummyvar = "";
+        });
+
+        function querySuccess_items(tx, results) {
+            $('#div_items').empty();
+            $("#div_items").append('<ul id="result_stockcat1" data-role="listview" data-inset="true" data-theme="c" style="margin:0;" />').trigger('create');
+            var len = results.rows.length;
+            var strHTML = '<li data-role="list-divider" id="divider">Please select...</li>';
+            var strjson = '{"qty" : 0, "code" : "@itemcode", "desc" : "@itemdesc", "price" : "@price"}';
+            for (var i = 0; i < len; i++) {
+                strHTML = strHTML + '<li data-icon="arrow-r" id="@element_id">@linelayout</li>';
+                // Replace the variables
+                var strjson2 = replaceAll(strjson,"@itemcode", results.rows.item(i).vchItem_Code);
+                strjson2 = replaceAll(strjson2,"@itemdesc", results.rows.item(i).vchItem_Description);
+                strjson2 = replaceAll(strjson2,"@price", results.rows.item(i).mnyPrice);
+                strjson2 = encodeURIComponent(strjson2);
+
+                strHTML = strHTML.replace("@linelayout", '<a href="" Onclick="popupQtyEntry(this)" data-rel="popup" data-transition="slideup" data-inline="true"  id="btnqty_@element_id"> <img src="@imgsrc" class="ui-li-thumb" /> <h4 class="ui-li-heading" style="margin:0;"><label id="orderqty_@element_id"></label> @itemdesc</h4> <p class="ui-li-desc"> <table border="0" cellspacing="1" cellpadding="1" class="ui-li-desc"> <tr> <td><b>@itemprice</b></td> </tr> <tr> <td> <div style="white-space: pre-wrap;"> @add1_itemdesc</div> </td> </tr> </table> </p> </a> <input type="hidden" id="hidrowval_@element_id" value="@jsonvalue" /> ');
+                strHTML = replaceAll(strHTML,"@jsonvalue",strjson2);
+                strHTML = strHTML.replace("@imgsrc", "data:image/jpg;base64," + results.rows.item(i).vbnItem_Picture2);
+                strHTML = replaceAll(strHTML,"@itemcode", results.rows.item(i).vchItem_Code);
+                strHTML = replaceAll(strHTML,"@itemdesc", results.rows.item(i).vchItem_Description);
+                strHTML = strHTML.replace("@add1_itemdesc", results.rows.item(i).vchItem_ExtendedDesc);
+                strHTML = replaceAll(strHTML, "@element_id", results.rows.item(i).vchItem_Code);
+                strHTML = strHTML.replace("@itemprice", "$" + results.rows.item(i).mnyPrice);
+            }
+
+            $("#div_items").html(strHTML);
+            $("#div_items").trigger('create');
+            $("#div_items").listview('refresh');
+        }
+
+        function popupQtyEntry(e) {
+            stritcode = e.id.substring(7);
+            $('#popupQtyEntry').popup('open',{transition: "slideup"});
+            // $.mobile.changePage('#pg_main', {transition: "slide", role: "none", reverse: false});
+        }
+
+        function errorCB_items(err) {
+            alert("Error processing SQL: " + err.code);
+        }
+
+        function errorTA_items(err) {
+            alert("Error processing SQL: " + err.code);
+        }
+
+        // Cancel Click
+        $('#btn_cancel2').click(function() {
+            //parent.history.back();
+            $.mobile.changePage('#pg_main', {transition: "slide", role: "none", reverse: false});
+        });
+
+        function btnAddQty(e) {
+            var valQty = parseInt($('#txtqtyentry').val());
+            $('#txtqtyentry').val(valQty + 1);
+        }
+
+        function btnSubQty(e) {
+            var valQty = parseInt($('#txtqtyentry').val());
+            valQty = valQty - 1;
+            if (valQty < 0) {
+                valQty = 0;
+            }
+            $('#txtqtyentry').val(valQty);
+        }
+
+        function btnOkQty(e) {
+            if ($('#txtqtyentry').val() !== "" && $('#txtqtyentry').val() !== "0") {
+                $('#orderqty_' + stritcode).text('[ ' + $('#txtqtyentry').val() + ' pc/s ]');
+            }
+            else {
+                $('#orderqty_' + stritcode).text('');
+            }
+            // Update the JSON
+            var strjson = $('#hidrowval_' + stritcode).val();
+            var data = JSON.parse(decodeURIComponent(strjson));
+            data.qty = $('#txtqtyentry').val();
+            $('#hidrowval_' + stritcode).val(encodeURIComponent(JSON.stringify(data)));
+            //
+
+            $('#popupQtyEntry').popup('close');
+            $('#txtqtyentry').val("0");
+        }
+
+        function replaceAll(string, token, newtoken) {
+            if (token !== newtoken)
+                while (string.indexOf(token) > -1) {
+                    string = string.replace(token, newtoken);
+                }
+            return string;
+        }
+    </script>
+</div>

@@ -1,0 +1,52 @@
+<div data-role="page" id="pg_map" data-theme="c" data-add-back-btn="true">
+    <div data-role="header" data-position="fixed">
+        <h1>Appointment Map</h1>                    
+    </div>
+    <div data-role="content">
+        <div id="map-panel" style="height:300px">  </div>
+
+        <input type="text" id="txtfrom"/>
+        <input type="text" id="txtto"/>
+        <a href="" data-role="button" id="btnsearchmap">Search</a>                 
+        <div id="directions"></div>                  
+        <script>
+            var isLoaded = "f";
+            $("#pg_map").on("pageshow", function(event, ui) {
+                if (isLoaded == 'f') {
+                    $('#map-panel').gmap({'center': '59.3426606750, 18.0736160278'});
+                    isLoaded = "t";
+                }
+                $('#map-panel').gmap('getCurrentPosition', function(position, status) {
+                    if (status === 'OK') {
+                        var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
+                        $('#map-panel').gmap('get', 'map').panTo(latlng);
+                        $('#map-panel').gmap('search', {'location': latlng}, function(results, status) {
+                            if (status === 'OK') {
+                                $('#txtfrom').val(results[0].formatted_address);
+                                $('#map-panel').gmap('displayDirections', {'origin': $('#txtfrom').val(), 'destination': $('#txtto').val(), 'travelMode': google.maps.DirectionsTravelMode.DRIVING}, {'panel': document.getElementById('directions')}, function(success, response) {
+                                    if (success) {
+                                    } else {
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        alert('Unable to get current position');
+                    }
+                });
+            });
+            
+            $('#btnsearchmap').click(function() {
+
+                $('#map-panel').gmap('displayDirections', {'origin': $('#txtfrom').val(), 'destination': $('#txtto').val(), 'travelMode': google.maps.DirectionsTravelMode.DRIVING}, {'panel': document.getElementById('directions')}, function(success, response) {
+                    if (success) {
+                        //$('#results').show();
+                    } else {
+                        //$('#results').hide();
+                    }
+                });
+                return false;
+            });
+        </script>
+    </div>
+</div>

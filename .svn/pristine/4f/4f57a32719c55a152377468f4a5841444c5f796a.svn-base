@@ -1,0 +1,186 @@
+<div data-role="page" id="pg_orderclosed" data-theme="a" >
+    <style scoped>
+        #pgorderclosed_itmheader {
+            border-radius: 0;
+            -moz-border-radius: 0;
+            -webkit-border-radius: 0;
+        }
+        #pgorderclosed_ulhead .ui-input-text {
+            border-radius: .3em!important;
+            box-shadow: none !important;
+            border: none!important;
+        }
+        input[disabled=disabled] {            
+            color: #000!important;
+            font-weight: bold;
+        }
+    </style>
+    <div data-role="header" data-position="fixed">        
+        <a href="#pg_empmain" data-icon="arrow-l" onclick="l_active_empnavbar = 'pgemp_dvorder';">Back</a>
+        <h1>Closed Order</h1>
+    </div>
+    <div data-role="content" >
+        <div data-role="collapsible" data-theme="c" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2>Order</h2>   
+            <ul id='pgorderclosed_ulhead' data-role="listview" data-inset="false">
+
+                <li data-role="fieldcontain">
+                    <label for="pgorderclosed_txtsocode">Sales Order Code</label>
+                    <input type="text" id="pgorderclosed_txtsocode" disabled="disabled"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgorderclosed_txtsocode">Customer Name</label>
+                    <input type="text" id="pgorderclosed_txtcustnm" disabled="disabled"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgorderclosed_txtsocode">Ship To</label>
+                    <input type="text" id="pgorderclosed_txtshipto" disabled="disabled" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgorderclosed_txtsocode">Sales Order Date</label>
+                    <input type="text" id="pgorderclosed_txtsodate" disabled="disabled" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgorderclosed_txtsocode">Delivery Date</label>
+                    <input type="text" id="pgorderclosed_txtdeldate" disabled="disabled" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgorderclosed_txtsocode">Special Instructions</label>
+                    <!--<input type="text" id="pgorderclosed_txtrem" disabled="disabled" />-->
+                    <textarea cols="40" rows="8" name="textarea" id="pgorderclosed_txtrem" disabled="disabled"></textarea>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgorderclosed_txtsocode">Total Order Amount</label>
+                    <input type="text" id="pgorderclosed_txttotamt" disabled="disabled" />
+                </li>
+            </ul >            
+        </div>
+        <div data-role="collapsible" data-theme="c" data-collapsed-icon="false" data-expanded-icon="false" data-collapsed="false" style="height:30px">
+            <h2><table align='center' width='100%' data-inset="true"><tr>
+                        <td width='16%'>ItemCode</td>
+                        <td width='30%'>Description</td>
+                        <td width='16%'>Size</td>
+                        <td width='14%'>U/Price</td>
+                        <td width='12%'>Qty</td>
+                        <td width='12%'>Amount</td>
+                    </tr></table></h2>
+        </div>
+        <div data-role="collapsible" data-theme="c" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <ul id='pgorderclosed_ulitm' data-role="listview" data-inset="false">
+            </ul>
+        </div>
+    </div>    
+
+    <script>
+        $("#pg_orderclosed").on("pagebeforeshow", function(event, ui) {
+            pg_orderclosed_getOrderHeader();
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        function pg_orderclosed_getOrderHeader() {
+//            p_db.transaction(function(tx) {
+//                tx.executeSql("SELECT * FROM tblso_headers WHERE vchStatus<>? AND dtype<>? AND vchSO_Code=?", ["FIRST","DELETE",p_socode], pg_orderclosed_loadHeader, pg_orderclosed_loadFail);
+//            });
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/getSOHeader",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {vchSO_Code: p_socode, vchStatus: 'CLOSED'},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    if (data.length !== 0) {
+                        pg_orderclosed_loadHeader(data)
+                    }
+                }});
+        }
+        function pg_orderclosed_loadHeader(results) {
+            //debugger;
+            $("#pgorderclosed_txtsocode").val(":   " + results[0].vchSO_Code);
+            $("#pgorderclosed_txtcustnm").val(":   " + results[0].vchCust_Name);
+            $("#pgorderclosed_txtshipto").val(":   " + results[0].vchShipTo);
+            $("#pgorderclosed_txtsodate").val(":   " + results[0].vchSODate);
+            $("#pgorderclosed_txtdeldate").val(":   " + results[0].vchDelDate);
+            $("#pgorderclosed_txtrem").val(":   " + results[0].vchRemarks);
+            $("#pgorderclosed_txttotamt").val(":   " + results[0].mnyTotOrderAmt.toFixed(2));
+            pg_orderclosed_getOrderDetails();
+        }
+        function pg_orderclosed_loadFail(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_orderclosed_getOrderDetails() {
+//            p_db.transaction(function(tx) {
+//                tx.executeSql("SELECT * FROM tblso_details WHERE vchStatus<>? AND dtype<>? AND vchSO_Code=?", ["FIRST","DELETE",p_socode], pg_orderclosed_loadDetails, pg_orderclosed_loadFail);
+//            });
+            $.ajax({
+                type: "POST",
+                url: p_urlServer + "/getSODetails",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {vchSO_Code: p_socode, vchStatus: 'CLOSED'},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    if (data.length !== 0) {
+                        pg_orderclosed_loadDetails(data)                        
+                    }
+                }});
+
+        }
+        function pg_orderclosed_loadDetails(results) {
+            var list = "";
+            var uls = $("#pgorderclosed_ulitm");
+            var l_liitmcategory = "";
+            uls.text("");
+            for (i in results) {
+                if (l_liitmcategory !== results[i].vchItem_Category) {
+                    //list = list + "<li data-role='list-divider' data-theme='b'>"+results.rows.item(i).vchItem_Category+"</li>";
+                    l_liitmcategory = results[i].vchItem_Category;
+                }
+                list = list + "<li id='pgorderclosed_liitm" + (i + 1).toString() + "' class='pgorderclosed_liitm' data-icon='false'>";
+                list = list + "<table width='100%' style='margin:0px'><tr>";
+                list = list + "<td class='vchItem_Code' width='16%'>" + results[i].vchItem_Code.trim() + "</td>";
+                list = list + "<td class='vchItem_Description' width='30%'>" + results[i].vchItem_Description.trim() + "</td>";
+                list = list + "<td class='vchSize' width='16%'>" + results[i].vchSize.trim() + "</td>";
+                list = list + "<td class='mnyPrice' width='14%'>" + results[i].mnyPrice.toFixed(2) + "</td>";
+                list = list + "<td class='intQty' width='12%'>" + results[i].intQty.toString() + "</td>";
+                list = list + "<td class='mnyAmount' width='12%'>" + results[i].mnyAmount.toFixed(2) + "</td>";
+                list = list + "</tr></table></li>";
+            }
+            uls = uls.append(list);
+            uls.listview('refresh');
+            
+//            for (i = 0; i < results.rows.length; i++) {
+//                if (l_liitmcategory !== results.rows.item(i).vchItem_Category) {
+//                    //list = list + "<li data-role='list-divider' data-theme='b'>"+results.rows.item(i).vchItem_Category+"</li>";
+//                    l_liitmcategory = results.rows.item(i).vchItem_Category;
+//                }
+//                list = list + "<li id='pgorderclosed_liitm" + (i + 1).toString() + "' class='pgorderclosed_liitm' data-icon='false'>";
+//                list = list + "<table width='100%' style='margin:0px'><tr>";
+//                list = list + "<td class='vchItem_Code' width='16%'>" + results.rows.item(i).vchItem_Code.trim() + "</td>";
+//                list = list + "<td class='vchItem_Description' width='30%'>" + results.rows.item(i).vchItem_Description.trim() + "</td>";
+//                list = list + "<td class='vchSize' width='16%'>" + results.rows.item(i).vchSize.trim() + "</td>";
+//                list = list + "<td class='mnyPrice' width='14%'>" + results.rows.item(i).mnyPrice.toFixed(2) + "</td>";
+//                list = list + "<td class='intQty' width='12%'>" + results.rows.item(i).intQty.toString() + "</td>";
+//                list = list + "<td class='mnyAmount' width='12%'>" + results.rows.item(i).mnyAmount.toFixed(2) + "</td>";
+//                list = list + "</tr></table></li>";
+//            }
+//            uls = uls.append(list);
+//            uls.listview('refresh');
+        }
+    </script>
+</div>
+

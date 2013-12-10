@@ -1,0 +1,104 @@
+<!--Pop-up Information Dialog-->
+<div data-role="popup" id="popup_Information" data-overlay-theme="a" data-theme="c" style="width:550px" class="ui-corner-all">
+    <style scoped>
+        #popInfo_dvTitle {
+            -moz-border-radius-topleft:.6em!important;
+            -webkit-border-top-left-radius:.6em!important;
+            border-top-left-radius:.6em!important;
+            -moz-border-radius-topright:.6em!important;
+            -webkit-border-top-right-radius:.6em!important;
+            border-top-right-radius:.6em!important;
+        }
+    </style>
+    <div id="popInfo_dvTitle" data-role="header" data-theme="a">
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <h1 id="popInfo_h1Title"></h1>
+    </div>
+    <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+        <div>	
+            <ul data-role="listview">
+                <li data-icon="false"><a href="#" data-rel="back" >
+                    <img src="img/information.png" alt="" style="padding:5px 10px"/>
+                    <h3 id="popInfo_h3Context" class="autowrap"></h3>
+                    <p id="popInfo_pSubContext" class="autowrap"></p>
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="padding:5px"><p><a href="#" data-rel="back" data-role="button" data-icon="check" data-theme="b" class="jpm-cornerstyle" style="display:block">Ok</a></p></div>
+</div>
+
+<!--Pop-up Exclamation Dialog-->
+<div data-role="popup" id="popup_Exclamation" data-overlay-theme="a" data-theme="c" style="width:550px" class="ui-corner-all">
+    <style scoped>
+        .autowrap {
+            word-break:break-all!important;white-space:normal;
+        }
+        #popExlc_dvTitle {
+            -moz-border-radius-topleft:.6em!important;
+            -webkit-border-top-left-radius:.6em!important;
+            border-top-left-radius:.6em!important;
+            -moz-border-radius-topright:.6em!important;
+            -webkit-border-top-right-radius:.6em!important;
+            border-top-right-radius:.6em!important;
+        }
+    </style>
+    <div id="popExlc_dvTitle" data-role="header" data-theme="a">
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <h1 id="popExlc_h1Title"></h1>
+    </div>
+    <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+        <div>	
+            <ul data-role="listview">
+                <li data-icon="false"><a href="#" data-rel="back" >
+                    <img src="img/exclaimation.png" alt="" style="padding:5px 10px"/>
+                    <h3 id="popExlc_h3Context" class="autowrap"></h3>
+                    <p id="popExlc_pSubContext" class="autowrap"></p>
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    <div style="padding:5px"><p><a href="#" data-rel="back" data-role="button" data-icon="check" data-theme="b" class="jpm-cornerstyle" style="display:block">Ok</a></p></div>        
+</div>
+
+<!--Pop-up Question Dialog-->
+<div data-role="popup" id="popup_Question" data-overlay-theme="a" data-theme="c" style="width:550px" class="ui-corner-all">
+    <style scoped>
+        .autowrap {
+            word-break:break-all!important;white-space:normal;
+        }
+        #popQues_dvTitle {
+            -moz-border-radius-topleft:.6em!important;
+            -webkit-border-top-left-radius:.6em!important;
+            border-top-left-radius:.6em!important;
+            -moz-border-radius-topright:.6em!important;
+            -webkit-border-top-right-radius:.6em!important;
+            border-top-right-radius:.6em!important;
+        }
+    </style>
+    <div id="popQues_dvTitle" data-role="header" data-theme="a">
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <h1 id="popQues_h1Title"></h1>
+    </div>    
+    <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+        <div>	
+            <ul data-role="listview">
+                <li data-icon="false"><a href="#" data-rel="back" >
+                    <img src="img/question.png" alt="" style="padding:5px 10px"/>
+                    <h3 id="popQues_h3Context" class="autowrap"></h3>
+                    <p id="popQues_pSubContext" class="autowrap"></p>
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    <div data-role="controlgroup" style="padding:5px" class="jpm-cornerstyle">
+        <p>
+            <a href="#" data-rel="back" data-role="button" data-icon="check" data-theme="e" onclick='popQues_btnYes_click()' >Yes</a>
+        </p>
+        <p>
+            <a href="#" data-rel="back" data-role="button" data-icon="delete" data-theme="b">No</a>
+        </p>
+        
+    </div>
+</div>
+

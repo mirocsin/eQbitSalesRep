@@ -1,0 +1,237 @@
+<div id="pgmem_dvnoti" >
+    <div data-role="header" >
+        <h1>Notifications</h1>
+    </div>
+    <div data-iscroll="" data-role="content" id="pgmemdvnoti_dvcontent" class='pgmemdvnoti_dvcontent_iscroll-wrapper' >
+        <ul id='pgmem_dvnoti_ullist' data-role="listview" data-theme="c">              
+        </ul>
+    </div>
+</div>
+<script>        
+    //p_notiExpiryInterval = 10000;  // for testing will expire notification in 10 secs
+    var l_startedRunExp = false;
+    var l_memNotification;
+    var l_memNotiRunExpire;
+    function pgmem_dvnoti_pagebeforeshow() {
+        //pgmem_dvnoti_querylist();
+    }
+    function pgmem_dvnoti_querylist() {
+        p_db.transaction(function(tx) {
+            tx.executeSql("SELECT * FROM tblnotifications WHERE vchStatus='INLIST' ORDER BY dtRecordAdded desc LIMIT 10", [], pgmem_dvnoti_list, pgmem_dvnoti_listfail);
+        });
+    }
+    function pgmem_dvnoti_list(tx, results) {
+        var intlist = 1;
+        pgmem_dvnoti_drawlist(results, intlist);
+    }
+    function pgmem_dvnoti_drawlist(results, intlist) {
+        $('#pgmem_dvnoti_ullist').empty();
+        var strline = '<li id="@lineid" data-icon="false"><a href="#" id="@btnid" onclick="pgmemdvnoti_list_click(@noti_id)"><img src="img/@icon" alt="" style="@style"/><h3 class="autowrap">@type</h3><p>@info</p><input type="hidden" id="@hiddtrecadd_notify" value="@hiddtrecadd_noti_value" /></a></li>';
+        if (results.rows.length > 0) {
+            for (i = 0; i < results.rows.length; i++) {
+                var strline2 = strline;
+                intlist = intlist + i;
+                strline2 = strline2.replace('@lineid', 'pgmem_dvnoti_li_' + intlist.toString());
+                strline2 = strline2.replace('@hiddtrecadd_notify', "hiddtrecadd_notify" + intlist.toString());
+                strline2 = strline2.replace('@hiddtrecadd_noti_value', results.rows.item(i).dtRecordAdded);
+                strline2 = strline2.replace('@btnid', 'btnmemponotify' + intlist.toString());
+                strline2 = strline2.replace('@info', results.rows.item(i).vchInfo);
+                strline2 = strline2.replace('@noti_id', results.rows.item(i).tblnoti_id);
+                switch (results.rows.item(i).vchType){
+                    case 'replenishment':
+                        strline2 = strline2.replace('@icon', "autoreplenish.png");
+                        strline2 = strline2.replace('@style', "padding:11px 10px");
+                        strline2 = strline2.replace('@type', "Auto Replenish");                                                
+                        break;
+                    case 'promotions':
+                        strline2 = strline2.replace('@icon', "promotions.png");
+                        strline2 = strline2.replace('@style', "padding:10px 10px");
+                        strline2 = strline2.replace('@type', "Promotions");
+                        break;
+                    case 'activities':
+                        strline2 = strline2.replace('@icon', "activities.png");
+                        strline2 = strline2.replace('@style', "padding:10px 10px");
+                        strline2 = strline2.replace('@type', "Activities");
+                        break;
+                    case 'announcements':                                      
+                        strline2 = strline2.replace('@icon', "announcements.png");
+                        strline2 = strline2.replace('@style', "padding:8px 10px");
+                        strline2 = strline2.replace('@type', "Announcements");
+                        break;
+                }
+                $('#pgmem_dvnoti_ullist').append(strline2);
+            }
+            $('#pgmem_dvnoti_ullist').listview('refresh');            
+        }        
+    }
+    function pgmem_dvnoti_listfail(){
+        alert("Error processing SQL: " + err.message);
+    }
+    function pgmem_dvnoti_onSlideDown() {
+        //alert('slide Down');
+        if ($('#pg_memmain_btnnoti_indicator').text() !== "") {
+            pgmem_dvnoti_updateNotiRead();
+        } else {
+            pgmem_dvnoti_querylist();
+        }        
+    }
+//    $("#pg_memmain").on("pagebeforeshow", function(event, ui) {
+//        //debugger
+//        if (navigator.platform === 'Win32') {
+//            $("#pgmemdvnoti_dvcontent").height($(window).height() * .85);
+//        }
+//        else {
+//            var intHeight = $(window).height() - ($(window).height() * .20);
+//            $("#pgmemdvnoti_dvcontent").height(intHeight);
+//        }
+//    });
+    function pgmem_dvnoti_memberNotifications(){
+        var cntNoti = 0;
+        clearTimeout(l_memNotiRunExpire);
+        l_startedRunExp = false;
+        if (p_settings === undefined) {
+            return;
+        }
+        var vchCode = p_settings.vchCustCode;
+        $.ajax({
+            type: "POST",
+            url: p_urlServer + "/getMemberNotifications",
+            async: true,
+            dataType: "json",
+            cache: false,
+            data: {vchCode: vchCode},
+            crossDomain: true,
+            beforeSend: function() {
+                //$.mobile.showPageLoadingMsg("b", "Loading from server...");
+            },
+            complete: function() {
+                //$.mobile.hidePageLoadingMsg();
+            },
+            success: function(data) {                            
+                if (data.length !== 0) {
+                    if (data.mem_notification !== undefined) {                        
+                        for (n in data.mem_notification) {
+                            var odata = data.mem_notification;
+                            var p1 = odata[n].tblnoti_id,
+                                p2 = odata[n].vchCode,
+                                p3 = odata[n].vchModule,
+                                p4 = odata[n].vchType,
+                                p5 = odata[n].vchInfo,
+                                p6 = odata[n].vchReference,
+                                p7 = odata[n].bitRead,
+                                p8 = odata[n].dtRecordAdded,
+                                p9 = odata[n].dtRecordModed;
+                            p_executeSql_cb('SELECT * FROM tblnotifications WHERE tblnoti_id=?', [p1], {},
+                                function(results, vars) {
+                                    if (results.rows.length === 0) {
+                                        p_executeSql("INSERT INTO tblnotifications (tblnoti_id,vchCode,vchModule,vchType,vchInfo,vchReference,bitRead,dtRecordAdded,dtRecordModed,vchStatus) VALUES (?,?,?,?,?,?,?,?,?,?)", [p1,p2,p3,p4,p5,p6,p7,p8,p9,'INLIST']);
+                                    }                                        
+                                }
+                            );
+                            cntNoti++;
+                        }
+                        pgmem_dvnoti_memAddLocalNoti(cntNoti);
+                    }                        
+                } else {
+                    pgmem_dvnoti_memAddLocalNoti(cntNoti);
+                }
+            },
+            error: function(err) {                
+            }
+        });
+        l_memNotification = setTimeout(pgmem_dvnoti_memberNotifications, p_notiInterval); 
+    }
+    function pgmem_dvnoti_memAddLocalNoti(cntNoti){
+        p_executeSql_cb("SELECT COUNT(bitRead) as notiCnt FROM tblnotifications WHERE bitRead=1 AND vchStatus='INLIST'", [], {},
+            function(results, vars) {
+                if (results.rows.length > 0) {
+                    cntNoti+=results.rows.item(0).notiCnt;
+                }
+                pgmem_dvnoti_notiDisplay(cntNoti);
+            }
+        );
+    }    
+    function pgmem_dvnoti_memNotiRunExpire(){        
+        if (l_startedRunExp){            
+            pgmem_dvnoti_memberNotifications();            
+        } else {
+            l_startedRunExp = true;
+            l_memNotiRunExpire = setTimeout(pgmem_dvnoti_memNotiRunExpire, p_notiExpiryInterval); 
+        }
+    }    
+    function pgmem_dvnoti_notiDisplay(cntNoti){
+        if (cntNoti > 0) {
+            var txtindicator = cntNoti.toString();
+            if (cntNoti > 10) {
+                txtindicator = "10+";
+            }
+            $('#pg_memmain_btnnoti_indicator').show();
+            $('#pg_memmain_btnnoti_indicator').text(txtindicator);
+        }
+    }
+    function pgmemdvnoti_list_click(noti_id) {
+        p_notiid = noti_id;
+        $.ajax({
+            type: "POST",
+            url: p_urlServer + "/createMemAutoReplenish",
+            async: true,
+            dataType: "json",
+            cache: false,
+            data: {vchCust_Code: p_settings.vchCustCode, intRefnoti_id: p_notiid},
+            crossDomain: true,
+            beforeSend: function() {
+                //$.mobile.showPageLoadingMsg("b", "Loading from server...");
+            },
+            complete: function() {
+                //$.mobile.hidePageLoadingMsg();
+            },
+            success: function(data) {
+                if (data.length !== 0) {
+                    if (data.mem_autoreplenish !== undefined) {
+                        p_replnshItemData = data.mem_autoreplenish; 
+                        l_active_memnavbar = 'pgmem_dvnoti';
+                        p_orderaction = 'replenish';
+                        $.mobile.changePage('#pgmem_orderentry', {transition: "slide", reverse: false});
+                    }
+                }
+            },
+            error: function(err) {
+                //alert("Error in connection...");
+                commonDialog('Notifications', 'Service is not available!',
+                             'Auto-replenishment cannot be processed.',
+                             'exclamation', 'pop');
+            }
+        });        
+    }
+    function pgmem_dvnoti_updateNotiRead(){
+        p_executeSql("Update tblnotifications set bitRead=1 where vchStatus='INLIST'",[]);
+        clearTimeout(l_memNotification);
+        pgmem_dvnoti_memNotiRunExpire();
+        $.ajax({
+            type: "POST",
+            url: p_urlServer + "/updateNotiRead",
+            async: true,
+            dataType: "json",
+            cache: false,
+            data: {criteria: "vchCode", criteriaVal: p_settings.vchCustCode, fldtoUpd: "bitRead", valtoUpdate: "1"},
+            crossDomain: true,
+            beforeSend: function() {
+                //$.mobile.showPageLoadingMsg("b", "Loading from server...");
+            },
+            complete: function() {
+                //$.mobile.hidePageLoadingMsg();
+            },
+            success: function(data) {
+                if (data.length !== 0) {
+                    if (data[0].message === 'SUCCESS') {
+                        pgmem_dvnoti_querylist();
+                        $('#pg_memmain_btnnoti_indicator').text('');
+                        $('#pg_memmain_btnnoti_indicator').hide();
+                    }
+                }
+            },
+            error: function(err) {
+            }
+        });
+    }
+</script>

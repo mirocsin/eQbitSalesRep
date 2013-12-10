@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>e-QbitSalesRep</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="css/jquery.mobile-1.3.1.min.css" />
+        <script src="js/libs/jquery-1.9.1.min.js"></script>
+        <script src="js/libs/jquery.mobile-1.3.1.min.js"></script>
+        <!--Maps-->
+        <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+        <script type="text/javascript" src="js/libs/jquery.ui.map.js"></script>
+        <script type="text/javascript" src="js/libs/jquery.ui.map.services.js"></script>
+        <script type="text/javascript" src="js/libs/jquery.ui.map.extensions.js"></script>
+        <!--End of Map-->
+
+        <script src="js/dbstructure.js"></script>
+        <script src="js/commondiag.js"></script>
+        <script>
+
+            // Global vars
+            var p_dummyvar,
+                    p_db,
+                    p_urlServer = 'http://localhost:64619/eService.asmx',
+                    p_mainpg,
+                    p_apptaction,
+                    p_custaction;
+
+            $(document).ready(function() {
+                // Notes: Donot refresh page in the main page, this will cause some problems e.g. the main page will be gone if there is a popup
+                $.mobile.popup.prototype.options.history = false;
+
+                // Inject Pages
+                injectPage('pg_firstlog.html', 'divContainer');
+                injectPage('pg_login.html', 'divContainer');
+
+                injectPage('pg_map.html', 'divContainer');
+                injectPage('pg_appointments.html', 'divContainer');
+                injectPage('pg_customers.html', 'divContainer');
+
+                // Inject Sub-Pages
+                injectPage('employee/pg_empmain.html', 'divContainer');
+                injectPage('employee/pgemp_dvappt.html', 'pg_empmain');
+                injectPage('employee/pgemp_dvorder.html', 'pg_empmain');
+                injectPage('employee/pgemp_dvnoti.html', 'pg_empmain');
+                injectPage('employee/pgemp_dvmore.html', 'pg_empmain');
+
+                // Inject Content-Pages - Order Module
+                injectPage('employee/pgemp_dvorder_dvpending.html', 'pgemp_dvorder');
+                injectPage('employee/pgemp_dvorder_dvclosed.html', 'pgemp_dvorder');
+                injectPage('employee/pgemp_dvorder_dventry.html', 'pgemp_dvorder');
+
+                // Some Dynamic Styles
+                if (navigator.platform === 'Win32') {
+                    $('#pg_firstlog').attr('style', 'width:30%;margin-left: 35%;margin-top: 15%');
+                    $('#pg_login').attr('style', 'min-height:100px;width:40%;margin-left:35%;margin-top:10%');
+                }
+
+                // Database
+                p_db = window.openDatabase("eqbitsales", "", "eQbitSalesRepDB", 1000 * 1024 * 1024);
+                Initialize_Tables();                
+                
+                //p_executeSql('Update tblappointments SET vchStatus = "PLAN" ')
+            });
+
+            // Global functions
+            function p_getDate() {
+                var l_Date = new Date();
+                var l_dd = l_Date.getDate();
+                var l_MM = l_Date.getMonth() + 1;
+
+                var l_yyyy = l_Date.getFullYear();
+                if (l_dd < 10) {
+                    l_dd = '0' + l_dd;
+                }
+                if (l_MM < 10) {
+                    l_MM = '0' + l_MM;
+                }
+                l_Date = l_dd + '/' + l_MM + '/' + l_yyyy;
+                return l_Date;     // format - dd/MM/yyyy
+            }
+            function p_getTime() {
+                var l_Date = new Date();
+                var l_Time;
+                var l_hh = l_Date.getHours() > 12 ? l_Date.getHours() - 12 : (l_Date.getHours() < 10 ? "0" + l_Date.getHours() : l_Date.getHours());
+                var l_mm = l_Date.getMinutes() < 10 ? "0" + l_Date.getMinutes() : l_Date.getMinutes();
+                var l_ss = l_Date.getSeconds() < 10 ? "0" + l_Date.getSeconds() : l_Date.getSeconds();
+                var l_Meridiem = l_Date.getHours() > 12 ? "PM" : "AM";
+                l_Time = l_hh + ":" + l_mm + " " + l_Meridiem;
+                return l_Time;     // format - hh:mm AM/PM
+            }
+
+            function Initialize_Tables() {
+                p_db.transaction(function(tx) {
+                    //Create Tables or Upgrade Structures by version
+                    createDataStru();
+
+                    //Check for Table Settings
+                    tx.executeSql("SELECT * FROM tblsettings", [], success_settings, error_settings);
+                }, errorTA_settings);
+            }
+
+            function success_settings(tx, results) {
+                var len = results.rows.length;
+                if (len === 0) {
+                    $.mobile.changePage('#pg_firstlog', {transition: "slidedown", reverse: false});
+                }
+                else {
+                    if (p_mainpg === undefined) {
+                        //$.mobile.changePage('#pg_login', {transition: "slidedown", reverse: false});
+
+                        // Debugging, you can change directly the pages here......
+                        $.mobile.changePage('#pg_empmain', {transition: "slidedown", reverse: false});
+                    }
+                    else {
+                        $.mobile.changePage(p_mainpg, {transition: "slidedown", reverse: false});
+                    }
+                }
+            }
+
+            function errorTA_settings(err) {
+                alert("Error processing SQL: " + err.code);
+            }
+
+            function error_settings(err) {
+                $.mobile.changePage('#pg_firstlog', {transition: "slidedown", reverse: false});
+            }
+
+            function injectPage(htmlpage, owner) {
+                var $html = getHtmlPage(htmlpage);
+                $($html).appendTo($("#" + owner));
+            }
+            function getHtmlPage(htmlfile) {
+                var strHtml;
+                $.ajax({url: htmlfile, async: false, success: function(data) {
+                        strHtml = data;
+                    }});
+                return strHtml;
+            }
+            $(window).bind('beforeunload', function(e) {
+                if (1)
+                {
+                    //return "This will cause some problems on apps, reload?"
+                }
+            });
+            document.onkeydown = function() {
+                switch (event.keyCode) {
+                    case 116 : //F5 button
+                        event.returnValue = false;
+                        event.keyCode = 0;
+                        return false;
+                    case 82 : //R button
+                        if (event.ctrlKey) {
+                            event.returnValue = false;
+                            event.keyCode = 0;
+                            return false;
+                        }
+                }
+            };
+            function p_enableControl(control, type) {
+                if (type === "disable") {
+                    $('#' + control).prop('disabled', true).addClass('ui-disabled');
+                }
+                else {
+                    $('#' + control).prop('disabled', false).removeClass('ui-disabled');
+                }
+            }
+            function p_setSelectionOptionValue(selectControl, assignValue) {
+                $("#" + selectControl).val(assignValue).attr('selected', true).siblings('option').removeAttr('selected');
+                $("#" + selectControl).selectmenu();
+                $("#" + selectControl).selectmenu("refresh", true);
+            }
+
+            //------------- Execute SQL
+            function p_executeSql(sql, param, fnCallBack) {
+                p_dummyvar = fnCallBack;
+                p_db.transaction(function(tx) {
+                    tx.executeSql(sql, param, l_callback_sql_success, l_callback_sql_fail);                    
+                })
+            }
+            function l_callback_sql_success(tx, results) {
+                if (p_dummyvar !== undefined) {
+                    if (p_dummyvar !== "") {
+                        window[p_dummyvar + '_sqlSuccess'](tx, results)
+                    }
+                }
+                p_dummyvar = "";
+            }
+            function l_callback_sql_fail(tx, err) {
+                if (p_dummyvar !== undefined && p_dummyvar !== "") {
+                    window[p_dummyvar + '_sqlFail'](tx, err);
+                }
+                else {
+                    window['l_callback_sql_fail2'](tx, err)
+                }
+                p_dummyvar = "";
+            }
+            function l_callback_sql_fail2(tx, err) {
+                alert("Error processing SQL: " + err.message);
+            }
+            //------------- eof Execute SQL
+            
+            function p_replaceAll(string, token, newtoken) {
+                if (token != newtoken)
+                    while (string.indexOf(token) > -1) {
+                        string = string.replace(token, newtoken);
+                    }
+                return string;
+            }
+        </script>
+    </head>
+    <body>
+        <div id="divContainer">           
+            <div data-role="page" id="pg_empty">                
+            </div>           
+        </div>    
+    </body>
+</html>

@@ -1,0 +1,48 @@
+<div id="pgemp_dvmore" >
+    <div data-role="header">
+        <h1>More</h1>
+    </div>
+    <div id="pgempdvmore_dvcontent" data-role="content" >
+        <ul id='pgemp_dvorder_ulmorelist' data-role="listview" data-theme="c">
+            <li data-icon="false" >
+                <a href="#pg_customers" data-prefetch onclick="p_custaction='new';" data-transition="slide">
+                    <img src="img/customers.png" alt="" style="padding:6px 10px"/>
+                    <h3 style="font-size:18px">Customers</h3>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#pg_items" data-prefetch onclick="p_itemaction='new';" data-transition="slide">
+                    <img src="img/items.png" alt="" style="padding:8px 10px"/>
+                    <h3 style="font-size:18px">Items</h3>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#pg_reports" >
+                    <img src="img/reports.png" alt="" style="padding:8px 10px"/>
+                    <h3 style="font-size:18px">Reports</h3>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#pg_settings" >
+                    <img src="img/settings.png" alt="" style="padding:8px 10px"/>
+                    <h3 style="font-size:18px">Settings</h3>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#" id="pgempdvmore_btnsync">
+                    <img src="img/sync.png" alt="" style="padding:8px 10px"/>
+                    <h3 style="font-size:18px">Synchronize</h3>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function pgemp_dvmore_onSlideDown(){
+        //alert('slide Down');
+    }
+    $('#pgempdvmore_btnsync').on('click', function() {
+        p_Synchronize();
+    });
+</script>

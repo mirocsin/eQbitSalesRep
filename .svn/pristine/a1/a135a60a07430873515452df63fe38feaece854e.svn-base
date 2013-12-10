@@ -1,0 +1,168 @@
+<div id="pgemp_dvappt" class="pgemp_dvappt-page">
+    <div data-role="header" >
+        <h1>Appointments</h1>
+        <a href="#" data-icon="plug" class="ui-btn-right" id="pgemp_btnnewappt">New Appointment</a>        
+    </div>    
+    <div data-iscroll="" id="pgemp_dvappt_content" data-role="content" >
+        <div data-role="collapsible" data-theme="a" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false" data-collapsed="false">
+            <h2>Planned Appointments List</h2>   
+            <ul id='pgemp_ulapplist' data-role="listview"></ul>                       
+        </div>
+        <div id="div_iscroll-pullup" class="iscroll-pullup" style="background-color:#262626" ><span class="iscroll-pull-icon"></span><span class="iscroll-pull-label" data-iscroll-loading-text="Loading appointment..." data-iscroll-pulled-text="Loading appointment...">Load appointment</span></div>
+    </div>
+    <!--Popup Dialog Appointment option-->
+    <div data-role="popup" id="popupDialog_appointment" data-overlay-theme="a" data-theme="c" style="max-width:800px;" class="ui-corner-all">
+        <div data-role="header" data-theme="a" class="ui-corner-top">
+            <h1>Select an option</h1>
+        </div>
+        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+            <h3 class="ui-title"> <span id='sp_appid'></span></h3>
+            <a href="#" onclick='pgemp_checkin_click(this)' data-role="button" data-icon="check" data-theme="c">Check-IN</a>    
+            <a href="#" onclick='pgemp_viewloc_click(this)' data-role="button" data-icon="grid" data-transition="flow" data-theme="c">View Location</a>  
+            <a href="#" onclick='pgemp_cancel_click(this)' data-role="button" data-icon="delete" data-transition="flow" data-theme="c">Cancel Appointment</a>  
+            <input type='hidden' id='hidden_location' />
+            <input type="hidden" id='hidden_apptcode'/>
+        </div>         
+    </div>
+</div>
+
+<script>
+    var pgemp_sqlStr = function() {
+        // Query Only Appointments within the Month + Year
+        var l_Date = new Date();
+        var strSQL = "SELECT * FROM tblappointments WHERE dtype<>'DELETE' AND vchStatus = 'PLAN' AND @dateCondition @addCondition ORDER BY vchAppt_Date,vchAppt_Time,dtRecordModed LIMIT 10";
+        var strMonth = l_Date.getMonth() + 1;
+        var strYear = l_Date.getFullYear()
+        strSQL = strSQL.replace('@dateCondition', 'substr(vchAppt_Date,4,2) = "@Month" AND substr(vchAppt_Date,7) = "@Year"');
+        strSQL = strSQL.replace('@Month', strMonth);
+        strSQL = strSQL.replace('@Year', strYear);
+        return strSQL
+    }
+    function pgemp_dvappt_pagebeforeshow() {
+        pgemp_querylist();
+        // Fixes for iscroll to show the content not hidden from footer    
+        if (navigator.platform === 'Win32') {
+            $("#pgemp_dvappt_content").height($(window).height() * .88);
+        }
+        else {
+            var intHeight = $(window).height() - ($(window).height() *.13)
+            $("#pgemp_dvappt_content").height(intHeight);
+        }
+
+
+    }
+    $(document).delegate("div.divContainer-page", "pageinit",
+            function bindPullPagePullCallbacks(event) {
+                $(".iscroll-wrapper", this).bind({                    
+                    iscroll_onpullup: onPullUp
+                });
+            });
+    function onPullUp(event, data) {
+        //debugger;
+        var intList = $('#pgemp_ulapplist').children('li').size();
+        var dttm = $('#hiddt' + intList.toString()).val();
+        var strSQL = pgemp_sqlStr().replace('@addCondition', 'AND cast(vchAppt_Date || "#" || vchAppt_Time as text) >= ?');        
+        p_executeSql(strSQL, [dttm], 'pgemp_dvappt_onPullup');
+    }
+    function pgemp_dvappt_onPullup_sqlSuccess(tx, results) {
+        //debugger;        
+        pgemp_drawlist(results, $('#pgemp_ulapplist').children('li').size());
+    }
+
+    function pgemp_querylist() {
+        p_db.transaction(function(tx) {
+            //debugger;
+            var strSQL = pgemp_sqlStr().replace('@addCondition', '')
+            tx.executeSql(strSQL, [], pgemp_list, pgemp_listfail);
+        });
+    }
+    function pgemp_list(tx, results) {
+        var intlist = 0;
+        $('#pgemp_ulapplist').empty();
+        pgemp_drawlist(results, intlist);
+    }
+
+    function pgemp_drawlist(results, intlistp) {
+        var intlist = intlistp;
+        var strline = '<li data-icon="false" ><a href="#" id="@btnid" onclick="btnmapopt_click(this)"><img src="img/@icon" alt="" style="padding:5px 10px"/><h3 class="autowrap" @stylefont>@customer</h3><h4 @stylefont>@date @time</h4><p @stylefont>@remarks</p><input type="hidden" id="@hidlocate" value="@country @zipcode"/><input type="hidden" id="@hidapptcd" value="@apptcd"/><input type="hidden" id="@hiddt" value="@hiddtval"/></a></li>';
+        for (i = 0; i < results.rows.length; i++) {
+            var strline2 = strline;
+            var strbtnName = 'btnlocate' + results.rows.item(i).vchAppt_Code;
+            if ($('#' + strbtnName).length > 0) {
+                continue;
+            }
+            intlist = intlist + 1;
+            strline2 = strline2.replace('@customer', results.rows.item(i).vchCust_Name);
+            strline2 = strline2.replace('@remarks', results.rows.item(i).vchRemarks);
+            strline2 = strline2.replace('@date', results.rows.item(i).vchAppt_Date);
+            strline2 = strline2.replace('@time', results.rows.item(i).vchAppt_Time);
+            strline2 = strline2.replace('@hidlocate', 'hidlocate' + results.rows.item(i).vchAppt_Code);
+            strline2 = strline2.replace('@country', results.rows.item(i).vchAppt_Cntry);
+            strline2 = strline2.replace('@zipcode', results.rows.item(i).vchAppt_Zip);
+            strline2 = strline2.replace('@icon', results.rows.item(i).vchIcon);
+            strline2 = strline2.replace('@btnid', strbtnName);
+            strline2 = strline2.replace('@hidapptcd', 'hidapptcd' + results.rows.item(i).vchAppt_Code);
+            strline2 = strline2.replace('@apptcd', results.rows.item(i).vchAppt_Code);
+            strline2 = strline2.replace('@hiddt', 'hiddt' + intlist.toString());
+            strline2 = strline2.replace('@hiddtval', results.rows.item(i).vchAppt_Date + '#' + results.rows.item(i).vchAppt_Time);
+            if (results.rows.item(i).vchStatus === 'IN') {
+                strline2 = p_replaceAll(strline2, '@stylefont', 'style="color: #ddd"');
+            }
+            else if (results.rows.item(i).vchStatus === 'CANCEL') {
+                strline2 = p_replaceAll(strline2, '@stylefont', 'style="text-decoration:line-through"');
+            }
+            else {
+                strline2 = p_replaceAll(strline2, '@stylefont', '');
+            }
+            $('#pgemp_ulapplist').append(strline2);
+        }
+        $('#pgemp_ulapplist').listview('refresh');
+
+        // Hide div Pull up
+        if ($('#pgemp_ulapplist').children().size() < 10) {
+            $('#div_iscroll-pullup').hide();
+        }
+
+    }
+    function pgemp_listfail(tx, err) {
+        alert("Error processing SQL: " + err.message);
+    }
+    $('#pgemp_btnnewappt').on('click', function() {
+        $.mobile.changePage('#pg_appointments', {transition: "slide", reverse: false});
+    });
+    function pgemp_dvappt_onSlideDown() {
+        //alert('slide Down');
+    }
+    function btnmapopt_click(e) {
+        //debugger;
+        var hidloc = '#hidlocate' + e.id.replace("btnlocate", "");
+        var hidappcd = '#hidapptcd' + e.id.replace("btnlocate", "")
+        $('#sp_appid').text(e.text);
+        $('#hidden_location').val($(hidloc).val());
+        $('#hidden_apptcode').val($(hidappcd).val());
+        $('#popupDialog_appointment').popup('open', {transition: 'slideup'});
+    }
+    function pgemp_viewloc_click(e) {
+        //debugger;
+        $('#txtto').val($('#hidden_location').val());
+        $.mobile.changePage('#pg_map', {transition: "slide", role: "none", reverse: false});
+    }
+    function pgemp_checkin_click(e) {
+        var strApptCode = $('#hidden_apptcode').val()
+        p_executeSql('UPDATE tblappointments SET vchStatus=?,dtRecordModed=?,dtype=? WHERE vchAppt_Code=?', ['IN', new Date(), 'EDIT', strApptCode], 'pgemp_dvappt_checkIN')
+    }
+    function pgemp_cancel_click(e) {
+        var strApptCode = $('#hidden_apptcode').val()
+        p_executeSql('UPDATE tblappointments SET vchStatus=?,dtRecordModed=?,dtype=? WHERE vchAppt_Code=?', ['CANCEL', new Date(), 'EDIT', strApptCode], 'pgemp_dvappt_apptcancel')
+    }
+    function pgemp_dvappt_apptcancel_sqlSuccess(tx, results) {
+        $("#popupDialog_appointment").popup("close")
+        pgemp_querylist();
+    }
+    function pgemp_dvappt_checkIN_sqlSuccess(tx, results) {
+        $("#popupDialog_appointment").popup("close")
+        pgemp_querylist();
+    }
+
+</script>
+

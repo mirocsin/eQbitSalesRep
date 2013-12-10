@@ -1,0 +1,57 @@
+<!--style="width:30%;margin-left: 35%;margin-top: 15%"-->
+<div data-role="page" id="pg_firstlog" data-theme="d" data-inset="false" >
+    <div data-role="header">
+        <table align="center">
+            <tr><td><img src='img/lorealsg.jpg' alt="L'Oreal Singapore" id="img_logo"></td></tr>
+        </table>
+    </div>
+    <div data-role="content" data-theme="c" data-content-theme="d">
+        <ul data-role="listview">
+            <li data-role="list-divider">Settings Setup</li>
+            <li>                        
+                <table style="width:100%">
+                    <tr>
+                        <td><input type="text" id ="txtaccesscode" placeholder="Company Access Code"/></td>
+                    </tr>
+                    <tr>
+                        <td><div id="statlogin"></div></td>
+                    </tr>
+                    <tr>                                
+                        <td><a id="btnfirstlog" data-role="button" href="" data-theme="a" >Submit</a></td>
+                    </tr>
+                </table>
+            </li>
+        </ul>                   
+    </div>
+    <script>
+        $('#btnfirstlog').click(function(e) {
+            //debugger;
+            var var_accesscode = $('#txtaccesscode').val();
+            $.ajax({
+                type: "GET",
+                url: p_urlServer + "/verifyAccessCode",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {accesscode: var_accesscode},
+                crossDomain: true,
+                success: function(data) {
+                    if (data.length !== 0) {
+                        p_db.transaction(function(tx) {
+                            // Settings
+                            var p1 = data[0].vchAccessCode,
+                                    p2 = data[0].vchAccessType,
+                                    p3 = data[0].vchUsername,
+                                    p4 = data[0].vchPassword;
+                            tx.executeSql('INSERT INTO tblsettings (vchId,vchUsrnm,vchPswd,vchUType,dtRecordAdded) VALUES (?,?,?,?,?)', [p1, p3, p4, p2, new Date()], pg_firstlog_success);
+                        });
+                    }
+                }});
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        })
+        function pg_firstlog_success() {
+            window.location.reload(); // Refresh page
+        }
+    </script>
+</div>  

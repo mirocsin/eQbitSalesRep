@@ -1,0 +1,184 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+eService
+</name>
+</assembly>
+<members>
+<member name="P:eService.My.MyWebExtension.Computer">
+	<summary>
+ Returns information about the host computer.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.User">
+	<summary>
+ Returns information for the current Web user.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.Request">
+	<summary>
+ Returns Request object.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.Response">
+	<summary>
+ Returns Response object.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.Log">
+	<summary>
+ Returns the Asp log object.
+ </summary>
+</member><member name="T:eService.My.MyWebExtension">
+	<summary>
+ Module used to define the properties that are available in the My Namespace for Web projects.
+ </summary>
+	<remarks></remarks>
+</member><member name="T:eService.DataSetService.tblemployeesDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:eService.DataSetService.tblacessDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:eService.DataSetService.tblcustomersDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:eService.DataSetService.tblso_headersDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:eService.DataSetService.tblso_detailsDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:eService.DataSetService.tblitemsDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:eService.DataSetService.tblcategoryDataTable">
+	<summary>
+Represents the strongly named DataTable class.
+</summary>
+</member><member name="T:eService.DataSetService.tblemployeesRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:eService.DataSetService.tblacessRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:eService.DataSetService.tblcustomersRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:eService.DataSetService.tblso_headersRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:eService.DataSetService.tblso_detailsRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:eService.DataSetService.tblitemsRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:eService.DataSetService.tblcategoryRow">
+	<summary>
+Represents strongly named DataRow class.
+</summary>
+</member><member name="T:eService.DataSetService.tblemployeesRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:eService.DataSetService.tblacessRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:eService.DataSetService.tblcustomersRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:eService.DataSetService.tblso_headersRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:eService.DataSetService.tblso_detailsRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:eService.DataSetService.tblitemsRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:eService.DataSetService.tblcategoryRowChangeEvent">
+	<summary>
+Row event argument class
+</summary>
+</member><member name="T:eService.DataSetService">
+	<summary>
+Represents a strongly typed in-memory cache of data.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.tblemployeesTableAdapter">
+	<summary>
+Represents the connection and commands used to retrieve and save data.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.tblacessTableAdapter">
+	<summary>
+Represents the connection and commands used to retrieve and save data.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.tblcustomersTableAdapter">
+	<summary>
+Represents the connection and commands used to retrieve and save data.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.tblso_headersTableAdapter">
+	<summary>
+Represents the connection and commands used to retrieve and save data.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.tblso_detailsTableAdapter">
+	<summary>
+Represents the connection and commands used to retrieve and save data.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.tblitemsTableAdapter">
+	<summary>
+Represents the connection and commands used to retrieve and save data.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.tblcategoryTableAdapter">
+	<summary>
+Represents the connection and commands used to retrieve and save data.
+</summary>
+</member><member name="M:eService.DataSetServiceTableAdapters.TableAdapterManager.UpdateUpdatedRows(eService.DataSetService,System.Collections.Generic.List{System.Data.DataRow},System.Collections.Generic.List{System.Data.DataRow})">
+	<summary>
+Update rows in top-down order.
+</summary>
+</member><member name="M:eService.DataSetServiceTableAdapters.TableAdapterManager.UpdateInsertedRows(eService.DataSetService,System.Collections.Generic.List{System.Data.DataRow})">
+	<summary>
+Insert rows in top-down order.
+</summary>
+</member><member name="M:eService.DataSetServiceTableAdapters.TableAdapterManager.UpdateDeletedRows(eService.DataSetService,System.Collections.Generic.List{System.Data.DataRow})">
+	<summary>
+Delete rows in bottom-up order.
+</summary>
+</member><member name="M:eService.DataSetServiceTableAdapters.TableAdapterManager.GetRealUpdatedRows(System.Data.DataRow[],System.Collections.Generic.List{System.Data.DataRow})">
+	<summary>
+Remove inserted rows that become updated rows after calling TableAdapter.Update(inserted rows) first
+</summary>
+</member><member name="M:eService.DataSetServiceTableAdapters.TableAdapterManager.UpdateAll(eService.DataSetService)">
+	<summary>
+Update all changes to the dataset.
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.TableAdapterManager.UpdateOrderOption">
+	<summary>
+Update Order Option
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.TableAdapterManager.SelfReferenceComparer">
+	<summary>
+Used to sort self-referenced table's rows
+</summary>
+</member><member name="T:eService.DataSetServiceTableAdapters.TableAdapterManager">
+	<summary>
+TableAdapterManager is used to coordinate TableAdapters in the dataset to enable Hierarchical Update scenarios
+</summary>
+</member>
+</members>
+</doc>

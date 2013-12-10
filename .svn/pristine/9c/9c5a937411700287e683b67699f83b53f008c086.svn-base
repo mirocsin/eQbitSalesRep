@@ -1,0 +1,24 @@
+<div data-role="page" id="pg_page2" data-theme="d">
+    <div data-role="header" data-position="fixed">
+        <a href="" data-role="button" data-rel="back">Back</a>
+        <h1>Page 2 Header</h1>
+    </div>
+    <div data-role="content" data-theme="">                                               
+        Page 2 Content
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist" >                   
+        Page 2 Footer
+    </div>
+    <script>
+        $("#pg_page2").on("pageshow", function(event, ui) {
+            alert('Page2 PageShow');
+               event.preventDefault();
+        event.stopImmediatePropagation();
+        });
+        $('#btn1').click(function(e) {
+            alert('Page 2');
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+    </script>
+</div>

@@ -1,0 +1,87 @@
+/* 
+    Created on : Nov 6, 2013, 1:07:31 PM
+    Author     : James Mapa
+*/
+
+.jpm-page .jpm-cornerstyle
+{
+        -moz-border-radius: .3em;
+        -webkit-border-radius: .3em;
+        border-radius: .3em;
+}​
+.jpm-dummy 
+{
+        /*add this line to prevent bug;*/
+}
+.jpm-page .ui-input-text:not(label)
+{
+        border-radius: .3em!important;
+        box-shadow: none !important;
+        background-color: azure;
+}
+.code 
+{
+	background: transparent url('images/code.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;
+}
+.person
+{
+	background: transparent url('images/person.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.address
+{
+	background: transparent url('images/address.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.country
+{
+	background: transparent url('images/country.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.zipcode
+{
+	background: transparent url('images/zipcode.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.date
+{
+	background: transparent url('images/date.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.time
+{
+	background: transparent url('images/time.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.search
+{
+	background: transparent url('images/search.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.homephone
+{
+	background: transparent url('images/homephone.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.mobilephone
+{
+	background: transparent url('images/mobilephone.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}
+.email
+{
+	background: transparent url('images/email.png')!important;
+	background-repeat: no-repeat!important;  
+        padding-left: 40px!important;        
+}

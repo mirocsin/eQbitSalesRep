@@ -1,0 +1,13 @@
+<div id="pgmem_dvdeli" >
+    <div data-role="header">
+        <h1>Delivery</h1>
+    </div>    
+    <div id="pgmemdvdeli_dvcontent" data-role="content">
+        Delivery content...
+    </div>
+</div>
+<script>
+    function pgmem_dvdeli_onSlideDown() {
+        //alert('slide Down');
+    }
+</script>

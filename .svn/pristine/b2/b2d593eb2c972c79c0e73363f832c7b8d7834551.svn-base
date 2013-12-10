@@ -1,0 +1,101 @@
+<!--Pop-up Dialog Search Customer From Appointment option
+1. Inject command in index.html
+    injectPage('pop_searchcustomer.html', 'pg_orderentry', {type: 'popup'});
+    parameter 1: name of the popup html
+    parameter 2: where to show the popup and inject
+    parameter 3: [object] with property type "popup"
+2. Naming Rules:  first parameter "pop_searchcustomer.html" prefix "pop_searchcustomer" is being search inside the html file and being replaced by pg_orderentry
+-->
+<div data-role="popup" id="pop_searchcustomer" data-overlay-theme="a" data-theme="c" style="width:1000px!important;" >        
+    <div data-role="header" data-theme="a" >
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <h1>Search Customer</h1>
+    </div>
+    <div data-role="content" data-theme="d">
+        <ul data-role="listview" data-inset='true' >
+            <li data-role="content"  >
+                <table width='100%'>
+                    <tr>
+
+                        <td width='99%'>
+                            <input type="text" id ="pop_searchcustomer_txtsrccust" placeholder="Search Customer" class="search"/>             
+                        </td>
+                        <td width='1%'>
+                            <img id='pop_searchcustomer_imgnoconnection' src='img/exclaimation32.png' style='display:none' />
+                        </td>
+                    </tr>
+                </table>
+            </li>                    
+            <li>
+                <div id="pop_searchcustomer_dvapptlst" style="padding:10px">                         
+                </div>
+            </li>
+        </ul>
+    </div>         
+</div>
+<script>
+    $("#pop_searchcustomer").on("popupbeforeposition", function() {
+        //alert('base poup');
+    })
+    $("#pop_searchcustomer_txtsrccust").on("input", function(e) {
+        if (typeof window['pop_searchcustomer_txtsrccust_input_before'] === 'function') {
+            window['pop_searchcustomer_txtsrccust_input_before'](e);
+        }
+        var sugList = $("#pop_searchcustomer_dvapptlst");
+        sugList.html('');
+        if (window.navigator.onLine) {
+            var txtname = $('#pop_searchcustomer_txtsrccust').val();
+            //pop_searchcustomer_imgnoconnection            
+            $.get(p_urlServer + "/getCustomerlist", {name: txtname},
+            function(results, code) {
+                var str = "";
+                //debugger
+                //debugger
+                for (var i = 0, len = results.Table.length; i < len; i++) {
+                    //for (n in res){
+                    //debugger
+                    var res = results.Table;
+                    var strAddress = '';
+                    strAddress = p_builstring(strAddress, res[i].vchCust_Add1);
+                    strAddress = p_builstring(strAddress, res[i].vchCust_Add2);
+                    strAddress = p_builstring(strAddress, res[i].vchCust_Add3);
+                    strAddress = p_builstring(strAddress, res[i].vchCust_Cntry);
+                    strAddress = p_builstring(strAddress, res[i].vchCust_Zip);
+
+                    var strContactnum = '';
+                    strContactnum = p_builstring(strContactnum, "Tel#: " + res[i].vchHomePhone);
+                    strContactnum = p_builstring(strContactnum, "Mobile#: " + res[i].vchMobilePhone);
+
+                    str = str + '<li data-icon="false"> <a href="#" onclick="@onclick"><h3>@custname</h3>' + "<p>@custaddress</p><p>@contactnum</p></a><input type='hidden' id='hidcuname@custcode' value=@value /><input type='hidden' id='hidcuadr@custcode' value=@address /></li>";
+                    str = p_replaceAll(str, "@custcode", res[i].vchCust_Code)
+                    str = str.replace('@custname', res[i].vchCust_Name);
+                    str = str.replace('@custaddress', strAddress);
+                    //str = str.replace('@onclick', "pgorderentry_li_click('@param')");                    
+                    str = str.replace('@onclick', "pop_searchcustomer_li_click('@param','@add1','@add2','@add3','@country','@zip','@home','@mobile','@emailaddress')");
+                    str = str.replace('@param', res[i].vchCust_Code);
+                    str = str.replace('@add1', res[i].vchCust_Add1);
+                    str = str.replace('@add2', res[i].vchCust_Add2);
+                    str = str.replace('@add3', res[i].vchCust_Add3);
+                    str = str.replace('@country', res[i].vchCust_Cntry);
+                    str = str.replace('@zip', res[i].vchCust_Zip);
+                    str = str.replace('@value', "'" + res[i].vchCust_Name + "'");
+                    str = str.replace('@address', "'" + strAddress + "'");
+                    str = str.replace('@contactnum', strContactnum);
+                    str = str.replace('@home', res[i].vchHomePhone);
+                    str = str.replace('@mobile', res[i].vchMobilePhone);
+                    str = str.replace('@emailaddress', res[i].vchEmail);
+                }
+                str = "<ul data-role='listview' ><li data-role='list-divider' >Search Result</li>" + str + "</ul>"
+                sugList.html(str);
+                sugList.trigger('create');
+                $('#pop_searchcustomer_imgnoconnection').attr('style', 'display:none')
+            }, "json").fail(function() {
+                $('#pop_searchcustomer_imgnoconnection').attr('style', '')
+            });
+        }
+        else {
+            $('#pop_searchcustomer_imgnoconnection').attr('style', '')
+        }
+    })
+
+</script>

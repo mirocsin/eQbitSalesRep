@@ -1,0 +1,267 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Data
+Imports Newtonsoft.Json
+Imports System.IO
+Imports Newtonsoft.Json.JsonConvert
+Imports System.Configuration
+Imports MySql.Data
+Imports MySql.Data.MySqlClient
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+' <System.Web.Script.Services.ScriptService()> _
+<WebService(Namespace:="http://microsoft.com/webservices/")> _
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)> _
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+Public Class eService
+    Inherits System.Web.Services.WebService
+    
+    <WebMethod()> _
+    Public Sub syncToServer(tableobj As String)
+        'Dim strMessage As String = "SUCCESS"
+
+        '-- Declare Datatable and Tableadapter
+        Dim tblso_headersDataTable As DataSetService.tblso_headersDataTable = Nothing
+        Dim tblso_detailsDataTable As DataSetService.tblso_detailsDataTable = Nothing
+        Dim tblitemsDataTable As New DataSetService.tblitemsDataTable
+        Dim tblcategoryDataTable As New DataSetService.tblcategoryDataTable
+
+        Dim tblso_headersTableAdapter As New DataSetServiceTableAdapters.tblso_headersTableAdapter
+        Dim tblso_detailsTableAdapter As New DataSetServiceTableAdapters.tblso_detailsTableAdapter
+        Dim tblitemsTableAdapter As New DataSetServiceTableAdapters.tblitemsTableAdapter
+        Dim tblcategoryTableAdapter As New DataSetServiceTableAdapters.tblcategoryTableAdapter
+
+        '-- Deserialize table object
+        Dim ds As New DataSetService
+        Dim dtser As dtSerialize
+        For ln = 2 To DeserializeObject(tableobj).count - 1
+            dtser = DirectCast(DeserializeObject(DeserializeObject(tableobj)(ln).ToString, (GetType(dtSerialize))), dtSerialize)
+            Select Case dtser.name.ToLower.Trim
+                Case "tblso_headers"
+                    tblso_headersDataTable = DirectCast(DeserializeObject(dtser.data.ToString, (GetType(DataSetService.tblso_headersDataTable))), DataSetService.tblso_headersDataTable)
+                Case "tblso_details"
+                    tblso_detailsDataTable = DirectCast(DeserializeObject(dtser.data.ToString, (GetType(DataSetService.tblso_detailsDataTable))), DataSetService.tblso_detailsDataTable)
+            End Select
+        Next
+
+        '-- Error Messages if any..
+        Dim strMessage As String = Update_SalesOrder(ds, tblso_headersDataTable, tblso_detailsDataTable)
+
+        '-- Updating of tables here....
+        If String.IsNullOrEmpty(strMessage) Then
+            Dim oSqlClass As New SQLClass(ConfigurationManager.ConnectionStrings("customer_loreal_backendConnectionString").ConnectionString.ToString)
+            Dim trTableTransaction As MySqlTransaction = oSqlClass.SqlConnection_BeginTransaction()
+            SetTableAdapterTransaction(tblso_headersTableAdapter.Adapter, trTableTransaction, oSqlClass)
+            SetTableAdapterTransaction(tblso_detailsTableAdapter.Adapter, trTableTransaction, oSqlClass)
+            Try
+                tblso_headersTableAdapter.Update(tblso_headersDataTable)
+                tblso_detailsTableAdapter.Update(tblso_detailsDataTable)
+                trTableTransaction.Commit()
+            Catch ex As Exception
+                strMessage = "ERROR: " + ex.Message
+                trTableTransaction.Rollback()
+            End Try
+        End If
+
+        '-- Send
+        Dim dtSend As New DataTable
+        dtSend.Columns.Add("message", Type.GetType("System.String"))
+        If String.IsNullOrEmpty(strMessage) Then
+            '-- Send Tables here to re-sync
+            Dim drNew As DataRow = dtSend.NewRow
+            drNew("message") = "SUCCESS"
+            dtSend.Rows.Add(drNew)
+            dtSend.TableName = "tblservermsg"
+
+            tblitemsTableAdapter.Fill(tblitemsDataTable) ' Items
+            tblcategoryTableAdapter.Fill(tblcategoryDataTable) ' Category
+
+            '- Build to dataset class
+            Dim dsObj1 As New dsObj
+            dsObj1.addTable(dtSend)
+            dsObj1.addTable(tblitemsDataTable)
+            dsObj1.addTable(tblcategoryDataTable)
+
+            ' Write it!
+            writeObjResponse(dsObj1.getDataset)
+        Else
+            '-- Send Error message
+            Dim drNew As DataRow = dtSend.NewRow
+            drNew("message") = strMessage
+            dtSend.Rows.Add(drNew)
+            dtSend.TableName = "tblservermsg"
+            Dim dsObj1 As New dsObj
+            dsObj1.addTable(dtSend)
+            ' Write it!
+            writeObjResponse(dsObj1.getDataset)
+        End If
+
+    End Sub
+
+    Private Function Update_SalesOrder(ds As DataSetService, dtheader As DataSetService.tblso_headersDataTable, dtdetail As DataSetService.tblso_detailsDataTable) As String
+        Update_SalesOrder = ""
+        '--- Header
+        If Not dtheader Is Nothing Then
+            Try
+                For Each oRecord As DataRow In dtheader.Rows
+                    If oRecord("dtype") = "NEW" Then
+                        ' NEW RECORD
+                        ds.tblso_headers.ImportRow(oRecord)
+                    ElseIf oRecord("dtype") = "EDIT" Then
+                        ' EDIT RECORD
+                        ds.tblso_headers.LoadDataRow(oRecord.ItemArray, True)
+                        ds.tblso_headers(ds.tblso_headers.Rows.Count - 1).SetModified()
+                    ElseIf oRecord("dtype") = "DELETE" Then
+                        ' DELETE RECORD
+                        ds.tblso_headers.LoadDataRow(oRecord.ItemArray, True)
+                        ds.tblso_headers(ds.tblso_headers.Rows.Count - 1).Delete()
+                    End If
+                Next
+            Catch ex As Exception
+                Update_SalesOrder = ex.Message
+                Exit Function
+            End Try
+        End If
+        '-- Detail
+        If Not dtdetail Is Nothing Then
+            Try
+                For Each oRecord As DataRow In dtdetail.Rows
+                    If oRecord("dtype") = "NEW" Then
+                        ' NEW RECORD
+                        ds.tblso_details.ImportRow(oRecord)
+                    ElseIf oRecord("dtype") = "EDIT" Then
+                        ' EDIT RECORD
+                        ds.tblso_details.LoadDataRow(oRecord.ItemArray, True)
+                        ds.tblso_details(ds.tblso_details.Rows.Count - 1).SetModified()
+                    ElseIf oRecord("dtype") = "DELETE" Then
+                        ' DELETE RECORD
+                        ds.tblso_details.LoadDataRow(oRecord.ItemArray, True)
+                        ds.tblso_details(ds.tblso_details.Rows.Count - 1).Delete()
+                    End If
+                Next
+            Catch ex As Exception
+                Update_SalesOrder = ex.Message
+                Exit Function
+            End Try
+        End If
+        If Not String.IsNullOrEmpty(Update_SalesOrder) Then
+            Update_SalesOrder = "ERROR: " + Update_SalesOrder
+        End If
+    End Function
+
+    Sub SetTableAdapterTransaction(ByVal toAdapter As MySqlDataAdapter, ByVal toTransaction As MySqlTransaction, sqlcls As SQLClass)
+        With toAdapter
+            .InsertCommand.Connection = sqlcls.Sql_Connection
+            .UpdateCommand.Connection = sqlcls.Sql_Connection
+            .DeleteCommand.Connection = sqlcls.Sql_Connection
+            .InsertCommand.CommandTimeout = 720
+            .UpdateCommand.CommandTimeout = 720
+            .DeleteCommand.CommandTimeout = 720
+            .UpdateCommand.UpdatedRowSource = UpdateRowSource.None
+            .InsertCommand.UpdatedRowSource = UpdateRowSource.None
+            .DeleteCommand.UpdatedRowSource = UpdateRowSource.None
+        End With
+        With toAdapter
+            .InsertCommand.Transaction = toTransaction
+            .UpdateCommand.Transaction = toTransaction
+            .DeleteCommand.Transaction = toTransaction
+        End With
+    End Sub
+
+    <WebMethod()> _
+    Public Sub verifyAccessCode(accesscode As String)
+        Dim tblAdapter_Access As New DataSetServiceTableAdapters.tblacessTableAdapter
+        Dim dtAccess As New DataSetService.tblacessDataTable
+        tblAdapter_Access.Fill(dtAccess, accesscode)
+        Dim jsSettings As New JsonSerializerSettings
+        jsSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        Context.Response.AddHeader("Access-Control-Allow-Origin", "*")
+        Context.Response.ContentType = "application/json"
+        Context.Response.Write(JsonConvert.SerializeObject(dtAccess, Formatting.None, jsSettings))
+    End Sub
+
+    <WebMethod()> _
+    Public Sub getCustomerlist(name As String)
+        Dim ta As New DataSetServiceTableAdapters.tblcustomersTableAdapter
+        Dim dt As New DataSetService.tblcustomersDataTable
+        If Not String.IsNullOrEmpty(name) Then
+            Dim strSearch As String = "%" + name + "%"
+            ta.FillBy(dt, strSearch, strSearch, strSearch, strSearch)
+        End If
+        Me.writeObjResponse(dt)
+        dt.Dispose()
+        dt = Nothing
+        ta.Dispose()
+        ta = Nothing
+    End Sub
+
+    Public Sub writeObjResponse(obj As Object)
+        Dim json As New JsonSerializerSettings
+        json.ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        Context.Response.AddHeader("Access-Control-Allow-Origin", "*")
+        Context.Response.ContentType = "application/json"
+        Context.Response.Write(JsonConvert.SerializeObject(obj, Formatting.None, json))
+    End Sub
+
+    Partial Class dsObj
+        Private ds As DataSet
+        Public Sub New()
+            ds = New DataSet
+        End Sub
+        Public Sub addTable(dt As DataTable)
+            ds.Tables.Add(dt)
+        End Sub
+        Public Function getDataset() As DataSet
+            Return ds
+        End Function
+    End Class
+
+
+End Class
+
+Public Class dtSerialize
+    Public Property name As String
+    Public data As Object
+    'IList(Of DataSetService.tblso_headersDataTable)
+End Class
+
+
+', tblMembers_Edit As String, tblMembers_Delete As String
+'<WebMethod()> _
+'Public Sub syncToServer(tblEmployees As String)
+'    Dim strMessage As String = "Sync Successfully"
+'    Dim ds As New DataSetService
+'    Dim tblAdapter_Employee As New DataSetServiceTableAdapters.tblemployeesTableAdapter
+'    Try
+'        Dim oEmployees As DataSetService.tblemployeesDataTable = DirectCast(JsonConvert.DeserializeObject(tblEmployees, (GetType(DataSetService.tblemployeesDataTable))), DataSetService.tblemployeesDataTable)
+'        For Each oRecord As DataRow In oEmployees.Rows
+'            If oRecord("dtype") = "NEW" Then
+'                ' NEW RECORD
+'                ds.tblemployees.ImportRow(oRecord)
+'            ElseIf oRecord("dtype") = "EDIT" Then
+'                ' EDIT RECORD
+'                ds.tblemployees.LoadDataRow(oRecord.ItemArray, True)
+'                ds.tblemployees(ds.tblemployees.Rows.Count - 1).SetModified()
+'            ElseIf oRecord("dtype") = "DELETE" Then
+'                ' DELETE RECORD
+'                ds.tblemployees.LoadDataRow(oRecord.ItemArray, True)
+'                ds.tblemployees(ds.tblemployees.Rows.Count - 1).Delete()
+'            End If
+'            'oRecord("dtype") = ""
+'        Next
+'        tblAdapter_Employee.Update(ds.tblemployees)
+'    Catch ex As Exception
+'        strMessage = "Error SyncToServer: " + ex.Message
+'    End Try
+
+'    'Dim tblUsers = From t In dbtest.Users
+'    'Context.Response.ClearHeaders()
+'    'Context.Response.Clear()
+'    'Context.Response.ContentType = "application/json"
+'    'Context.Response.Write("Ext.util.JSONP.callback(" + JsonConvert.SerializeObject(tblUsers) + ");")
+
+'    ds.Dispose()
+'    ds = Nothing
+
+'End Sub

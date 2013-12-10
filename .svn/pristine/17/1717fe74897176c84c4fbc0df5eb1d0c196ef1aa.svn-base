@@ -1,0 +1,95 @@
+<style>    
+    #errlogin {
+        font-size: 16px;
+        font-weight: bold;
+        color: red;
+    }
+    #pglogin_divcntnt .ui-input-text:not(label) {
+        background-color: #FFF;
+    }
+</style>
+<div data-role="page" id="pg_login" data-theme="d" data-inset="false" class="jpm-page">
+    <div data-role="header">
+        <table style="width:100%">
+            <tr><td><img src='img/lorealsg.jpg' alt="L'Oreal Singapore" style="display:block;margin-left:auto;margin-right:auto"></td></tr>
+        </table>
+    </div>
+    <div data-role="content" data-theme="c" data-content-theme="d" id="pglogin_divcntnt">
+        <ul data-role="listview">
+            <li data-role="list-divider">User Log-in</li>
+            <li>
+                <table style="width:100%">
+                    <tr>
+                        <td><input type="text" id ="txtusrnm" placeholder="Username"/></td>
+                    </tr>
+                    <tr>
+                        <td><input type="password" id ="txtpswd" placeholder="Password"/></td>
+                    </tr>
+                    <tr>
+                        <td><div id="errlogin"></div></td>
+                    </tr>
+                    <tr>
+                        <td><a id="btnlogin" data-role="button" href="" data-theme="a" class="jpm-cornerstyle" >Log-in</a></td>
+                    </tr>
+                </table>
+            </li>
+        </ul>                   
+    </div>   
+    
+    <script>
+        $('#btnlogin').click(function(e) {
+            var l_usrnm = $('#txtusrnm').val();
+            var l_pswd = $('#txtpswd').val();
+            l_usrnm = l_usrnm.toUpperCase();
+            if (l_usrnm === "" && l_pswd === "") {
+                return;
+            }
+            var sql = "SELECT * FROM tblsettings WHERE UPPER(vchUsrnm) = ? AND vchPswd = ?";
+            p_db.transaction(function(tx) {
+                tx.executeSql(sql, [l_usrnm, l_pswd], pg_login_success, pg_login_error);
+            }, pg_login_errorTA);
+
+            function pg_login_success(tx, results) {
+                var l_len = results.rows.length;                
+                if (l_len === 0) {
+                    pg_login_error();
+                    return false;
+                }
+                if (results.rows.item(0).vchUType === 'employee') {
+                    $.mobile.changePage('#pg_empmain', {transition: "fade", reverse: false});
+                    p_mainpg = '#pg_empmain';                    
+                }
+                if (results.rows.item(0).vchUType === 'member') {
+                    pgmem_dvnoti_memberNotifications();
+                    $.mobile.changePage('#pg_memmain', {transition: "fade", reverse: false});
+                    p_mainpg = '#pg_memmain';
+                }
+                p_usercode = results.rows.item(0).vchUsrnm;
+                tx.executeSql("Update tblsettings set bitLogin=1")
+                p_startNotification();
+            }
+            
+            function pg_login_error(err) {
+                var l_errmsg = "Wrong <username> or <password>...";
+                $("#errlogin").text(l_errmsg);               
+            }
+
+            function pg_login_errorTA(err) {
+                var l_errmsg = "Error processing SQL: " + err.code;
+                $("#errlogin").text(l_errmsg);
+            }
+            
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+
+        $('#txtusrnm').keyup(function() {
+            $("#errlogin").text("");
+        });
+
+        $('#txtpswd').keyup(function() {
+            $("#errlogin").text("");
+        });
+
+    </script>
+</div>

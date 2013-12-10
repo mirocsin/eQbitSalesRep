@@ -1,0 +1,11 @@
+<div id="pgemp_dvorder_dvclosed" data-role="content" style="margin-top: 110px">
+    Closed Order Content...    
+</div>
+<script>
+    function pgemp_dvorder_dvclosed_pagebeforeshow(){
+        
+    }
+    function pgemp_dvorder_dvclosed_onSlideDown() {
+        //alert('slide Down');        
+    }
+</script>

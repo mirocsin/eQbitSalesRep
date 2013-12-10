@@ -1,0 +1,184 @@
+<style>
+    .custom-count-pos{
+        font-size: 11px;
+        font-weight: bold;
+        padding: 0.2em 0.5em;
+        float: right;
+    }
+    .tdtxt_pad {
+        min-width: 80px;
+    }
+    .tdval_pad {
+        padding: 0.4em 1.5em;
+    }
+    .myicon[href*="rss"]:after {
+        font-family: 'Heydings';
+        /*font-family: 'res/icon/heydings_icons.ttf';*/
+        content: attr(data-icon);
+    }
+</style>
+<div data-role="page" id="pg_empmain" data-theme="d">
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_menu" data-icon="home">Menu</a>
+        <h1>Qbit e-SalesRep (Salesman)</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>
+    <div data-role="content" data-theme="">
+        <table style="width:100%">
+            <tr>
+                <td>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false">
+                        <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">0</div> Appointments</h2> 
+<!--                                    <ul data-role="listview">
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate1'>11/10/2013 2:30pm - Guardian-Causeway Point</a> 
+                                <input type='hidden' id='hidlocate1' value='Singapore 738099'/>
+                            </li>
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate2'>15/10/2013 10:30am - Watson-Lucky Plaza</a>
+                                <input type='hidden' id='hidlocate2' value='Singapore 238863'/>
+                            </li>
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate3'>16/10/2013 3:00pm - Tony & Guy Salon-The Star</a>
+                                <input type='hidden' id='hidlocate3' value='Singapore 138617'/>
+                            </li>                                        
+                        </ul>-->
+                    </div>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false">
+                        <h2>Routing Schedule</h2>
+<!--                                    <ul data-role="listview">
+                            <li><a href="">Pending (3)</a></li>
+                            <li><a href="">Confirmed (3)</a></li>
+                        </ul>-->
+                    </div>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false">
+                        <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">0</div> PO Approval Notifications</h2> 
+<!--                                    <ul data-role="listview">
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate1'>11/10/2013 2:30pm - Guardian-Causeway Point</a> 
+                                <input type='hidden' id='hidlocate1' value='Singapore 738099'/>
+                            </li>
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate2'>15/10/2013 10:30am - Watson-Lucky Plaza</a>
+                                <input type='hidden' id='hidlocate2' value='Singapore 238863'/>
+                            </li>
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate3'>16/10/2013 3:00pm - Tony & Guy Salon-The Star</a>
+                                <input type='hidden' id='hidlocate3' value='Singapore 138617'/>
+                            </li>                                        
+                        </ul>-->
+                    </div>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false">
+                        <h2>GPS Customer Locator</h2> 
+<!--                                    <ul data-role="listview">
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate1'>11/10/2013 2:30pm - Guardian-Causeway Point</a> 
+                                <input type='hidden' id='hidlocate1' value='Singapore 738099'/>
+                            </li>
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate2'>15/10/2013 10:30am - Watson-Lucky Plaza</a>
+                                <input type='hidden' id='hidlocate2' value='Singapore 238863'/>
+                            </li>
+                            <li><a href="" onClick='btn_touchstart_maplocate(this)' id='btnlocate3'>16/10/2013 3:00pm - Tony & Guy Salon-The Star</a>
+                                <input type='hidden' id='hidlocate3' value='Singapore 138617'/>
+                            </li>                                        
+                        </ul>-->
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="uldashboard2" data-role="listview" data-inset="true" data-theme="d" data-divider-theme="e" style="margin:0.5;">
+                        <li data-role="list-divider">Target Sales</li>
+                        <li data-icon="arrow-u">
+                            <table style="font-family: verdana; font-weight: bold; font-size: small">
+                                <tr>
+                                    <td class="tdtxt_pad">Daily:</td>
+                                    <td class="tdval_pad">$1,735.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Weekly:</td>
+                                    <td class="tdval_pad">$12,850.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly:</td>
+                                    <td class="tdval_pad">$55,550.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Yearly</td>
+                                    <td class="tdval_pad">$250,320.00</td>
+                                </tr>
+                                 <tr>
+                                    <td><a href="" class="myicon" data-icon="e"></a></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="uldashboard3" data-role="listview" data-inset="true" data-theme="d" data-divider-theme="e" style="margin:0.5;">
+                        <li data-role="list-divider">Sales Performance (Confirmed)</li>
+                        <li data-icon="arrow-u">
+                            <table style="font-family: verdana; font-weight: bold; font-size: small">
+                                <tr>
+                                    <td class="tdtxt_pad">Today:</td>
+                                    <td class="tdval_pad">$1,832.88</td>
+                                </tr>
+                                <tr>
+                                    <td>This Week:</td>
+                                    <td class="tdval_pad">$1,832.88</td>
+                                </tr>
+                                <tr>
+                                    <td>This Month:</td>
+                                    <td class="tdval_pad">$3,665.76</td>
+                                </tr>
+                                <tr>
+                                    <td>This Year</td>
+                                    <td class="tdval_pad">$208,601.54</td>
+                                </tr>
+                            </table>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="uldashboard_graph" data-role="listview" data-inset="true" data-theme="c" style="margin:0;">
+                        <li data-role="list-divider">Graph Performance</li>
+                        <li data-icon="arrow-u">
+                            <div id="chartdiv" style="height:200px"></div>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>                   
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist" style="text-align: right">  
+        <img src="img/companylogo.jpg" alt="L'Oreal Singapore"/>
+    </div>
+    <div data-role="panel" id="pg_menu" data-theme="a"  >
+        <input type="search" id ="txtcustomer_panel" placeholder="Search Customer"/> 
+        <div data-role="controlgroup" data-corners="true">
+            <a href="quickorder.html" data-prefetch data-role="button" id="btn_quickorder" data-icon="arrow-r" data-transition="slide">Quick Order</a>
+            <a href="customers.html" data-prefetch data-role="button" id="btn_customers" data-icon="arrow-r" data-transition="slide">Customers</a>
+            <a href="stockcatalog.html" data-prefetch data-role="button"  id="btn_stocks" data-icon="arrow-r" data-transition="slide">Stock Catalog</a>
+            <a href="getitems.html" data-prefetch data-role="button"  id="btntest" data-icon="arrow-r" data-transition="slide">Prefetch1</a>
+
+            <a href="" id="btn_logout" data-theme="c" data-icon="arrow-r" data-role="button">LogOut</a>                  
+        </div>                
+    </div>
+    <script>
+        $("#pg_main").on("pageshow", function() {
+            $("#txtcustomer_panel").val("");
+        });
+
+        function btn_touchstart_maplocate(e) {
+            //alert("check");
+            $('#txtto').val($('#hidlocate' + e.id.replace("btnlocate", "")).val());
+            //$.mobile.changePage('#pg_map');
+            //$.mobile.changePage('#pg_map', {transition: "slide", role: "none", reverse: false});
+            $.mobile.changePage('map.html', {transition: "slide", role: "none", reverse: false});
+        }
+
+
+        //$('#btn_quickorder').bind('touchstart', function(e) {
+        //    //$.mobile.changePage("#pg_getcustomer");
+        //    $.mobile.changePage('#pg_getcustomer', {transition: 'slide'});
+        //});
+    </script>
+</div>                

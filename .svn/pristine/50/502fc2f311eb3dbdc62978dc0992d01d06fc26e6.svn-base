@@ -1,0 +1,23 @@
+<div data-role="page" id="pg_stockcatalog" data-theme="c" >
+    <div data-role="header" data-position="fixed">
+        <a href="" id="btn_cancel" data-icon="delete" >Cancel</a>
+        <h1>Stock Catalog</h1>           
+        <a href="" data-icon="" class="ui-btn-right">Sync</a>   
+        <table style="width:100%">
+            <tr>
+                <td style="width:50%">
+                    <input type="search" id ="txtsearch_stockcatalog" placeholder="Search Stock Catalog"/>
+                </td>
+                <td style="width:50%">
+                    <a id="btnsearch_stockcat" data-role="button" href="" data-theme="b" data-inline="true" >Search</a>
+                </td>
+            </tr>
+        </table>                
+    </div>
+    <div data-role="content">
+        <div id="div_stockcat"></div>        
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist">                
+    </div>     
+    <script src="js/app/pg_stockcatalog.js"></script>
+</div>

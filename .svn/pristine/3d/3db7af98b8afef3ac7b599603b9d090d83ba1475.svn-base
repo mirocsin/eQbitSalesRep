@@ -1,0 +1,11 @@
+<div id="pgemp_dvorder_dventry" data-role="content" style="margin-top: 110px">
+        Order Entry Content...        
+</div>
+<script>
+    function pgemp_dvorder_dventry_pagebeforeshow(){
+        //alert("check");
+    }
+    function pgemp_dvorder_dventry_onSlideDown() {
+        //alert('slide Down');
+    }
+</script>

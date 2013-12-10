@@ -1,0 +1,216 @@
+<div id="pgemp_dvorder_dvpending" >    
+    <ul id='pgemp_dvorder_ulpendinglist' data-role="listview" data-theme="c"></ul>
+</div>
+<!--Popup Dialog Order option-->
+<div data-role="popup" id="popupDialog_pending" data-overlay-theme="a" data-theme="c" style="max-width:800px;" class="ui-corner-all">
+    <div data-role="header" data-theme="a" class="ui-corner-top">
+        <h1>Select an option</h1>S
+    </div>
+    <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+        <h3 class="ui-title"> <span id='sp_pendingid'></span></h3>
+        <a id="pgempdvorderdvpending_btnPost" href="#" onclick='pgemp_dvorder_dvpending_submitClick(this)' data-role="button" data-icon="forward" data-theme="c">Submit Order</a>    
+        <a id="pgempdvorderdvpending_btnEdit" href="#" onclick='pgemp_dvorder_dvpending_editClick(this)' data-role="button" data-icon="star" data-transition="flow" data-theme="c">Edit Order</a>  
+        <a id="pgempdvorderdvpending_btnCancel" href="#" onclick='pgemp_dvorder_dvpending_deleteClick(this)' data-role="button" data-icon="delete" data-transition="flow" data-theme="c">Delete Order</a>
+        <a id="pgempdvorderdvpending_btnClose" href="#" onclick='pgemp_dvorder_dvpending_closeClick(this)' data-role="button" data-icon="arrow-d" data-transition="flow" data-theme="c">Close</a>
+        <input type="hidden" id='hidden_socode_pending'/>
+        <input type="hidden" id='hidden_sodtype_pending'/>
+        <input type="hidden" id='hidden_customer'/>
+        <input type="hidden" id='hidden_customer_code'/>        
+    </div>         
+</div>
+
+<script>
+    function pgemp_dvorder_dvpending_pagebeforeshow() {
+        pgemp_dvorder_dvpending_querylist();
+    }
+    function pgemp_dvorder_dvpending_querylist() {
+        p_db.transaction(function(tx) {
+            tx.executeSql("SELECT * FROM tblso_headers WHERE vchStatus='PENDING' AND dtype<>'DELETE' ORDER BY vchSODate ", [], pgemp_dvorder_dvpending_list, pgemp_dvorder_dvpending_listfail);
+        });
+    }
+    function pgemp_dvorder_dvpending_list(tx, results) {
+        var intlist = 1;
+        pgemp_dvorder_dvpending_drawlist(results, intlist);
+    }
+    function pgemp_dvorder_dvpending_drawlist(results, intlist) {
+        $('#pgemp_dvorder_ulpendinglist').empty();
+        var strline = '<li data-icon="false" ><a href="#" id="@btnid" onclick="btnpendingopt_click(this)"><img src="img/@icon" alt="" style="padding:10px 20px;height:64px;width:64px"/><h2 class="autowrap" @stylefont>SO#.: @dispsocode - @sodate @dtype</h3><p @stylefont>@customer - Ship to: @shipto on @deldate</p><p @stylefont>@remarks</p><input type="hidden" id="@hidsocode" value="@valsocode"/><input type="hidden" id="@hidso_custcode" value="@custcode"/><input type="hidden" id="@hidsopending_dtype" value="@sopending_dtype"/><input type="hidden" id="@hidcustomer" value="@licustomer"/></a></li>';
+        for (i = 0; i < results.rows.length; i++) {
+            var strline2 = strline;
+            intlist = intlist + i;
+            strline2 = strline2.replace('@customer', results.rows.item(i).vchCust_Name);
+            strline2 = strline2.replace('@remarks', results.rows.item(i).vchRemarks);
+            strline2 = strline2.replace('@sodate', results.rows.item(i).vchSODate);
+            strline2 = strline2.replace('@deldate', results.rows.item(i).vchDelDate);
+            strline2 = strline2.replace('@shipto', results.rows.item(i).vchShipTo);
+            strline2 = strline2.replace('@btnid', 'btnpending' + intlist.toString());
+            strline2 = strline2.replace('@hidsocode', 'hidsocode' + intlist.toString());
+            strline2 = strline2.replace('@icon', 'pendingorder.png');
+            strline2 = strline2.replace('@dispsocode', results.rows.item(i).vchSO_Code);
+            strline2 = strline2.replace('@valsocode', results.rows.item(i).vchSO_Code);
+            strline2 = strline2.replace('@hidsopending_dtype', 'hidsopending_dtype' + intlist.toString());
+            strline2 = strline2.replace('@sopending_dtype', results.rows.item(i).dtype);
+            strline2 = strline2.replace('@hidcustomer', 'hidcustomer' + intlist.toString());
+            strline2 = strline2.replace('@licustomer', results.rows.item(i).vchCust_Name);
+            strline2 = p_replaceAll(strline2, '@hidso_custcode', 'hidso_custcode' + intlist.toString());
+            strline2 = p_replaceAll(strline2, '@custcode', results.rows.item(i).vchCust_Code);
+
+            if (results.rows.item(i).dtype === 'EDIT') {
+                strline2 = p_replaceAll(strline2, '@stylefont', 'style="color: #a1a"');
+                strline2 = strline2.replace('@dtype', '(EDITED)');
+            }
+            else if (results.rows.item(i).dtype === 'CANCEL') {
+                strline2 = p_replaceAll(strline2, '@stylefont', 'style="text-decoration:line-through"');
+                strline2 = strline2.replace('@dtype', '(CANCELLED)');
+            }
+            else {
+                strline2 = p_replaceAll(strline2, '@stylefont', '');
+                strline2 = strline2.replace('@dtype', '');
+            }
+            $('#pgemp_dvorder_ulpendinglist').append(strline2);
+        }
+        $('#pgemp_dvorder_ulpendinglist').listview('refresh');
+    }
+    function pgemp_dvorder_dvpending_listfail(tx, err) {
+        alert("Error processing SQL: " + err.message);
+    }
+    function pgemp_dvorder_dvpending_onSlideDown() {
+        //alert('slide Down');        
+    }
+    function btnpendingopt_click(e) {
+        var hidsocd = '#hidsocode' + e.id.replace("btnpending", "");
+        var hidsopending_dtype = '#hidsopending_dtype' + e.id.replace("btnpending", "");
+        var hidcustomer = '#hidcustomer' + e.id.replace("btnpending", "");
+        var pending_dtype = $(hidsopending_dtype).val();
+        var customer = $(hidcustomer).val();
+        var hidcustomercd = '#hidso_custcode' + e.id.replace("btnpending", "");
+        var customer_code = $(hidcustomercd).val()
+        $('#sp_pendingid').text(e.text);
+        $('#hidden_socode_pending').val($(hidsocd).val());
+        $('#hidden_sodtype_pending').val(pending_dtype);
+        $('#hidden_customer').val(customer);
+        $('#hidden_customer_code').val(customer_code);
+        $('#popupDialog_pending').popup('open', {transition: 'slideup'});
+        if (pending_dtype === 'CANCEL') {
+            p_enableControl('pgempdvorderdvpending_btnPost', 'disable');
+            $("#pgempdvorderdvpending_btnCancel").find(".ui-btn-text").text("Delete From List");
+            $("#pgempdvorderdvpending_btnEdit").find(".ui-btn-text").text("View Order");
+        }
+    }
+
+    $('#popupDialog_pending').on('popupafterclose', function(e) {
+        if ($('#hidden_customer_code').val() === "" && p_dummyvar === "postclick") {
+//            debugger;
+            p_dummyvar = "";
+            commonDialog('Validation', 'Customer information is invalid',
+                    'Please edit the customer and try to select from the list',
+                    'exclamation', 'pop');
+
+        }
+        if (p_dummyvar === 'delete_order') {
+            p_dummyvar = "";
+            commonDialog('Validation', 'Delete this Order?',
+                    'You will not be able to make some changes if deleted',
+                    'question', 'pop');
+        }
+    })
+    function pgemp_dvorder_dvpending_submitClick(e) {
+        if ($('#hidden_customer_code').val() === "") {
+            p_dummyvar = "postclick";
+            $('#popupDialog_pending').popup('close', {transition: 'slidedown'});
+        }
+        else {
+            // Posting code
+            // Split Order by Brand and marked as closed
+            pg_orderentry_qryNextSalesOrder('pgemp_dvorder_dvpending_ProcessOrder');
+        }
+    }
+
+    function pgemp_dvorder_dvpending_ProcessOrder(newSO) {
+        var strSO = $('#hidden_socode_pending').val();
+        newSO = parseInt(newSO.replace(p_settings.vchId + '-','')) - 1;
+        p_db.transaction(function(tx) {
+            tx.executeSql('SELECT vchBrand FROM tblSO_details WHERE vchSO_Code = ? AND vchStatus = ? GROUP by vchBrand', [strSO, 'PENDING'],
+                    function(tx, results) {
+                        for (i = 0; i < results.rows.length; i++) {
+                            newSO = newSO + 1
+                            var strNewSO = p_settings.vchId + '-' + newSO.toString()
+                            var strDateTime = p_getDateTime();
+                            var strBrand = results.rows.item(i).vchBrand;
+                            var vars = {NewSO: strNewSO, DateTime: strDateTime, Brand: strBrand};
+                            //--------------------- Headers
+                            p_executeSql_cb("INSERT INTO tblso_headers (vchSO_Code,vchCust_Code,vchCust_Name,vchShipTo,vchSalesman_Code,vchTerms,vchSODate,vchDelDate,vchRemarks,mnyTotOrderAmt,vchStatus,dtype,dtRecordAdded,dtRecordModed,vchSO_Code2) \n\
+                                                SELECT ? as vchSO_Code,vchCust_Code,vchCust_Name,vchShipTo,\n\
+                                                vchSalesman_Code,vchTerms,vchSODate,vchDelDate,vchRemarks,mnyTotOrderAmt,\n\
+                                                ? as vchStatus,dtype,? as dtRecordAdded,? as dtRecordModed,? as vchSO_Code2 \n\
+                                                FROM tblso_headers \n\
+                                                WHERE vchSO_Code = ? AND vchStatus = ?", [strNewSO, 'CLOSED', strDateTime, strDateTime, strSO, strSO, 'PENDING'], vars,
+                                    function(results, vars) { // Callback function
+                                        //--------------------- Details
+                                        p_executeSql_cb("INSERT INTO tblso_details(vchSO_Code,vchItem_Category,vchItem_Code,vchItem_Description,vchSize,mnyPrice, intQty,mnyAmount,vchStatus,dtype,vchBrand)\n\
+                                            SELECT ? as vchSO_Code,vchItem_Category,vchItem_Code,vchItem_Description,vchSize,mnyPrice,\n\
+                                                intQty,mnyAmount,? as vchStatus,dtype,vchBrand \n\
+                                            FROM tblso_details \n\
+                                            WHERE vchSO_Code=? AND vchStatus=? AND vchBrand=?", [vars.NewSO, 'CLOSED', strSO, 'PENDING', vars.Brand], vars,
+                                                function(results, vars) { // Callback function
+                                                    p_executeSql_cb('SELECT vchSO_Code, SUM(mnyAmount) as ntotal FROM tblso_Details WHERE vchSO_Code = ? GROUP BY vchSO_Code', [vars.NewSO], vars,
+                                                            function(results, vars) { // Callback function
+                                                                // Update Total Order Amount
+                                                                p_executeSql_cb("UPDATE tblso_headers SET mnyTotOrderAmt = ? WHERE vchSO_Code=?", [results.rows.item(0).ntotal, vars.NewSO], vars,
+                                                                        function(results, vars) {// Callback function
+                                                                            // Cancel Existing Record
+                                                                            p_executeSql_cb("UPDATE tblso_headers SET vchStatus=? WHERE vchSO_Code = ? AND vchStatus = ?", ['CANCEL', strSO, 'PENDING'], vars,
+                                                                                    function(results, vars) { // Callback function
+                                                                                        $('#popupDialog_pending').popup('close', {transition: 'slidedown'});
+                                                                                        pgemp_dvorder_dvpending_querylist();
+                                                                                        pgemp_dvorder_dvclosed_querylist();
+                                                                                    })
+                                                                            p_executeSql("UPDATE tblso_details SET vchStatus=? WHERE vchSO_Code = ? AND vchStatus = ?", ['CANCEL', strSO, 'PENDING'])        
+                                                                        });
+                                                            })
+                                                });
+                                    });
+
+                        }
+                         // Update the settings
+                        p_executeSql("Update tblsettings set intSO = COALESCE(intSO,0) + ?",[results.rows.length])
+                    })
+        })
+    }
+    function pgemp_dvorder_dvpending_postClick(strSOCode) {
+        p_executeSql('UPDATE tblso_headers SET dtRecordModed=?,vchStatus=?,dtype=? WHERE vchSO_Code=? AND vchStatus<>?', [new Date(), 'CLOSED', 'EDIT', strSOCode, 'FIRST'], 'pgemp_dvorder_postOrderHeader');
+        p_executeSql('UPDATE tblso_details SET vchStatus=?,dtype=? WHERE vchSO_Code=? AND vchStatus<>?', ['CLOSED', 'EDIT', strSOCode, 'FIRST'], 'pgemp_dvorder_postOrderDetail');
+    }
+    function pgemp_dvorder_postOrderDetail_sqlSuccess(tx, results) {
+        $("#popupDialog_pending").popup("close");
+        pgemp_dvorder_dvpending_querylist();
+        pgemp_dvorder_dvclosed_querylist();
+    }
+    function pgemp_dvorder_dvpending_editClick(e) {
+        var pending_dtype = $('#hidden_sodtype_pending').val();
+        p_socode = $('#hidden_socode_pending').val();
+        if (pending_dtype === 'CANCEL') {
+            p_orderaction = "view";
+        } else {
+            p_orderaction = "edit";
+        }
+        $.mobile.changePage('#pg_orderentry', {transition: "slide", reverse: false});
+    }
+    function pgemp_dvorder_dvpending_closeClick(e) {
+        $("#popupDialog_pending").popup("close");
+    }
+    function pgemp_dvorder_dvpending_deleteClick(e) {
+        p_dummyvar = 'delete_order'
+        $("#popupDialog_pending").popup("close");
+    }
+    function pgemp_dvorder_dvpending_cancelOrderDetail_sqlSuccess(tx, results) {
+        $("#popupDialog_pending").popup("close");
+        pgemp_dvorder_dvpending_querylist();
+    }
+    function pg_empmain_popQues_btnYes_click() {
+        var strSOCode = $('#hidden_socode_pending').val();
+        p_executeSql('DELETE FROM tblso_headers WHERE vchSO_Code=?', [strSOCode]);
+        p_executeSql('DELETE FROM tblso_details WHERE vchSO_Code=?', [strSOCode]);
+        pgemp_dvorder_dvpending_querylist();
+    }
+</script>

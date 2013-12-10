@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>e-QbitSalesRep</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta charset="utf-8">
+
+        <link rel="stylesheet" href="css/jquery.mobile-1.3.1.min.css" />
+        <style>
+            .custom-count-pos{
+                font-size: 11px;
+                font-weight: bold;
+                padding: 0.2em 0.5em;
+                float: right;                
+            }
+            #pg_login {
+                -webkit-box-sizing: border-box; 
+                -moz-box-sizing: border-box;    
+                box-sizing: border-box;
+                
+                top: calc(25%);
+                left: 0;
+                padding-right: -10px;
+                margin-top: -100px;                
+                border: 1px solid black;
+                padding: 10px;
+                min-height: 100px !important;
+            }
+            #errlogin {
+                font-size: 16px;
+                font-weight: bold;
+                color: red;
+            }
+        </style>
+        
+        <script src="js/libs/jquery-1.9.1.min.js"></script>
+        <script src="js/libs/jquery.mobile-1.3.1.min.js"></script>
+
+        <script>
+            $(document).on("pageinit", ".ui-page", function(e) {                
+                //$("#pg_login").hide(); 
+                
+                // Inject Pages
+                injectPage('onetimelog.html');
+                injectPage('emp_main.html');
+                injectPage('mem_main.html');
+                injectPage('customer.html');
+                injectPage('getitems.html');
+                injectPage('map.html');
+                injectPage('quickorder.html');
+                injectPage('stockcatalog.html');
+                injectPage('stockentry.html');
+            });
+            
+            var dummyvar;
+            var db;
+            var mainpg;            
+            var urlServer = 'http://localhost/eService/eService.asmx';
+            
+            db = window.openDatabase("eqbitsales", "1.0", "eQbitSalesRepDB", 2 * 1024 * 1024);
+            //clearDB();
+            checkSettings();
+            
+            function clearDB() {  
+                var sql1, sql2, sql3, sql4;
+                sql1 = 'DROP TABLE IF EXISTS tblsettings';
+                sql2 = 'DROP TABLE IF EXISTS tblmembers';
+                sql3 = 'DROP TABLE IF EXISTS tblitems';
+                sql4 = 'DROP TABLE IF EXISTS tblappointments';
+                db.transaction(function(tx) {
+                    tx.executeSql(sql1);
+                    tx.executeSql(sql2);
+                    tx.executeSql(sql3);
+                    tx.executeSql(sql4);
+                }, errorTA);
+            }
+            
+            function checkSettings() {                   
+                var sql = "SELECT * FROM tblsettings";
+                db.transaction(function(tx) {                    
+                    tx.executeSql(sql, [], checkLogin, onetimeLogin);                    
+                }, errorTA);
+            }
+            
+            function checkLogin(tx, results) {
+                var len = results.rows.length;
+                if (len===0) {                    
+                    //window.open("onetimelog.html","_self",false);
+                    $.mobile.changePage('#pg_firstlog', {transition: "slidedown", reverse: false});
+                    return false;
+                }
+                else
+                    //alert('here');
+                    $("#pg_login").show();
+            }
+            
+            function errorTA(err) {
+                alert("Error processing SQL: " + err.code);
+            }
+            
+            function onetimeLogin(err) { 
+                //window.open("onetimelog.html","_self",false);
+                $.mobile.changePage('#pg_firstlog', {transition: "slidedown", reverse: false});
+            }
+            
+            function injectPage(htmlpage) {
+                var $html = getHtmlPage(htmlpage);
+                $($html).appendTo($("#divContainer"));
+            }
+            function getHtmlPage(htmlfile) {
+                var strHtml;
+                $.ajax({url: htmlfile, async: false, success: function(data) {
+                        strHtml = data;
+                    }});
+                return strHtml;
+            }
+        </script>
+    </head>
+
+    <body>
+        <div id="divContainer">
+            <div data-role="page" id="pg_login" data-theme="d" data-inset="false" style="min-height: 100px" >
+                <div data-role="header">
+                    <table align="center">
+                        <tr><td><img src='img/lorealsg.jpg' alt="L'Oreal Singapore"></td></tr>
+                    </table>
+                </div>
+                <div data-role="content" data-theme="c" data-content-theme="d">
+                    <ul data-role="listview">
+                        <li data-role="list-divider">User Log-in</li>
+                        <li>
+                            <table style="width:100%">
+                                <tr>
+                                    <td><input type="text" id ="txtusrnm" placeholder="Username"/></td>
+                                </tr>
+                                <tr>
+                                    <td><input type="password" id ="txtpswd" placeholder="Password"/></td>
+                                </tr>
+                                <tr>
+                                    <td><div id="errlogin"></div></td>
+                                </tr>
+                                <tr>
+                                    <td><a id="btnlogin" data-role="button" href="" data-theme="a" data-prefetch >Log-in</a></td>
+                                </tr>
+                            </table>
+                        </li>
+                    </ul>                   
+                </div>
+                <script>
+                    $('#btnlogin').click(function() {
+                        var usrnm = $('#txtusrnm').val();
+                        var pswd = $('#txtpswd').val();
+                        if (usrnm === "" && pswd === "")
+                            return;
+                        var sql = "SELECT * FROM tblsettings WHERE vchUsrnm = ? AND vchPswd = ?";
+                        db.transaction(function(tx) {
+                            tx.executeSql(sql, [usrnm, pswd], checkLogin, errorCB);
+                        }, errorTA);
+
+                        function checkLogin(tx, results) {                
+                            var len = results.rows.length;
+                            if (len===0) {
+                                errorCB();
+                                return false;
+                            }    
+                            if (results.rows.item(0).vchUType==='employee'){
+                                $.mobile.changePage('#pg_empmain', {transition: "fade", reverse: false});
+                                mainpg = '#pg_empmain';
+                            }
+                            if (results.rows.item(0).vchUType==='member'){
+                                $.mobile.changePage('#pg_memmain', {transition: "fade", reverse: false});
+                                mainpg = '#pg_memmain';
+                            }
+                        }
+
+                        function errorCB(err) {
+                            var errmsg = "Wrong <username> or <password>...";
+                            $("#errlogin").text(errmsg);
+                        }
+
+                        function errorTA(err) {
+                            var errmsg = "Error processing SQL: " + err.code;
+                            $("#errlogin").text(errmsg);                            
+                        }
+                    });
+
+                    $('#txtusrnm').keyup(function() {
+                        $("#errlogin").text("");
+                    });
+
+                    $('#txtpswd').keyup(function() {
+                        $("#errlogin").text("");
+                    });
+                </script>
+            </div>
+<!--            <div data-role="page" id="pg_firstlog" data-theme="d" data-inset="false" >
+                test...
+            </div>-->
+        </div>        
+    </body>
+</html>
+
+<!--Some Notes:
+// PARAMETERIZED PAGE
+//            $(document).on("pagebeforechange", function(e, data) {
+//                if (typeof data.toPage === "string") {
+//                    var u = $.mobile.path.parseUrl(data.toPage)
+//                    showPage(e, u, data.options);
+//                }
+//            });
+
+//            function showPage(e, urlObj, options) {
+//                var jspage = urlObj.hash.replace(/.*page=/, "");
+//                if (jspage == "") {
+//                    return;
+//                }
+//                if (jspage == urlObj.hash.replace(/\?.*$/, "")) {
+//                    $.mobile.changePage("#" + jspage, {transition: 'slide'});
+//                    return;
+//                }
+//                //html = window[jspage](urlObj, options, jspage),
+//                var pageSelector = urlObj.hash.replace(/\?.*$/, ""),
+//                        $page = $(pageSelector),
+//                        html = getHtmlPage(jspage);
+//                $content = $page.children(":jqmData(role=content)")
+//                //$content.html(html).trigger('create');
+//                $content.html(html);
+//                $page.page();
+//                $content.trigger('create');
+//                options.dataUrl = urlObj.href;
+//                $.mobile.changePage($page, {transition: 'slide'});
+//                e.preventDefault();
+//            }
+
+// SYNCHRONIZE NOTES
+<script>
+            $("#btnsync").click(function(e) {
+                syncData = [];
+                var json_output;
+                db.transaction(function(tx) {
+                    tx.executeSql('SELECT * FROM tblemployees', [],
+                            function(tx, results) {
+                                for (var i = 0; i < results.rows.length; i++) {
+                                    syncData.push(results.rows.item(i));
+                                }
+                                syncSQL();
+                            });
+
+                });
+                function syncSQL() {
+                    var Data = JSON.stringify(syncData);
+                    $.ajax({
+                        type: "POST",
+                        url: "http://localhost:64619/eService.asmx/syncToServer",
+                        crossDomain: true,
+                        beforeSend: function() {
+                            $.mobile.showPageLoadingMsg();
+                        },
+                        complete: function() {
+                            $.mobile.hidePageLoadingMsg();
+                        },
+                        data: {tblEmployees: Data},
+                        dataType: 'jsonp',
+                        success: function(response) {
+                            console.error(JSON.stringify(response));
+                        },
+                        error: function(response) {
+                            console.error("error");
+                        }
+                    });
+                }
+            });
+        </script>
+
+//            ;-->
+

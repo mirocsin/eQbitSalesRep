@@ -1,0 +1,344 @@
+<link rel="stylesheet" href="css/jpm-page.css" />
+<div data-role="page" id="pg_appointments" data-theme="d" class="jpm-page">
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_empmain" data-icon="home">Back</a>
+        <h1>Appointments</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>
+    <div data-role="content" data-theme="">
+        <form>
+            <ul data-role="listview" data-inset="true">
+                <li data-role="list-divider" id="pgappt_lidvtitle">New Appointment</li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtcode">Appointment Code</label>
+                    <input type="text" id ="pgappt_txtcode" readonly="true" class="code" style="color:graytext"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtcustnm">Customer Name</label>
+                    <input type="text" id ="pgappt_txtcustnm" placeholder="Customer Name" class="person"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtadd1">Address 1</label>
+                    <input type="text" id ="pgappt_txtadd1" placeholder="Address 1" class="address"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtadd2">Address 2</label>
+                    <input type="text" id ="pgappt_txtadd2" placeholder="Address 2" class="address"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtcntry">Country</label>
+                    <input type="text" id ="pgappt_txtcntry" placeholder="Country" class="country" value="Singapore"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtzip">Zip Code</label>
+                    <input type="text" id ="pgappt_txtzip" placeholder="Zip Code" class="zipcode"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtdate">Appointment Date (dd/mm/yyyy)</label>
+                    <input type="text" id ="pgappt_txtdate" placeholder="Appointment Date" class="date" maxlength="10"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txttime">Appointment Time (hh:mm AM/PM)</label>
+                    <input type="text" id ="pgappt_txttime" placeholder="Appointment Time" class="time" />
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgappt_txtrem">Remarks</label>
+                    <textarea cols="40" rows="8" name="textarea" id="pgappt_txtrem"></textarea>
+                </li>
+                <li class="ui-body ui-body-b">
+                    <fieldset class="ui-grid-c">
+                        <div class="ui-block-a">
+                            <a id="pgappt_btnsave" data-role="button" href="" data-theme="e" data-icon="check" data-inline="true" class="jpm-cornerstyle" style="width:98%"  >Save Appointment</a>
+                        </div>
+                        <div class="ui-block-b">
+                            <a id="pgappt_btnsearch" data-role="button" href="" onclick="pg_appointments_btnsrc_click();" data-theme="b" data-icon="search" data-inline="true" class="jpm-cornerstyle" style="width:98%">Search </a>                              
+                        </div>
+                        <div class="ui-block-c">
+                            <a id="pgappt_btnnew" data-role="button" href="" data-theme="a" data-icon="plus" data-inline="true" class="jpm-cornerstyle" style="width:98%">New </a>
+                        </div>
+                        <div class="ui-block-d">
+                            <a id="pgappt_btndelete" data-role="button" href="" onclick="pg_appointments_btndelete_click();" data-theme="a" data-icon="delete" data-inline="true" class="jpm-cornerstyle" style="width:98%" >Delete </a>
+                        </div>
+                    </fieldset>
+                </li>
+            </ul>
+        </form>
+    </div>   
+
+    <!--Pop-up Dialog Search Appointment option-->
+    <div data-role="popup" id="popup_searchappt" data-overlay-theme="a" data-theme="c" style="width:1000px!important;" >        
+        <div data-role="header" data-theme="a" >
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            <h1>Search Appointment</h1>
+        </div>
+        <div data-role="content" data-theme="d">
+            <h2>Appointments (Planned and Visited)</h2>
+            <ul data-role="listview" style="padding:5px">
+                <li data-role="content" data-theme="c" >
+                    <table style="width:100%">
+                        <tr>
+                            <td><p><span>Date format searching - dd/mm/yyyy, Time format searching - hh:mm AM/PM</span><input type="text" id ="pgappt_txtsrccust" placeholder="Text to search..." class="search"/></p>
+                            </td>
+                            <td><a href="#" data-role="button" data-icon="search" data-theme="b" data-inline="true" class="jpm-cornerstyle" style="display:block;" onclick="pg_appointments_searchAppt()">Search</a></td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            <input type='hidden' id='hid_searchappt' value=''/>
+            <div style="padding:5px"><p id="pgappt_dvapptlst"></p>
+            </div>
+            <div style="padding:5px; text-align: right">
+                <div data-role="controlgroup" data-type="horizontal" class="jpm-cornerstyle">
+                    <a href="#" data-rel="back" data-role="button" data-icon="check" data-inline='true' data-theme="e" onclick="pg_appointments_getAppt()">Select</a>
+                    <a href="#" data-rel="back" data-role="button" data-icon="delete" data-inline='true' data-theme="b" >Cancel</a>
+                </div>
+            </div>
+        </div>         
+    </div>
+    
+    <script>
+        $("#pgappt_btnnew").on("click", function(e) {
+            p_apptaction = 'new';
+            $('#pgappt_lidvtitle').text('New Appointment');
+            pg_appointments_pageInit();
+        });
+        $("#pg_appointments").on("pagebeforeshow", function(event, ui) {
+            pg_appointments_pageInit();
+            insertDialogs(this);
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+
+        $("#pg_appointments").on("pageshow", function(event, ui) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        $('#pgappt_txtdate').keyup(function() {
+            var l_date = this.value;
+            if (l_date.match(/^\d{2}$/) !== null) {
+                this.value = l_date + '/';
+            } else if (l_date.match(/^\d{2}\/\d{2}$/) !== null) {
+                this.value = l_date + '/';
+            }
+        });
+        $('#pgappt_txttime').keyup(function() {
+            var l_time = this.value;
+            if (l_time.match(/^\d{2}$/) !== null) {
+                this.value = l_time + ':';
+            }
+        });
+        function pg_appointments_pageInit() {
+            $("#pgappt_txtcustnm").val("");
+            $("#pgappt_txtadd1").val("");
+            $("#pgappt_txtadd2").val("");
+            $("#pgappt_txtcntry").val("Singapore");
+            $("#pgappt_txtzip").val("");
+            $("#pgappt_txtrem").val("");
+            pg_appointments_qryNextApptCode();
+            $("#pgappt_txtdate").val(p_getDate);
+            $("#pgappt_txttime").val(p_getTime);
+            p_enableControl('pgappt_btndelete', 'disable');
+            p_enableControl('pgappt_btnnew', 'disable');
+        }
+        function pg_appointments_qryNextApptCode() {
+            p_apptaction = "new";
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT Max(Cast(vchAppt_Code as int)) as vchAppt_Code FROM tblappointments", [], pg_appointments_getnextapptcode, pg_appointments_qryempty);
+            });
+        }
+        function pg_appointments_getnextapptcode(tx, results) {
+            var l_apptcode = "";
+            var pad = "0000";
+            if (results.rows.length === 0) {
+                l_apptcode = "0001";
+            }
+            l_apptcode = results.rows.item(0).vchAppt_Code + 1;
+            l_apptcode = pad.substring(0, pad.length - l_apptcode.toString.length) + l_apptcode;
+            $("#pgappt_txtcode").val(l_apptcode);
+        }
+        function pg_appointments_qryempty() {
+            $("#pgappt_txtcode").val("0001");
+        }
+        function pg_appointments_qryListfail(tx, results) {
+            pg_appointments_fillApptList(tx, results);
+        }
+        $('#pgappt_btnsave').click(function(e) {
+            //debugger;
+            var p1 = $("#pgappt_txtcode").val(),
+                p2 = $("#pgappt_txtadd1").val(),
+                p3 = $("#pgappt_txtadd2").val(),
+                p4 = $("#pgappt_txtcntry").val(),
+                p5 = $("#pgappt_txtzip").val(),
+                p6 = $("#pgappt_txtdate").val(),
+                p7 = $("#pgappt_txttime").val(),
+                p8 = $("#pgappt_txtrem").val(),
+                p9 = $("#pgappt_txtcustnm").val();
+
+            if (p2 === "" || p5 === "" || p6 === "" || p7 === "" || p9 === "") {
+                commonDialog('Save Appointment','There are some blank fields in the entry.',
+                             'Important fields are Address1, Zip Code, Appointment Date, Appointment Time and Customer Name.',
+                             'exclamation','pop');
+                return;
+            } else {
+                p_db.transaction(function(tx) {
+                    //debugger;
+                    if (p_apptaction === 'new') {
+                        tx.executeSql('INSERT INTO tblappointments (vchAppt_Code,vchAppt_Add1,vchAppt_Add2,vchAppt_Cntry,vchAppt_Zip,vchAppt_Date,vchAppt_Time,vchRemarks,vchCust_Name,vchStatus,dtype,dtRecordModed) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)', [p1, p2, p3, p4, p5, p6, p7, p8, p9, 'PLAN', 'NEW', new Date()], pg_appointments_addsuccess, pg_appointments_errorTX);
+                    }
+                    if (p_apptaction === 'edit') {
+                        tx.executeSql('UPDATE tblappointments SET vchAppt_Add1=?,vchAppt_Add2=?,vchAppt_Cntry=?,vchAppt_Zip=?,vchAppt_Date=?,vchAppt_Time=?,vchRemarks=?,vchCust_Name=?,dtype=?,dtRecordModed=? WHERE vchAppt_Code=?', [p2, p3, p4, p5, p6, p7, p8, p9, "EDIT", new Date(), p1], pg_appointments_editsuccess, pg_appointments_errorTX);
+                    }
+                }, pg_appointments_errorTA);
+            }
+            //e.preventDefault();
+            //e.stopImmediatePropagation();
+        });
+        function pg_appointments_addsuccess() {
+            pg_appointments_pageInit();
+            commonDialog('New Appointment','Appointment was added successfully.',
+                         'Click Ok to proceed on a new Appointment entry form.',
+                         'information','pop');
+//            $('#popup_saveapptsuccess').popup('open', {transition: 'pop'});
+//            $('#pgappt_popupsave_h1').text('New Appointment');
+//            $('#pgappt_popupsave_h3').text('Appointment was added successfully.');
+//            $('#pgappt_popupsave_p').text('Click Ok to proceed on a new Appointment entry form.');
+        }
+        function pg_appointments_errorTX(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_appointments_errorTA(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_appointments_editsuccess() {
+            commonDialog('Edit Appointment','Appointment was updated successfully.',
+                         '','information','pop');
+//            $('#popup_saveapptsuccess').popup('open', {transition: 'pop'});
+//            $('#pgappt_popupsave_h1').text('Edit Appointment');
+//            $('#pgappt_popupsave_h3').text('Appointment was updated successfully.');
+//            $('#pgappt_popupsave_p').text('');
+        }
+        function pg_appointments_qryApptList() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblappointments WHERE dtype<>'DELETE' ORDER BY dtRecordModed DESC LIMIT 20", [], pg_appointments_fillApptList, pg_appointments_qryListfail);
+            });
+        }
+        function pg_appointments_fillApptList(tx, results) {
+            var ultag, ulopentag, ulclosetag;
+            var list = "";
+            var liheader = "";
+
+            $('#pgappt_dvapptlst').text("");
+            var uls = $();
+            ulopentag = "<ul id='pgappt_lstvw1' data-role='listview' >";
+            liheader = "<li data-role='list-divider'><table align='center' column='5' width='100%'><tr>";
+            liheader = liheader + "<td width='10%'>Appt.Code</td>";
+            liheader = liheader + "<td width='21%'>Date/Time</td>";
+            liheader = liheader + "<td width='25%'>Customer</td>";
+            liheader = liheader + "<td width='35%'>Address</td>";
+            liheader = liheader + "<td width='9%'>Status</td>";
+            liheader = liheader + "</tr></table></li>";
+            ulclosetag = "</ul>";
+
+            if (results.rows.hasOwnProperty("length")) {
+                l_address = "";
+                l_datetime = "";
+                for (i = 0; i < results.rows.length; i++) {
+                    //debugger;
+                    l_address = results.rows.item(i).vchAppt_Add1.trim() +
+                            (results.rows.item(i).vchAppt_Add2.trim() === "" ? "" : ", " + results.rows.item(i).vchAppt_Add2.trim()) +
+                            (results.rows.item(i).vchAppt_Cntry.trim() === "" ? "" : ", " + results.rows.item(i).vchAppt_Cntry.trim()) +
+                            ", " + results.rows.item(i).vchAppt_Zip.trim();
+                    l_datetime = results.rows.item(i).vchAppt_Date.trim() + " " + results.rows.item(i).vchAppt_Time.trim();
+                    list = list + "<li id='lstappt" + (i + 1).toString() + "' class='lstappt' data-icon='false'><a href='#' onclick=pg_appointments_lstAppt_click('" + results.rows.item(i).vchAppt_Code.toString() + "'," + (i + 1).toString() + ")>";
+                    list = list + "<table width='100%'><tr>";
+                    list = list + "<td class='vchAppt_Code' width='10%'>" + results.rows.item(i).vchAppt_Code.trim() + "</td>";
+                    list = list + "<td class='vchAppt_DateTime' width='21%'>" + l_datetime + "</td>";
+                    list = list + "<td class='vchCust_Name' width='25%'>" + results.rows.item(i).vchCust_Name.trim() + "</td>";
+                    list = list + "<td class='vchAppt_Add' width='35%'>" + l_address + "</td>";
+                    list = list + "<td class='vchStatus' width='9%'>" + results.rows.item(i).vchStatus.trim() + "</td>";
+                    list = list + "</tr></table> </a></li>";
+                }
+            }
+            ultag = ulopentag + liheader + list + ulclosetag;
+            uls = uls.add(ultag);
+            $('#pgappt_dvapptlst').append(uls);
+            uls.listview();
+        }
+
+        $('#popup_searchappt').on('popupbeforeposition', function(event, ui) {
+            pg_appointments_qryApptList();
+        });
+
+        function pg_appointments_btnsrc_click() {
+            $('#popup_searchappt').popup('open', {transition: 'slideup'});            
+            //pg_appointments_qryApptList();
+        }
+        function pg_appointments_lstAppt_click(code, index) {
+            //debugger;
+            $('#pgappt_lstvw1').find('li').removeClass('ui-btn-active');
+            $('#' + $('#pgappt_lstvw1').children()[index].id).addClass('ui-btn-active');
+            $("#hid_searchappt").val(code);
+        }
+        function pg_appointments_getAppt() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblappointments WHERE dtype<>? AND vchAppt_Code=?", ["DELETE", $("#hid_searchappt").val()], pg_appointments_loadAppt, pg_appointments_loadfail);
+            });
+        }
+        function pg_appointments_loadAppt(tx, results) {
+            $("#pgappt_txtcode").val(results.rows.item(0).vchAppt_Code);
+            $("#pgappt_txtcustnm").val(results.rows.item(0).vchCust_Name);
+            $("#pgappt_txtadd1").val(results.rows.item(0).vchAppt_Add1);
+            $("#pgappt_txtadd2").val(results.rows.item(0).vchAppt_Add2);
+            $("#pgappt_txtcntry").val(results.rows.item(0).vchAppt_Cntry);
+            $("#pgappt_txtzip").val(results.rows.item(0).vchAppt_Zip);
+            $("#pgappt_txtdate").val(results.rows.item(0).vchAppt_Date);
+            $("#pgappt_txttime").val(results.rows.item(0).vchAppt_Time);
+            $("#pgappt_txtrem").val(results.rows.item(0).vchRemarks);
+            $("#pgappt_lidvtitle").text("Edit Appointment");
+            p_apptaction = 'edit';
+            p_enableControl('pgappt_btndelete');
+            p_enableControl('pgappt_btnnew');
+        }
+        function pg_appointments_loadfail(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_appointments_btndelete_click() {
+            //$('#popup_confirmdelappt').popup('open', {transition: 'pop'});
+            commonDialog('Delete Appointment','Are you sure to delete this Appointment?',
+                         '','question','pop');
+        }
+        function pg_appointments_popQues_btnYes_click() {
+            p_db.transaction(function(tx) {
+                tx.executeSql('UPDATE tblappointments SET dtype=? WHERE vchAppt_Code=?', ["DELETE", $("#pgappt_txtcode").val()], pg_appointments_delsuccess, pg_appointments_errorTX);
+            }, pg_appointments_errorTA);
+        }
+        function pg_appointments_delsuccess() {
+            pg_appointments_pageInit();
+            commonDialog('Delete Appointment','Appointment was deleted successfully.',
+                         'Click Ok to proceed on a new Appointment entry form.',
+                         'information','pop');
+                         
+//            $('#popup_saveapptsuccess').popup('open', {transition: 'pop'});
+//            $('#pgappt_popupsave_h1').text('Delete Appointment');
+//            $('#pgappt_popupsave_h3').text('Appointment was deleted successfully.');
+//            $('#pgappt_popupsave_p').text('Click Ok to proceed on a new Appointment entry form.');
+        }
+        function pg_appointments_searchAppt() {
+            l_valsrc = $("#pgappt_txtsrcappt").val();
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblappointments WHERE dtype<>? AND (UPPER(vchAppt_Code)=? OR vchCust_Name LIKE ? OR vchAppt_Add1 LIKE ? OR vchAppt_Add2 LIKE ? OR vchAppt_Date=? OR vchAppt_Time=?)", ["DELETE", l_valsrc, '%' + l_valsrc + '%', '%' + l_valsrc + '%', '%' + l_valsrc + '%', l_valsrc, l_valsrc], pg_appointments_fillApptList, pg_appointments_qryListfail);
+            });
+        }
+    </script>
+</div>       
+
+
+<!--Notes - Button Inset (Group button)
+<li data-role="fieldcontain">
+    <div data-role="controlgroup" data-type="horizontal" >
+        <a id="pgappt_btnsave" data-role="button" href="" data-theme="e" data-icon="check" data-inline="true"  >Save Appointment</a>
+        <a id="pgappt_btnnew" data-role="button" href="" data-theme="a" data-icon="plus" data-inline="true" >New </a>
+        <a id="pgappt_btnsearch" data-role="button" href="" onclick="pg_appointments_btnsrc_click();" data-theme="b" data-icon="search" data-inline="true"  >Search </a>                    
+        <a id="pgappt_btndelete" data-role="button" href="" onclick="pg_appointments_btndelete_click();" data-theme="a" data-icon="delete" data-inline="true"  >Delete </a>
+    </div>
+</li>-->

@@ -1,0 +1,192 @@
+<link rel="stylesheet" href="css/jqm-inlinetabs.min.css" />
+<link rel="stylesheet" href="css/jpm-textbox.css" />
+<!--<script src="js/libs/jqm-inlinetabs.min.js"></script>-->
+<div data-role="page" id="pg_appointments" data-theme="d">
+    <div data-role="header" data-position="fixed">
+        <a href="" data-icon="home" data-rel="back" >Back</a>
+        <h1>Appointments</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>
+    <div data-role="content" data-theme="">
+        <table style="width:100%">
+            <tr>
+                <td>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false" data-collapsed="false">                        
+                        <ul data-role="listview">
+                            <li data-role="list-divider">New Appointment</li>
+                            <li data-role="content" data-theme="c">
+                                <p>
+                                    <span>Appointment Code</span>
+                                    <input type="text" id ="pgappt_txtcode" readonly="true" class="code" style="color:graytext"/>
+                                </p>
+                            </li>
+                            <li data-role="content" data-theme="f"><input type="text" id ="pgappt_txtcustnm" placeholder="Customer Name" class="person"/></li>
+                            <li data-role="content" data-theme="f"><input type="text" id ="pgappt_txtadd1" placeholder="Address 1" class="address"/></li>
+                            <li data-role="content" data-theme="f"><input type="text" id ="pgappt_txtadd2" placeholder="Address 2" class="address"/></li>
+                            <li data-role="content" data-theme="f"><input type="text" id ="pgappt_txtcntry" placeholder="Country" class="country" value="Singapore"/></li>
+                            <li data-role="content" data-theme="f"><input type="text" id ="pgappt_txtzip" placeholder="Zip Code" class="zipcode"/></li>
+                            <li data-role="content" data-theme="f">
+                                <p>
+                                    <span>format: dd/mm/yyyy</span>
+                                    <input type="text" id ="pgappt_txtdate" placeholder="Appointment Date" class="date" maxlength="10"/>
+                                </p>                                
+                            </li>                                    
+                            <li data-role="content" data-theme="f">
+                                <p>
+                                    <span>format: hh:mm AM/PM</span>
+                                    <input type="text" id ="pgappt_txttime" placeholder="Appointment Time" class="time" />
+                                </p>                                
+                            </li>                            
+                            <li data-role="content" data-theme="f">
+                                <p>
+                                    <span>Remarks</span>
+                                    <textarea cols="40" rows="8" name="textarea" id="pgappt_txtrem"></textarea>
+                                </p>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding:0;margin:0">
+                    <a id="pgappt_btnsave" data-role="button" href="" data-theme="a" data-icon="save" data-inline="true" style="width:87%">Save</a>
+                    <a id="pgappt_btnsearch" data-role="button" href="" onclick="pg_appointments_btnsrc_click()" data-theme="a" data-icon="search" data-inline="true" style="width:11%">Search</a>
+                </td>
+            </tr>            
+        </table>
+    </div>
+    <!--    <div data-role="footer" data-position="fixed" data-id="TestPersist" style="text-align: right">  
+            <img src="img/companylogo.jpg" alt="L'Oreal Singapore" />
+        </div>-->
+
+    <!--Pop-up Dialog Save Appointment Error-->
+    <div data-role="popup" id="popup_saveappointmenterror" data-overlay-theme="a" data-theme="c" style="width:750px;" class="ui-corner-all">
+        <div data-role="header" data-theme="a" class="ui-corner-top">
+            <h1>Search Appointment</h1>
+        </div>
+        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+            <h3 class="ui-title">Important fields (Customer Name, Address1, Zip Code, Date and Time) cannot be leaved empty.</h3>
+            <a href="#pg_appointments" data-role="button" data-theme="c">Ok</a>
+        </div>         
+    </div>
+
+    <!--Pop-up Dialog Search Appointment option-->
+    <div data-role="popup" id="popup_searchappointment" data-overlay-theme="a" data-theme="c" style="width:800px;" class="ui-corner-all">
+        <div data-role="header" data-theme="a" class="ui-corner-top">
+            <h1>Search Appointment</h1>
+        </div>
+        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+            <h3 class="ui-title">Appointment Date | Customer </h3>
+            <p><span>date format: dd/mm/yyyy</span></p>
+            <input type="text" id ="pgappt_txtsrcappt" placeholder="Text to search..." class="search"/>
+            <a href="#" data-role="button" data-icon="search" data-theme="c">Search</a>
+        </div>         
+    </div>
+
+    <script>
+        $("#pg_appointments").on("pageshow", function(event, ui) {
+            pg_appointments_qryNextApptCode();
+            $("#pgappt_txtdate").val(p_getDate);
+            $("#pgappt_txttime").val(p_getTime);
+//            pg_appointments_qryApptList();
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        $('#pgappt_txtdate').keyup(function() {
+            var l_date = this.value;
+            if (l_date.match(/^\d{2}$/) !== null) {
+                this.value = l_date + '/';
+            } else if (l_date.match(/^\d{2}\/\d{2}$/) !== null) {
+                this.value = l_date + '/';
+            }
+        });
+        $('#pgappt_txttime').keyup(function() {
+            var l_time = this.value;
+            if (l_time.match(/^\d{2}$/) !== null) {
+                this.value = l_time + ':';
+            }
+        });
+        function pg_appointments_qryNextApptCode() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT Max(Cast(vchAppt_Code as int)) as vchAppt_Code FROM tblappointments", [], pg_appointments_getnextapptcode, pg_appointments_qryfail);
+            });
+        }
+        function pg_appointments_getnextapptcode(tx, results) {
+            var l_apptcode = "";
+            var pad = "0000";
+            if (results.rows.length === 0) {
+                l_apptcode = "0001";
+            }
+            l_apptcode = results.rows.item(0).vchAppt_Code + 1;
+            l_apptcode = pad.substring(0, pad.length - l_apptcode.toString.length) + l_apptcode;
+            $("#pgappt_txtcode").val(l_apptcode);
+        }
+        function pg_appointments_qryfail() {
+            $("#pgappt_txtcode").val("001");
+        }
+        $('#pgappt_btnsave').click(function(e) {
+            debugger;
+            var p1 = $("#pgappt_txtcode").val(),
+                    p2 = $("#pgappt_txtadd1").val(),
+                    p3 = $("#pgappt_txtadd2").val(),
+                    p4 = $("#pgappt_txtcntry").val(),
+                    p5 = $("#pgappt_txtzip").val(),
+                    p6 = $("#pgappt_txtdate").val(),
+                    p7 = $("#pgappt_txttime").val(),
+                    p8 = $("#pgappt_txtrem").val(),
+                    p9 = $("#pgappt_txtcustnm").val();
+
+            if (p2 === "" || p4 === "" || p6 === "" || p7 === "") {
+                $('#popup_saveappointmenterror').popup('open', {transition: 'slideup'});
+                return;
+            } else {
+                p_db.transaction(function(tx) {
+                    tx.executeSql('INSERT INTO tblappointments (vchAppt_Code,vchAppt_Add1,vchAppt_Add2,vchAppt_Cntry,vchAppt_Zip,vchAppt_Date,vchAppt_Time,vchRemarks,vchCust_Name,vchStatus,dtype) VALUES (?,?,?,?,?,?,?,?,?,?,?)', [p1, p2, p3, p4, p5, p6, p7, p8, p9, 'PLAN', 'NEW'], pg_appointments_addsuccess, pg_appointments_adderror);
+                }, pg_appointments_adderrorTA);
+            }
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+        function pg_appointments_addsuccess() {
+            alert("add success");
+        }
+        function pg_appointments_adderror(tr,err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_appointments_adderrorTA(tr,err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pg_appointments_qryApptList() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblappointments", [], pg_appointments_fillApptList, pg_appointments_qryfail);
+            });
+        }
+        function pg_appointments_fillApptList(tx, results) {
+//            var ulheader="<h2><div class='ui-btn-up-c ui-btn-corner-all custom-count-pos' id='pgappt_dvapptcnt'></div>Appointments (Planned and Visited)</h2>";
+//            var ultag, ulopentag, ulclosetag;
+//            var liheader = "";
+//            var list = "";
+//            $('#pgappt_dvapptlst').text("");
+//            $('#pgappt_dvapptlst').append(ulheader);
+//            $('#pgappt_dvapptcnt').text(results.rows.length.toString());            
+//            uls = $();
+//            ulopentag = "<ul data-role='listview' >";
+//            liheader = "<li data-role='list-divider'><table data-role='table' align='center' column='5' width='100%'><tr>";
+//            liheader = liheader + "<td width='15%' align='left'>Date</td>";
+//            liheader = liheader + "<td width='15%' align='left'>Time</td>";
+//            liheader = liheader + "<td width='25%' align='center'>Customer</td>";
+//            liheader = liheader + "<td width='35%' align='center'>Address</td>";                
+//            liheader = liheader + "<td width='10%' align='left'>Status</td>";
+//            liheader = liheader + "</tr></table></li>";
+//            ulclosetag = "</ul>";
+//            
+//            ultag = ulopentag + liheader + list + ulclosetag;
+//            uls = uls.add(ultag);
+//            $('#pgappt_dvapptlst').append(uls);
+//            uls.listview();
+        }
+        function pg_appointments_btnsrc_click() {
+//            $('#popup_searchappointment').popup('open', {transition: 'slideup'});
+        }
+    </script>
+</div>       

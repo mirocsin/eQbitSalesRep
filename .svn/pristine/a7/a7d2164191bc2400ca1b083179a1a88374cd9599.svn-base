@@ -1,0 +1,75 @@
+function createDataStru() {
+    //alert("check");
+    var M = new Migrator(p_db);   
+    
+    // Version 1    
+    M.migration(1, function(t) {        
+        t.executeSql("CREATE TABLE IF NOT EXISTS tblsettings(vchId text,vchUsrnm text,vchPswd text,vchUType text,dtRecordAdded text)");
+        t.executeSql("CREATE TABLE IF NOT EXISTS tblappointments(vchAppt_Code text,vchAppt_Add1 text,vchAppt_Add2 text,vchAppt_Add3 text,vchAppt_Cntry text,vchAppt_Zip text,vchAppt_Date text,vchAppt_Time text,vchRemarks text,vchCust_Name text,vchStatus text,dtype text,dtRecordModed text,vchIcon text)");        
+        t.executeSql("CREATE TABLE IF NOT EXISTS tblcustomers(vchCust_Code text,vchCust_Name text,vchCust_Add1 text,vchCust_Add2 text,vchCust_Add3 text,vchCust_Cntry text,vchCust_Zip text,vchHomePhone text,vchMobilePhone text,vchEmail text,dtype text,dtRecordModed text)");
+        t.executeSql("CREATE TABLE IF NOT EXISTS tblitems(vchItem_Code text,vchItem_Description text,vchBarcode text,vchSize text,mnyPrice numeric,vbnItem_Picture none,vchItem_Category text,vchItem_ExtendedDesc text)");
+        t.executeSql("CREATE TABLE IF NOT EXISTS tblso_headers(vchSO_Code text,vchCust_Code text,vchCust_Name text,vchShipTo text,vchSalesman_Code text, vchTerms text,vchSODate text,vchDelDate text,vchRemarks text,mnyTotOrderAmt numeric,dtype text,dtRecordModed text)");
+        t.executeSql("CREATE TABLE IF NOT EXISTS tblso_details(vchSO_Code text,vchItem_Category text,vchItem_Code text,vchItem_Description text,vchSize text,mnyPrice numeric, intQty integer,mnyAmount numeric,dtype text)");
+    });
+
+    // Other version for migration
+    //    M.migration(2, function(t){
+    //      t.executeSql("alter table foo...");
+    //    });
+
+    // Run it
+    M.doIt();    
+}
+
+// created by Max Aller <nanodeath@gmail.com>
+function Migrator(db) {
+    var migrations = [];
+    this.migration = function(number, func) {
+        migrations[number] = func;
+    };
+    var doMigration = function(number) {
+        if (migrations[number]) {
+            db.changeVersion(db.version, String(number), function(t) {
+                migrations[number](t);
+            }, function(err) {
+                if (console.error)
+                    console.error("Error!: %o", err);
+            }, function() {
+                doMigration(number + 1);
+            });
+        }
+    };
+    this.doIt = function() {
+        var initialVersion = parseInt(db.version) || 0;
+        try {
+            doMigration(initialVersion + 1);
+        } catch (e) {
+            if (console.error)
+                console.error(e);
+        }
+    };
+}
+function insertTempData(){
+    p_db.transaction(function(tx) {
+        tx.executeSql('DROP TABLE IF EXISTS tblitems');
+        tx.executeSql('CREATE TABLE tblitems(vchItem_Code text,vchItem_Description text,vchBarcode text,vchSize text,mnyPrice numeric,vbnItem_Picture none,vchItem_Category text,vchItem_ExtendedDesc text)');
+        
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["P0500100", "Shampoo", "BC001", "500 ml", 14.5, "BIOLAGE COLOR THERAPY"]);
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["P0500600", "Conditioner", "BC002", "500 ml", 18, "BIOLAGE COLOR THERAPY"]);
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["P0503400", "Mask", "BC003", "150 ml", 14, "BIOLAGE COLOR THERAPY"]);
+        
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["P0182000", "Shampoo", "BC004", "500 ml", 14.5, "BIOLAGE SMOOTH THERAPY"]);
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["P0182700", "Conditioner", "BC005", "300 ml", 13, "BIOLAGE SMOOTH THERAPY"]);
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["P0184000", "Serum", "BC006", "89 ml", 14, "BIOLAGE SMOOTH THERAPY"]);
+        
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["F5323600", "Cera Repair Color", "BC007", "6 x 10 ml", 23, "CERA VITAL REPAIR"]);
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["F5323700", "Cera Repair Forte", "BC008", "6 x 10 ml", 23, "CERA VITAL REPAIR"]);
+        tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,vchSize,mnyPrice,vchItem_Category) VALUES (?,?,?,?,?,?)', ["F5323800", "Cera Repair Hydra", "BC009", "6 x 10 ml", 23, "CERA VITAL REPAIR"]);
+        
+//        tx.executeSql('DROP TABLE IF EXISTS tblso_headers');
+//        tx.executeSql("CREATE TABLE tblso_headers(vchSO_Code text,vchCust_Code text,vchCust_Name text,vchShipTo text,vchSalesman_Code text, vchTerms text,vchSODate text,vchDelDate text,vchRemarks text,mnyTotOrderAmt numeric,dtype text,dtRecordModed text)");
+//        
+//        tx.executeSql('DROP TABLE IF EXISTS tblso_details');
+//        tx.executeSql("CREATE TABLE tblso_details(vchSO_Code text,vchItem_Category text,vchItem_Code text,vchItem_Description text,vchSize text,mnyPrice numeric, intQty integer,mnyAmount numeric,dtype text)");
+    });
+}

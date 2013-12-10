@@ -1,0 +1,54 @@
+<div id="pgemp_dvorder" >
+    <div id="pgemp_dvorder_header" data-role="header">
+        <a href="" data-icon="refresh" class="ui-btn-left" id="pgemp_dvorder_btnsync">Sync</a>
+        <h1>Orders</h1>        
+        <a href="#" data-icon="plus" class="ui-btn-right" id="pgemp_btnneworder">New Order</a>
+        <div id="pgemp_dvorder_subheader" data-role="navbar" class="nav-glyphish-example" data-grid="a"> 
+            <ul id="pgemp_dvordernavbar"> 
+                <li><a href="#" id="pgemp_dvorder_dvpending_btn" data-icon="custom">Pending</a></li> 
+                <li><a href="#" id="pgemp_dvorder_dvclosed_btn" data-icon="custom">Closed</a></li>                
+            </ul>             
+        </div>
+    </div>    
+    <!--    <div data-role="content" id="pgempdvorder_dvcontent" data-theme="a" >
+        </div>-->
+</div>
+<script>
+    var l_active_dvorder;
+
+    function pgemp_dvorder_onSlideDown() {
+        //alert('slide Down');
+    }
+    $("#pg_empmain").on("pagebeforeshow", function(event, ui) {
+        //debugger;
+        insertDialogs(this);
+        if (l_active_dvorder === undefined) {
+            l_active_dvorder = "pgemp_dvorder_dvpending";
+        }
+        pgemp_dvorder_showpage(l_active_dvorder);
+        $("#" + l_active_dvorder + "_btn").addClass('ui-btn-active');
+        pgemp_dvorder_dvpending_pagebeforeshow();        
+    });
+    $('#pgemp_dvordernavbar').on('click', 'a', function(event) {
+        pgemp_dvorder_showpage(this.id.replace("_btn", ""));
+    });
+    function pgemp_dvorder_showpage(pagename) {
+        //debugger;
+        $("#pgemp_dvorder_dvpending").hide();
+        $("#pgemp_dvorder_dvclosed").hide();
+        $("#" + pagename).slideDown('fast', function() {
+            var callback_function = new Function(pagename + '_onSlideDown()');
+            callback_function();
+        });
+        l_active_dvorder = pagename;
+    }
+    $('#pgemp_btnneworder').on('click', function() {
+        p_orderaction = "new";
+        $('#pgemp_dvorder_header').removeAttr("data-position");
+        $('#pgemp_dvorder_header').trigger("refresh");
+        $.mobile.changePage('#pg_orderentry', {transition: "slide", reverse: false});
+    });
+    $('#pgemp_dvorder_btnsync').on('click', function() {
+        p_Synchronize();
+    })   
+</script>

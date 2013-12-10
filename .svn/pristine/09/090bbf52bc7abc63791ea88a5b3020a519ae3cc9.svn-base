@@ -1,0 +1,201 @@
+<style>
+    .custom-count-pos{
+        font-size: 11px;
+        font-weight: bold;
+        padding: 0.2em 0.5em;
+        float: right;
+    } 
+    .nav-glyphish-example .ui-btn .ui-btn-inner {
+        padding-top: 40px !important; 
+    }
+    .nav-glyphish-example .ui-btn .ui-icon { 
+        width: 45px!important; 
+        height: 35px!important; 
+        margin-left: -24px !important; 
+        box-shadow: none!important; 
+        -moz-box-shadow: none!important; 
+        -webkit-box-shadow: none!important;
+        -webkit-border-radius: none!important;
+        border-radius: none!important; 
+    }
+    #pgemp_dvappt_btn .ui-icon { 
+        background:  url('img/appointment.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgemp_dvorder_btn .ui-icon { 
+        background:  url('img/order.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgemp_dvnoti_btn .ui-icon { 
+        background:  url('img/notifications.png') 50% 50% no-repeat; 
+        background-size: 34px 34px;
+    }
+    #pgemp_dvmore_btn .ui-icon { 
+        background:  url('img/more.png') 50% 50% no-repeat; 
+        background-size: 32px 32px;
+    }
+    #pgemp_dvorder_dvpending_btn .ui-icon { 
+        background:  url('img/orderpending.png') 50% 50% no-repeat; 
+        background-size: 34px 34px; 
+    }
+    #pgemp_dvorder_dvclosed_btn .ui-icon { 
+        background:  url('img/orderclosed.png') 50% 50% no-repeat; 
+        background-size: 36px 34px; 
+    }
+    #pgemp_dvorder_dventry_btn .ui-icon { 
+        background:  url('img/orderentry.png') 50% 50% no-repeat; 
+        background-size: 38px 34px;
+    }    
+    .custom-count-pos2{
+        font-size: 14px;
+        font-weight: bold;
+        padding: 0.2em 0.5em;
+        float: top;
+    } 
+</style>
+<div data-role="page" id="pg_empmain" data-theme ="a" class="jpm-page">   
+    <div id="pg_empmain_footer" data-role="footer" class="nav-glyphish-example" data-position="fixed" > 
+        <div data-role="navbar" class="nav-glyphish-example" data-grid="c"> 
+            <ul id="pg_empnavbar"> 
+                <li><a href="#" id="pgemp_dvappt_btn" data-icon="custom">Appointments</a></li> 
+                <li><a href="#" id="pgemp_dvorder_btn" data-icon="custom">Orders</a></li> 
+                <li><a href="#" id="pgemp_dvnoti_btn" data-icon="custom">Notifications 
+                        <span id="pg_empmain_btnnoti_indicator" class="ui-btn-up-e ui-btn-corner-all custom-count-pos2">0</span>
+                    </a>
+                </li> 
+                <li><a href="#" id="pgemp_dvmore_btn" data-icon="custom">More</a></li> 
+            </ul> 
+        </div> 
+    </div>    
+</div>
+<script>
+    var l_active_empnavbar;
+    $("#pg_empmain").on("pagebeforeshow", function(event, ui) {
+        if (l_active_empnavbar === undefined) {
+            l_active_empnavbar = "pgemp_dvappt";
+        }
+        pg_empmain_showpage(l_active_empnavbar);
+        $("#" + l_active_empnavbar + "_btn").addClass('ui-btn-active');
+        pgemp_dvappt_pagebeforeshow();
+        $('#pg_empmain_btnnoti_indicator').hide();        
+    });
+    $('#pg_empnavbar').on('click', 'a', function(event) {
+        pg_empmain_showpage(this.id.replace("_btn", ""));
+    });
+    function pg_empmain_showpage(pagename) {
+        //debugger;
+        $("#pgemp_dvappt").hide();
+        $("#pgemp_dvorder").hide();
+        $("#pgemp_dvnoti").hide();
+        $("#pgemp_dvmore").hide();
+        $("#" + pagename).slideDown('slow', function() {
+            var callback_function = new Function(pagename + '_onSlideDown()');
+            callback_function();
+        });
+        l_active_empnavbar = pagename;
+    }
+    $('#pgempmain_searcholcust').on('pageshow', function(event, ui) {
+        $("#pgempmainsrcolcust_dvHeader").text("New Customer Found: " + p_newcustname + " Or Select existing Customer below...");
+        pgempmain_fillCustList(p_custoldata, '');
+    });
+    function pgempmain_searchOLCust() {
+        var l_tosrc = $("#pgempmain_txtsrccust").val();
+        pgempmain_fillCustList(p_custoldata, l_tosrc);
+    }
+    function pgempmain_lstCust_click(code, index) {
+        $('#pgempmain_lstvw').find('li').removeClass('ui-btn-active');
+        $('#' + $('#pgempmain_lstvw').children()[index].id).addClass('ui-btn-active');
+        $("#pgempmain_hid_searcholcust").val(code);
+    }
+    function pgempmain_postOrder(strSOCode, strNwCustCode, strNwCustName) {
+        //alert("check");
+        p_executeSql('UPDATE tblso_headers SET dtRecordModed=?,vchCust_Code=?,vchCust_Name=?,vchStatus=?,dtype=? WHERE vchSO_Code=? AND vchStatus<>?', [new Date(), strNwCustCode, strNwCustName, 'CLOSED', 'EDIT', strSOCode, 'FIRST'], 'pgemp_dvorder_postOrderHeader');
+        p_executeSql('UPDATE tblso_details SET vchStatus=?,dtype=? WHERE vchSO_Code=? AND vchStatus<>?', ['CLOSED', 'EDIT', strSOCode, 'FIRST'], 'pgemp_dvorder_postOrderDetail');
+        pgemp_dvorder_dvpending_pagebeforeshow();
+        $.mobile.changePage('#pg_empmain', {transition: "slideup", reverse: false});
+    }
+    function pgempmain_fillCustList(data, filter) {
+        var ultag, ulopentag, ulclosetag;
+        var list = "";
+        var liheader = "";
+
+        $('#pgempmain_dvolcustlst').text("");
+        var uls = $();
+        ulopentag = "<ul id='pgappt_lstvw1' data-role='listview' >";
+        liheader = "<li data-role='list-divider' data-theme='c'>Search Results</li>";
+        ulclosetag = "</ul>";
+        for (i = 0; i < data.length; i++) {
+            var l_address;
+            l_address = data[i].vchAddress_1.trim() +
+                    (data[i].vchAddress_2.trim() === "" ? "" : ", " + data[i].vchAddress_2.trim()) +
+                    (data[i].vchCity.trim() === "" ? "" : ", " + data[i].vchCity.trim()) +
+                    ", " + data[i].vchZip.trim();
+            var strAddress = '';
+            strAddress = p_builstring(strAddress, data[i].vchAddress_1);
+            strAddress = p_builstring(strAddress, data[i].vchAddress_2);
+            strAddress = p_builstring(strAddress, data[i].vchCity);
+            strAddress = p_builstring(strAddress, data[i].vchZip);
+            var addtolist = true;
+            if (filter !== '') {
+                var l_name = data[i].vchMember_Name.toString().toUpperCase();
+                filter = filter.toUpperCase();
+                l_address = strAddress.toUpperCase();
+                if (!(filter === data[i].vchMember_Code.toString() || l_name.indexOf(filter) >= 0 ||
+                        l_address.indexOf(filter) >= 0 || filter === data[i].vchMobilePhone.toString())) {
+                    addtolist = false;
+                }
+            }
+            if (addtolist) {
+                list = list + "<li id='@lstolcust' class='lstolcust' data-icon='false'><a href='#' onclick='@functioncall'><img src='img/@icon' alt='' style='padding:15px 15px'/><h3 @stylefont>@vchMember_Code:  @vchMember_Name</h3><p @stylefont>@address</p></a></li>";
+                list = list.replace('@lstolcust', 'lstolcust' + (i + 1).toString());
+                list = list.replace('@vchMember_Code', data[i].vchMember_Code.toString());
+                list = list.replace('@icon', 'olcustomer.png');
+                list = list.replace('@vchMember_Code', data[i].vchMember_Code.toString());
+                list = list.replace('@vchMember_Name', data[i].vchMember_Name.toString());
+                list = list.replace('@functioncall', 'pgempmain_postOrder("' + p_socode + '","' + data[i].vchMember_Code.toString() + '","' + data[i].vchMember_Name.toString() + '")');
+                list = list.replace('@address', strAddress);
+                list = list.replace('@index', (i + 1).toString());
+            }
+        }
+        ultag = ulopentag + liheader + list + ulclosetag;
+        uls = uls.add(ultag);
+        $('#pgempmain_dvolcustlst').append(uls);
+        uls.listview();
+    }
+    function pgempmain_addNewCust() {
+
+    }
+</script>
+
+<div data-role="page" id="pgempmain_searcholcust" data-overlay-theme="a" data-theme="c" >        
+    <div data-role="header" data-position="fixed">
+        <h1>Search Customer (Online)</h1>
+        <a href="#" data-rel="back" data-icon="plus" class="jpm-cornerstyle" onclick="pgempmain_addNewCust()" data-theme="b" >Post as New Customer</a>
+    </div>
+    <div data-role="content" data-theme="d">
+        <form>
+            <ul data-role="listview" style="padding:1px" data-inset="true" >
+                <li>
+                    <h1 id="pgempmainsrcolcust_dvHeader"></h1>
+                </li>
+                <li data-role="content" data-theme="c" >
+                    <table style="width:100%;padding:3px">
+                        <tr>
+                            <td><p><span>Date format searching - dd/mm/yyyy, Time format searching - hh:mm AM/PM</span><input type="text" id ="pgempmain_txtsrccust" placeholder="Text to search..." class="search"/></p>
+                            </td>
+                            <td><a href="#" data-role="button" data-icon="search" data-theme="e" data-inline="true" class="jpm-cornerstyle" style="display:block;" onclick="pgempmain_searchOLCust()">Search</a></td>
+                            <td>
+                                <a href="#" data-rel="back" data-role="button" data-icon="delete" data-inline='true' class="jpm-cornerstyle" style="display:block;" data-theme="b" >Cancel</a>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+                <li data-role="content" data-theme="d" >
+                    <div id="pgempmain_dvolcustlst"></div>
+                </li>
+            </ul>
+        </form>
+
+        <input type='hidden' id='pgempmain_hid_searcholcust' value=''/>
+    </div>         
+</div>

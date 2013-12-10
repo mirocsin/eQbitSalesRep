@@ -1,0 +1,25 @@
+<div data-role="popup" id="pop_uploadoffset" data-overlay-theme="a" data-theme="c">        
+    <div data-role="header" data-theme="a" >
+        <h1>Upload Offset File</h1>
+    </div>
+    <div data-role="content" data-theme="d">       
+        <iframe id="pop_uploadoffset_iframe">        
+        </iframe>
+    </div>         
+</div>
+<script>
+    $('#pop_uploadoffset').on('popupbeforeposition', function() {
+        var strAspx = 'fileupload.aspx?cucode=@cucode';
+        strAspx = strAspx.replace('@cucode',p_settings.vchCustCode);        
+        $('#pop_uploadoffset_iframe').attr('src',p_urlServer.replace('eService.asmx',strAspx))                
+        var style = "max-width:@max-width;width:@width"
+        var id = '#' + $(this).attr('id') + '-popup'
+        var width = ($(window).width()-($(window).width()*.05)).toString() + 'px'
+        style = style.replace('@max-width', width);
+        style = style.replace('@width', width);
+        $(id).attr('style', style);
+        $(id).trigger('create');        
+        $('#pop_uploadoffset_iframe').width(($(this).width()) - ($(this).width()*.02));
+        $('#pop_uploadoffset_iframe').height($(window).height() - ($(window).height()*.50));                
+    })
+</script>

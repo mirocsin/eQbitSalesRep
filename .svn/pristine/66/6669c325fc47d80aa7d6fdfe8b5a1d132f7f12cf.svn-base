@@ -1,0 +1,44 @@
+<div data-role="popup" id="pop_uploadoffset" data-overlay-theme="a" data-theme="c" >        
+    <div data-role="header" data-theme="a" >
+        <h1>Upload Offset File</h1>
+    </div>
+    <div data-role="content" data-theme="d">       
+        <iframe>
+        <form enctype="multipart/form-data">
+            <input name="file" type="file" />
+            <input type="button" value="Upload" />
+        </form>
+        <progress></progress>
+        </iframe>
+
+
+    </div>         
+</div>
+
+<script>
+    $(':button').click(function() {
+        //debugger
+        var formData = new FormData($('form')[0]);
+        $.ajax({
+            url: p_urlServer + "/uploadOffset", //Server script to process data
+            type: 'POST',
+            contentType: "application/x-www-form-urlencoded",
+            //Ajax events
+//            beforeSend: beforeSendHandler,
+//            success: completeHandler,
+//            error: errorHandler,
+            // Form data            
+            //Options to tell jQuery not to process data or worry about content-type.
+            cache: false,
+            contentType: false,
+                    processData: false
+        });
+    });
+
+    function progressHandlingFunction(e) {
+//        if (e.lengthComputable) {
+//            $('progress').attr({value: e.loaded, max: e.total});
+//        }
+    }
+
+</script>

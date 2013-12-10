@@ -1,0 +1,17 @@
+<div id="pgemp_dvorder" >
+    <div data-role="header" class="nav-glyphish-example" >                
+        <div data-role="navbar" class="nav-glyphish-example" data-grid="a"> 
+            <ul> 
+                <li><a href="#" id="pgemp_orderheader_pending" data-icon="custom">Pending</a></li> 
+                <li><a href="#" id="pgemp_orderheader_closed" data-icon="custom">Closed</a></li> 
+                <li><a href="#" id="pgemp_orderheader_entry" data-icon="custom" style="display: none;">Entry</a></li>                 
+            </ul> 
+        </div> 
+    </div>
+    <div data-role="content">Content</div>
+</div>
+<script>
+    function pgemp_dvorder_onSlideDown() {
+        //alert('slide Down');
+    }
+</script>

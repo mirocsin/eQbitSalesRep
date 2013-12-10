@@ -1,0 +1,61 @@
+<div id="pgmem_dvmore" >
+    <div data-role="header">
+        <h1>More</h1>
+    </div>
+    <div id="pgmemdvmore_dvcontent" data-role="content" >
+        <ul id='pgmem_dvorder_ulmorelist' data-role="listview" data-theme="c">            
+            <li data-icon="false" >
+                <a href="#pg_reports" >
+                    <img src="img/reports.png" alt="" style="padding:8px 10px"/>
+                    <h3 style="font-size:18px">Reports</h3>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#pgmem_settings" >
+                    <img src="img/settings.png" alt="" style="padding:8px 10px"/>
+                    <h3 style="font-size:18px">Settings</h3>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#" id="pgmemdvmore_btnsync">
+                    <img src="img/sync.png" alt="" style="padding:8px 10px"/>
+                    <h3 style="font-size:18px">Synchronize</h3>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#" id="pgmemdvmore_btnlogoff">
+                    <img src="img/logoff.png" alt="" style="padding:12px 14px"/>
+                    <h3 style="font-size:18px">LogOff</h3>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function pgmem_dvmore_onSlideDown() {
+        //alert('slide Down');
+    }
+    $('#pgmemdvmore_btnsync').on('click', function() {
+        var tables = new p_syncTables;
+        tables.callBackFn = "pgmem_dvmore_syncComplete";
+        tables.addTable('tblpo_headers', "WHERE bitPosted = ?", [1]);
+        tables.addTable('tblpo_details', "WHERE bitPosted = ?", [1]);
+        tables.syncToServer();
+    });
+    function pgmem_dvmore_syncComplete(msg) {
+        // Refresh the list
+        if (msg !== undefined) {
+            commonDialog('Validation', 'Error in Synchronization', msg, 'exclamation', 'pop');
+        }
+        else {
+            commonDialog('Validation', 'Synchronization Complete', 'Data: Purchase Order, Items, Category and other settings', 'information', 'pop');
+        }
+    }
+    $('#pgmemdvmore_btnlogoff').on('click', function() {
+        p_executeSql_cb('Update tblsettings set bitLogin=0', [], [],
+                function(results, vars) {
+                    pg_firstlog_Reload();
+                })
+    })
+</script>

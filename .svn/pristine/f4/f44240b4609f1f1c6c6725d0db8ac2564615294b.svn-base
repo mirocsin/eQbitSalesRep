@@ -1,0 +1,100 @@
+<style>
+    #statlogin {
+        font-size: 16px;
+        font-weight: bold;
+        color: red;
+    }
+    #pgfirstlog_divcntnt .ui-input-text:not(label) {
+        background-color: #FFF;
+    }
+</style>
+<div data-role="page" id="pg_firstlog" data-theme="d" data-inset="false" class="jpm-page">
+    <div data-role="header">
+        <table style="width:100%">
+            <tr><td><img src='img/lorealsg.jpg' alt="L'Oreal Singapore" style="display:block;margin-left:auto;margin-right:auto"></td></tr>
+        </table>
+    </div>
+    <div data-role="content" data-theme="c" data-content-theme="d" id="pgfirstlog_divcntnt">
+        <ul data-role="listview">
+            <li data-role="list-divider">Settings Setup</li>
+            <li>                        
+                <table style="width:100%">
+                    <tr>
+                        <td><input type="text" id ="txtaccesscode" placeholder="Company Activation Code"/></td>
+                    </tr>
+                    <tr>
+                        <td><div id="statlogin"></div></td>
+                    </tr>
+                    <tr>                                
+                        <td><a id="btnfirstlog" data-role="button" href="" data-theme="a" class="jpm-cornerstyle" >Submit</a></td>
+                    </tr>
+                </table>
+            </li>
+        </ul>                   
+    </div>
+    <script>
+        $('#btnfirstlog').click(function(e) {
+            //debugger;
+            var var_accesscode = $('#txtaccesscode').val();
+
+            $.ajax({
+                type: "GET",
+                url: p_urlServer + "/activateSystem",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {activationCode: var_accesscode},
+                crossDomain: true,
+                beforeSend: function() {
+                    $.mobile.showPageLoadingMsg();
+                },
+                complete: function() {
+                    $.mobile.hidePageLoadingMsg();
+                },
+                success: function(data) {
+                    //debugger
+                    if (data.length !== 0) {
+                        //debugger
+                        if (data[0].message === undefined) {
+                            p_db.transaction(function(tx) {
+                                // Settings
+                                var p1 = data[0].vchAccessCode,
+                                    p2 = data[0].vchAccessType,
+                                    p3 = data[0].vchUsername,
+                                    p4 = data[0].vchPassword,
+                                    p5 = data[0].vchCust_Code,
+                                    p6 = data[0].vchCust_Name,
+                                    p7 = data[0].vchMainpg,
+                                    p8 = data[0].vchSalesman_Code;
+                                var l_address = "";
+                                l_address = p_builstring(l_address,data[0].vchCust_Add1);
+                                l_address = p_builstring(l_address,data[0].vchCust_Add2);
+                                l_address = p_builstring(l_address,data[0].vchCust_Cntry);
+                                l_address = p_builstring(l_address,data[0].vchCust_Zip);                                    
+                                tx.executeSql('INSERT INTO tblsettings (vchId,vchUsrnm,vchPswd,vchUType,dtRecordAdded,vchCustCode,vchCustName,vchCustAdd,vchMainpg,vchSalesman_Code) VALUES (?,?,?,?,?,?,?,?,?,?)', [p1, p3, p4, p2, new Date(),p5,p6,l_address.trim(),p7,p8], pg_firstlog_success(p2, p3));
+                            });
+                        }
+                        else {
+                            alert(data[0].message);
+                        }
+                    }
+                },
+                error: function(data) {
+                    alert(data.error().statusText);
+                }
+            });
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        });
+      
+        function pg_firstlog_success(accesstype, loginid) {
+              pg_firstlog_Reload();          
+        }
+        function pg_firstlog_Reload() {
+            window.location.reload(); // Refresh page
+        }
+        function pg_firstlog_getMemberFail(tx, err){
+            alert("Error processing SQL: " + err.message);
+        }
+    </script>
+</div>  

@@ -1,0 +1,129 @@
+<style>
+    .custom-count-pos{
+        font-size: 11px;
+        font-weight: bold;
+        padding: 0.2em 0.5em;
+        float: right;
+    } 
+</style>
+<div data-role="page" id="pg_empmain" data-theme="d">
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_menu" data-icon="home">Menu</a>
+        <h1>Salesman Dashboard</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>
+    <div data-role="content" data-theme="">
+        <table style="width:100%">
+            <tr>
+                <td>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false" data-collapsed="false">
+                        <h2><div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">3</div>Appointments Today</h2> 
+                        <ul data-role="listview">
+                            <li><a href="" onclick="btnmapopt_click(this)" data-inline="true" id='btnlocate1'>11/10/2013 2:30pm - Guardian-Causeway Point</a>
+                                <input type='hidden' id='hidlocate1' value='Singapore 738099'/>
+                            </li>
+                            <li><a href="" onclick="btnmapopt_click(this)" id='btnlocate2'>15/10/2013 10:30am - Watson-Lucky Plaza</a>
+                                <input type='hidden' id='hidlocate2' value='Singapore 238863'/>
+                            </li>
+                            <li><a href="" onclick="btnmapopt_click(this)" id='btnlocate3'>16/10/2013 3:00pm - Tony & Guy Salon-The Star</a>
+                                <input type='hidden' id='hidlocate3' value='Singapore 138617'/>
+                            </li>                                        
+                        </ul>
+                    </div>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false" data-collapsed="false">
+                        <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">2</div> PO Approval Notifications</h2> 
+                        <ul data-role="listview">
+                            <li><a href="" id='btnpoapproval'>Peter Parker PO#11111 </a></li>
+                            <li><a href="" id='btnpoapproval'>Clark Kent PO#2222 </a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="uldashboard2" data-role="listview" data-inset="true" data-theme="d" data-divider-theme="e" style="margin:0.5;">
+                        <li data-role="list-divider">Target Sales</li>
+                        <li data-icon="arrow-u">
+                            <table style="font-family: verdana; font-weight: bold; font-size: small">
+                                <tr>
+                                    <td class="tdtxt_pad">Daily:</td>
+                                    <td class="tdval_pad">$1,735.00 (work hard)</td>
+                                </tr>
+                                <tr>
+                                    <td>Weekly:</td>
+                                    <td class="tdval_pad">$12,850.00 (target hit)</td>
+                                </tr>
+                                <tr>
+                                    <td>Monthly:</td>
+                                    <td class="tdval_pad">$55,550.00 (target hit)</td>
+                                </tr>
+                                <tr>
+                                    <td>Yearly</td>
+                                    <td class="tdval_pad">$250,320.00 (work hard)</td>
+                                </tr>
+                                <tr>
+                                    <td><a href="" class="myicon" data-icon="e"></a></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>              
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist" style="text-align: right">  
+        <img src="img/companylogo.jpg" alt="L'Oreal Singapore" />
+    </div>
+
+    <!--Left side Panel-->
+    <div data-role="panel" id="pg_menu" data-theme="a"  >
+        <input type="search" id ="txtcustomer_panel" placeholder="Search Customer"/> 
+        <div data-role="controlgroup" data-corners="true" >
+            <a href="quickorder.html" data-role="button"  id="btn_quickorder" data-icon="arrow-r" data-transition="slide">Quick Order</a>
+            <a href="#pg_appointments" data-prefetch data-role="button" id="btn_newappointment" data-icon="arrow-r" data-transition="slide" onclick="p_apptaction='new';">New Appointment</a>
+            <a href="#pg_customers" data-prefetch data-role="button" id="btn_customers" data-icon="arrow-r" data-transition="slide" onclick="p_custaction='new';">Customers</a>
+            <a href="stockcatalog.html" data-role="button"  id="btn_stocks" data-icon="arrow-r" data-transition="slide">Stock Catalog</a>
+            <a href="" id="btn_logout" data-theme="c" data-icon="arrow-r" data-role="button">LogOut</a>                  
+        </div>                
+    </div>
+
+    <!--Popup Dialog Appointment option-->
+    <div data-role="popup" id="popupDialog_appointment" data-overlay-theme="a" data-theme="c" style="max-width:800px;" class="ui-corner-all">
+        <div data-role="header" data-theme="a" class="ui-corner-top">
+            <h1>Select an option</h1>
+        </div>
+        <div data-role="content" data-theme="d" class="ui-corner-bottom ui-content">
+            <h3 class="ui-title">Appointment: <span id='sp_appid'></span></h3>
+            <a href="#" data-role="button" data-icon="check" data-theme="c">Check-IN</a>    
+            <a href="#" onclick='pg_empmain_viewloc_click(this)' data-role="button" data-icon="grid" data-transition="flow" data-theme="c">View Location</a>  
+            <a href="#" data-role="button" data-icon="delete" data-transition="flow" data-theme="c">Cancel Appointment</a>  
+            <input type='hidden' id='hidden_location' />
+        </div>         
+    </div>
+
+    <script>
+        function pg_empmain_viewloc_click(e) {
+            $('#txtto').val($('#hidden_location').val());
+            $.mobile.changePage('#pg_map', {transition: "slide", role: "none", reverse: false});
+        }
+        $("#pg_empmain").on("pageshow", function() {
+            $("#txtcustomer_panel").val("");
+        });
+        function btnmapopt_click(e) {
+            //debugger;
+            var hidloc = '#hidlocate' + e.id.replace("btnlocate", "");
+            $('#sp_appid').text(e.text);
+            $('#hidden_location').val($(hidloc).val());
+            $('#popupDialog_appointment').popup('open', {transition: 'slideup'});
+        }
+        function btn_touchstart_maplocate(e) {
+            //alert("check");
+            $('#txtto').val($('#hidlocate' + e.id.replace("btnlocate", "")).val());
+            //$.mobile.changePage('#pg_map');
+            //$.mobile.changePage('#pg_map', {transition: "slide", role: "none", reverse: false});
+            $.mobile.changePage('map.html', {transition: "slide", role: "none", reverse: false});
+        }
+    </script>
+</div>       
+

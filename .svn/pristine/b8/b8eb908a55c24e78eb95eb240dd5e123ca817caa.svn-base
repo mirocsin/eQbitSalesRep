@@ -1,0 +1,113 @@
+<link rel="stylesheet" href="css/jpm-page.css" />
+<style>
+    #pg_settings .ui-input-text:not(label) {
+        border-radius: .3em!important;
+        box-shadow: none !important;
+        background-color: #fff;        
+    }
+    #pgsettings_sttngslist .ui-body-a {
+        color: #000!important;        
+    }
+    #pgsettings_sttngslist .ui-body-a[readonly="readonly"] {
+        color: #A7A7A7!important;        
+    }
+    #pgsettings_btnSave {
+        max-width: 200px;
+    }
+    #pgsettings_sttngslist label {
+        font-size: .8em!important;
+    }
+</style>
+<div data-role="page" id="pg_settings" data-theme="a" class="jpm-page">    
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_empmain" data-icon="home">Back</a>
+        <h1>Settings</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>    
+    <div data-role="content" >
+        <form>
+            <ul id='pgsettings_sttngslist' data-role="listview" data-theme="c" data-content-theme="d" data-inset="true">
+                <li data-icon="false" >
+                    <!--<img src="img/accesscode.png" alt="" style="padding:10px 10px"/>-->
+                    <label for="pgsettings_txtaccsscode">Access Code</label>
+                    <input type="text" id ="pgsettings_txtaccsscode" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <!--<img src="img/username.png" alt="" style="padding:10px 10px"/>-->
+                    <label for="pgsettings_txtusrnm">Username</label>
+                    <input type="text" id ="pgsettings_txtusrnm" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <!--<img src="img/password.png" alt="" style="padding:10px 10px"/>-->
+                    <label for="pgsettings_txtpswd">Password</label>
+                    <input type="text" id ="pgsettings_txtpswd" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <!--<img src="img/nextso.png" alt="" style="padding:10px 10px"/>-->
+                    <label for="pgsettings_txtnxtSO">Current SO Sequence #</label>
+                    <input type="text" id ="pgsettings_txtnxtSO" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgsettings_txtnxtCust">Current Customer Sequence #</label>
+                    <input type="text" id ="pgsettings_txtnxtCust" readonly />
+                </li>
+            </ul>                
+        </form>
+        <div style="padding-top:10px;">
+            <a href="" data-icon="check" data-theme="b" data-role="button" class="jpm-cornerstyle" id="pgsettings_btnSave">Save</a>
+        </div>
+    </div>
+    <div data-role="popup" id="pgitems_popupPhoto" data-overlay-theme="a" data-theme="d" data-corners="false">
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <img id="pgitems_imgItem" class="popphoto" src="" alt="" >
+    </div>
+</div>
+
+<script>
+    function pgemp_dvmore_onSlideDown(){
+        //alert('slide Down');
+    }
+    $("#pg_settings").on("pagebeforeshow", function(event, ui) {        
+        pg_settings_pageInit();
+        insertDialogs(this);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    });
+    function pg_settings_pageInit(){
+        pg_settings_getSettings();
+    }
+    function pg_settings_getSettings(){
+        p_db.transaction(function(tx) {
+            tx.executeSql("SELECT * FROM tblsettings", [], pg_settings_fillSettings);
+        });
+    }
+    function pg_settings_fillSettings(tx, results){        
+        //alert();
+        $("#pgsettings_txtaccsscode").val(results.rows.item(0).vchId.trim());
+        $("#pgsettings_txtusrnm").val(results.rows.item(0).vchUsrnm.trim());
+        $("#pgsettings_txtpswd").val(results.rows.item(0).vchPswd.trim());
+        $("#pgsettings_txtnxtSO").val(results.rows.item(0).intSO.toString());
+        $("#pgsettings_txtnxtCust").val(results.rows.item(0).intCust.toString());
+        
+    }
+    $('#pgsettings_btnSave').click(function(e) {
+        var l_newnxtSO;
+        l_newnxtSO=$("#pgsettings_txtnxtSO").val();
+        if (isNaN(l_newnxtSO / 1)) {
+            commonDialog('Save Settings','Next SO should be a numeric value.',
+                         '','exclamation','pop');
+        } else {
+            var l_intSO;
+            l_intSO = parseInt(l_newnxtSO);
+            p_db.transaction(function(tx) {
+                tx.executeSql('UPDATE tblsettings SET intSO=?', [l_intSO], pg_settings_editsuccess);
+            }, pg_settings_errorTA);
+        }            
+    });
+    function pg_settings_errorTA(tx, err){
+        alert("Error processing SQL: " + err.message);
+    }
+    function pg_settings_editsuccess(){
+        $.mobile.changePage('#pg_empmain', {transition: "slide", reverse: false});
+    }
+</script>

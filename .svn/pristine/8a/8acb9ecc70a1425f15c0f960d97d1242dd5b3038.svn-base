@@ -1,0 +1,160 @@
+﻿<?xml version="1.0"?>
+<doc>
+<assembly>
+<name>
+eService
+</name>
+</assembly>
+<members>
+<member name="M:eService.customer_loreal_backendEntities.#ctor">
+	<summary>
+Initializes a new customer_loreal_backendEntities object using the connection string found in the 'customer_loreal_backendEntities' section of the application configuration file.
+</summary>
+</member><member name="M:eService.customer_loreal_backendEntities.#ctor(System.String)">
+	<summary>
+Initialize a new customer_loreal_backendEntities object.
+</summary>
+</member><member name="M:eService.customer_loreal_backendEntities.#ctor(System.Data.EntityClient.EntityConnection)">
+	<summary>
+Initialize a new customer_loreal_backendEntities object.
+</summary>
+</member><member name="P:eService.customer_loreal_backendEntities.tblemployees">
+	<summary>
+There are no comments for tblemployees in the schema.
+</summary>
+</member><member name="P:eService.customer_loreal_backendEntities.tblitems">
+	<summary>
+There are no comments for tblitems in the schema.
+</summary>
+</member><member name="P:eService.customer_loreal_backendEntities.tblmembers">
+	<summary>
+There are no comments for tblmembers in the schema.
+</summary>
+</member><member name="M:eService.customer_loreal_backendEntities.AddTotblemployees(eService.tblemployee)">
+	<summary>
+There are no comments for tblemployees in the schema.
+</summary>
+</member><member name="M:eService.customer_loreal_backendEntities.AddTotblitems(eService.tblitem)">
+	<summary>
+There are no comments for tblitems in the schema.
+</summary>
+</member><member name="M:eService.customer_loreal_backendEntities.AddTotblmembers(eService.tblmember)">
+	<summary>
+There are no comments for tblmembers in the schema.
+</summary>
+</member><member name="T:eService.customer_loreal_backendEntities">
+	<summary>
+There are no comments for customer_loreal_backendEntities in the schema.
+</summary>
+</member><member name="M:eService.tblemployee.Createtblemployee(System.String)">
+	<summary>
+Create a new tblemployee object.
+</summary>
+	<param name="vchEmployee_Code">Initial value of vchEmployee_Code.</param>
+</member><member name="P:eService.tblemployee.vchEmployee_Code">
+	<summary>
+There are no comments for property vchEmployee_Code in the schema.
+</summary>
+</member><member name="P:eService.tblemployee.vchEmployee_Name">
+	<summary>
+There are no comments for property vchEmployee_Name in the schema.
+</summary>
+</member><member name="P:eService.tblemployee.vchLoginID">
+	<summary>
+There are no comments for property vchLoginID in the schema.
+</summary>
+</member><member name="P:eService.tblemployee.vchLoginPassword">
+	<summary>
+There are no comments for property vchLoginPassword in the schema.
+</summary>
+</member><member name="T:eService.tblemployee">
+	<summary>
+There are no comments for customer_loreal_backendModel.tblemployee in the schema.
+</summary>
+	<KeyProperties>
+vchEmployee_Code
+</KeyProperties>
+</member><member name="M:eService.tblitem.Createtblitem(System.String)">
+	<summary>
+Create a new tblitem object.
+</summary>
+	<param name="vchItem_Code">Initial value of vchItem_Code.</param>
+</member><member name="P:eService.tblitem.vchItem_Code">
+	<summary>
+There are no comments for property vchItem_Code in the schema.
+</summary>
+</member><member name="P:eService.tblitem.vchItem_Description">
+	<summary>
+There are no comments for property vchItem_Description in the schema.
+</summary>
+</member><member name="P:eService.tblitem.vchBarcode">
+	<summary>
+There are no comments for property vchBarcode in the schema.
+</summary>
+</member><member name="P:eService.tblitem.mnyCost">
+	<summary>
+There are no comments for property mnyCost in the schema.
+</summary>
+</member><member name="T:eService.tblitem">
+	<summary>
+There are no comments for customer_loreal_backendModel.tblitem in the schema.
+</summary>
+	<KeyProperties>
+vchItem_Code
+</KeyProperties>
+</member><member name="M:eService.tblmember.Createtblmember(System.String)">
+	<summary>
+Create a new tblmember object.
+</summary>
+	<param name="vchMember_Code">Initial value of vchMember_Code.</param>
+</member><member name="P:eService.tblmember.vchMember_Code">
+	<summary>
+There are no comments for property vchMember_Code in the schema.
+</summary>
+</member><member name="P:eService.tblmember.vchMember_Name">
+	<summary>
+There are no comments for property vchMember_Name in the schema.
+</summary>
+</member><member name="P:eService.tblmember.vchLoginID">
+	<summary>
+There are no comments for property vchLoginID in the schema.
+</summary>
+</member><member name="P:eService.tblmember.vchLoginPassword">
+	<summary>
+There are no comments for property vchLoginPassword in the schema.
+</summary>
+</member><member name="T:eService.tblmember">
+	<summary>
+There are no comments for customer_loreal_backendModel.tblmember in the schema.
+</summary>
+	<KeyProperties>
+vchMember_Code
+</KeyProperties>
+</member><member name="P:eService.My.MyWebExtension.Computer">
+	<summary>
+ Returns information about the host computer.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.User">
+	<summary>
+ Returns information for the current Web user.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.Request">
+	<summary>
+ Returns Request object.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.Response">
+	<summary>
+ Returns Response object.
+ </summary>
+</member><member name="P:eService.My.MyWebExtension.Log">
+	<summary>
+ Returns the Asp log object.
+ </summary>
+</member><member name="T:eService.My.MyWebExtension">
+	<summary>
+ Module used to define the properties that are available in the My Namespace for Web projects.
+ </summary>
+	<remarks></remarks>
+</member>
+</members>
+</doc>

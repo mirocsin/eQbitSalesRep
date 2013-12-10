@@ -1,0 +1,4 @@
+browser=Chrome.INTEGRATED
+file.reference.eQbitSalesRep2-config=D:\\Projects\\QbitSolutions\\Customization\\eQbitSalesRep\\config
+file.reference.eQbitSalesRep2-public_html=D:\\Projects\\QbitSolutions\\Customization\\eQbitSalesRep\\public_html
+file.reference.eQbitSalesRep2-test=D:\\Projects\\QbitSolutions\\Customization\\eQbitSalesRep\\test

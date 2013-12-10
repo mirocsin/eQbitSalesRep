@@ -1,0 +1,85 @@
+<div data-role="page" id="pg_memmain" data-theme="d">
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_menu" data-icon="home">Menu</a>
+        <h1>Qbit e-SalesRep (Customer)</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>
+    <div data-role="content" data-theme="">
+        <table style="width:100%">
+            <tr>
+                <td>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false" data-collapsed="false">
+                        <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">3</div> Approved Orders</h2> 
+                        <ul data-role="listview">
+                            <li><a href="" id='btnapprovpo1'>PO No. 10020131101 - Total Items: 5, Amount: SGD 2,000</a> 
+                                <input type='hidden' id='hidapprovpo1' value='10020131101'/>
+                            </li>
+                            <li><a href="" id='btnapprovpo2'>PO No. 10020131102 - Total Items: 7, Amount: SGD 2,400</a> 
+                                <input type='hidden' id='hidapprovpo2' value='10020131102'/>
+                            </li>
+                            <li><a href="" id='btnapprovpo3'>PO No. 10020131103 - Total Items: 2, Amount: SGD 550</a> 
+                                <input type='hidden' id='hidapprovpo3' value='10020131103'/>
+                            </li>
+                        </ul>
+                    </div>
+                    <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-inset="false">
+                        <h2><div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">2</div> Pending Orders</h2>
+                        <ul data-role="listview">
+                            <li><a href="" id='btnpendingpo1'>PO No. 10020131104 - Total Items: 3, Amount: SGD 1,500</a> 
+                                <input type='hidden' id='hidpendingpo1' value='10020131101'/>
+                            </li>
+                            <li><a href="" id='btnpendingpo2'>PO No. 10020131105 - Total Items: 4, Amount: SGD 2,100</a> 
+                                <input type='hidden' id='hidpendingpo2' value='10020131102'/>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="uldashboard2" data-role="listview" data-inset="true" data-theme="d" data-divider-theme="e" style="margin:0.5;">
+                        <li data-role="list-divider">Sales Performance (Confirmed)</li>
+                        <li data-icon="arrow-u">
+                            <table style="font-family: verdana; font-weight: bold; font-size: small">
+                                <tr>
+                                    <td>This Week:</td>
+                                    <td>$12,858.20</td>
+                                <tr>
+                                    <td>This Month:</td>
+                                    <td>$55,558.60</td>
+                                </tr>
+                                <tr>
+                                    <td>This Year</td>
+                                    <td>$250,321.85</td>
+                                </tr>
+                            </table>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ul id="uldashboard_graph" data-role="listview" data-inset="true" data-theme="c" style="margin:0;">
+                        <li data-role="list-divider">Graph Performance</li>
+                        <li data-icon="arrow-u">
+                            <div id="chartdiv" style="height:200px"></div>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>                   
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="TestPersist" style="text-align: right">  
+        <img src="img/companylogo.jpg" alt="L'Oreal Singapore"/>
+    </div>
+    <div data-role="panel" id="pg_menu" data-theme="a"  >
+        <input type="search" id ="txtcustomer_panel" placeholder="Search Customer"/> 
+        <div data-role="controlgroup" data-corners="true">
+            <a href="quickorder.html" data-prefetch data-role="button" id="btn_quickorder" data-icon="arrow-r" data-transition="slide">Quick Order</a>                        
+            <a href="stockcatalog.html" data-prefetch data-role="button"  id="btn_stocks" data-icon="arrow-r" data-transition="slide">Stock Catalog</a>                        
+            <a href="" id="btn_logout" data-theme="c" data-icon="arrow-r" data-role="button">LogOut</a>                  
+        </div>                
+    </div>
+    <script>                    
+    </script>
+</div>  

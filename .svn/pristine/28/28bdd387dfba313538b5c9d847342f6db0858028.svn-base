@@ -1,0 +1,139 @@
+<link rel="stylesheet" href="css/jpm-page.css" />
+<style>
+    #pgmem_settings .ui-input-text:not(label) {
+        border-radius: .3em!important;
+        box-shadow: none !important;
+        background-color: #fff;        
+    }
+    #pgmemsettings_sttngslist .ui-body-a {
+        color: #000!important;        
+    }
+    #pgmemsettings_sttngslist .ui-body-a[readonly="readonly"] {
+        color: #A7A7A7!important;        
+    }
+    #pgmemsettings_btnSave {
+        max-width: 200px;
+    }
+    #pgmemsettings_sttngslist label {
+        font-size: .8em!important;
+    }
+</style>
+<div data-role="page" id="pgmem_settings" data-theme="a" class="jpm-page">    
+    <div data-role="header" data-position="fixed">
+        <a href="#pg_memmain" data-icon="home">Back</a>
+        <h1>Settings</h1>
+        <a href="" data-icon="refresh" class="ui-btn-right" id="btnsync">Sync</a>
+    </div>    
+    <div data-role="content" >
+        <form>
+            <ul id='pgmemsettings_sttngslist' data-role="listview" data-theme="c" data-content-theme="d" data-inset="true">
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtcuscode">Customer Code</label>
+                    <input type="text" id ="pgmemsettings_txtcuscode" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtcusnm">Customer Name</label>
+                    <input type="text" id ="pgmemsettings_txtcusnm" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtadd">Address</label>
+                    <input type="text" id ="pgmemsettings_txtadd" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtslsmcd">Salesman Code</label>
+                    <input type="text" id ="pgmemsettings_txtslsmcd" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtslsmcd">Minimum Purchase Order Amount</label>
+                    <input type="text" id ="pgmemsettings_txtminorder" readonly="readonly" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtnxtPO">Next PO#</label>
+                    <input type="text" id ="pgmemsettings_txtnxtPO" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtIntrvNoti">Time Interval for Notifications (in Secs)</label>
+                    <input type="text" id ="pgmemsettings_txtIntrvNoti" />
+                </li>
+                <li data-icon="false" >
+                    <label for="pgmemsettings_txtIntrvExprNoti">Time Interval to Expire Notifications (in Hrs)</label>
+                    <input type="text" id ="pgmemsettings_txtIntrvExprNoti" />
+                </li>
+            </ul>                
+        </form>
+        <div style="padding-top:10px;">
+            <a href="" data-icon="check" data-theme="b" data-role="button" class="jpm-cornerstyle" id="pgmemsettings_btnSave">Save</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function pgemp_dvmore_onSlideDown(){
+        //alert('slide Down');
+    }
+    $("#pgmem_settings").on("pagebeforeshow", function(event, ui) {        
+        pgmem_settings_pageInit();
+        insertDialogs(this);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    });
+    function pgmem_settings_pageInit(){
+        pgmem_settings_getSettings();
+        $('#pgmemsettings_btnBack').attr("href",p_mainpg);
+    }
+    function pgmem_settings_getSettings(){
+        p_db.transaction(function(tx) {
+            tx.executeSql("SELECT * FROM tblsettings", [], pgmem_settings_fillSettings);
+        });
+    }
+    function pgmem_settings_fillSettings(tx, results){        
+        //alert();        
+        $("#pgmemsettings_txtcuscode").val(p_settings.vchCustCode);
+        $("#pgmemsettings_txtcusnm").val(p_settings.vchCustName);
+        $("#pgmemsettings_txtadd").val(p_settings.vchCustAdd);
+        $("#pgmemsettings_txtslsmcd").val(p_settings.vchSalesman_Code);
+        var minorder = p_settings.mnyCustMinOrderAmt;
+        $("#pgmemsettings_txtminorder").val(minorder.toFixed(2));
+        l_currentnxPO = results.rows.item(0).intPO + 1;
+        $("#pgmemsettings_txtnxtPO").val((l_currentnxPO).toString());
+        $("#pgmemsettings_txtIntrvNoti").val(p_settings.intNotiIntrval);
+        $("#pgmemsettings_txtIntrvExprNoti").val(p_settings.intNotiExprIntrval);
+    }
+    $('#pgmemsettings_btnSave').click(function(e) {
+        var l_newnxtPO, l_NotiIntrval, l_NotiExprIntrval;
+        l_newnxtPO=$("#pgmemsettings_txtnxtPO").val();
+        l_NotiIntrval=$("#pgmemsettings_txtIntrvNoti").val();
+        l_NotiExprIntrval=$("#pgmemsettings_txtIntrvExprNoti").val();
+        if (isNaN(l_newnxtPO / 1)) {
+            commonDialog('Save Settings','Next PO should be a numeric value.',
+                         '','exclamation','pop');
+            return;
+        }
+        if (isNaN(l_NotiIntrval / 1)) {
+            commonDialog('Save Settings','Time Interval for Notifications should be a numeric value.',
+                         '','exclamation','pop');
+            return;
+        }
+        if (isNaN(l_NotiExprIntrval / 1)) {
+            commonDialog('Save Settings','Time Interval to Expire Notifications should be a numeric value.',
+                         '','exclamation','pop');
+            return;
+        }
+        if (parseInt(l_newnxtPO) < l_currentnxPO) {
+            var msgtxt = 'The modified Next PO is less than the current - ' + l_currentnxPO.toString() + '.';
+            commonDialog('Save Settings',msgtxt,
+                         '','exclamation','pop');
+            return;
+        }     
+        p_db.transaction(function(tx) {
+            tx.executeSql('UPDATE tblsettings SET intPO=?, intNotiIntrval=?, intNotiExprIntrval=?', [l_newnxtPO-1,l_NotiIntrval,l_NotiExprIntrval], pg_settings_editsuccess);
+        }, pg_settings_errorTA);
+    });
+    function pg_settings_errorTA(tx, err){
+        alert("Error processing SQL: " + err.message);
+    }
+    function pg_settings_editsuccess(){
+        l_loadSettings();
+        $.mobile.changePage('#pg_memmain', {transition: "slide", reverse: false});
+    }
+</script>

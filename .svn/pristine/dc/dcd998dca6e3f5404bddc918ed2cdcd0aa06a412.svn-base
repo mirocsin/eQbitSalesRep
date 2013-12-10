@@ -1,0 +1,131 @@
+<div id="pgmem_dvnoti" >
+    <div data-role="header" >
+        <h1>Notifications</h1>
+    </div>
+    <div data-role="content" data-theme='d'>
+        <ul data-role="listview">
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/autoreplenish.png" alt="" style="padding:15px 10px"/>
+                    <h3>Auto Replenish 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/autoreplenish.png" alt="" style="padding:15px 10px"/>
+                    <h3>Auto Replenish 2</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/promotions.png" alt="" style="padding:15px 10px"/>
+                    <h3>Promotion 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/announcements.png" alt="" style="padding:15px 10px"/>
+                    <h3>Announcements 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/activities.png" alt="" style="padding:15px 10px"/>
+                    <h3>Activities 1</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+            <li data-icon="false" >
+                <a href="#">
+                    <img src="img/announcements.png" alt="" style="padding:15px 10px"/>
+                    <h3>Announcements 2</h3>
+                    <p>details here....</p>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+<!--<div data-role="header">
+        <h1>Notifications</h1>
+    </div>
+    <div id="pgmemdvnoti_dvcontent" data-role="content">
+        <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">2</div>AUTO-REPLENISHMENT</h2> 
+            <ul data-role="listview" data-theme="d" data-divider-theme="d" data-inset="false">
+                <li><a href="#">
+                    <h3>P0500100: Shampoo</h3>
+                    <p><strong>Below Minimum Stock Level</strong></p>
+                    <p>This is a fast-moving item, you need to replenish urgently as there is only <strong>1</strong> left in the inventory.</p>
+                    <p class="ui-li-aside">since <strong>23/11/2013</strong></p>
+
+                </a></li>
+                <li><a href="#">
+                    <h3>F5323800: Cera Repair Hydra</h3>
+                    <p><strong>Near Stock level</strong></p>
+                    <p>This could hit the minimum stock level by next week. You can order in advance.</p>
+                    <p class="ui-li-aside">since <strong>23/11/2013</strong></p>
+                </a></li>
+            </ul>
+        </div>
+        <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">1</div>PROMOTIONS</h2> 
+            <ul data-role="listview" data-theme="d" data-divider-theme="d" data-inset="false">
+                <li><a href="#">
+                    <h3>Amazon.com</h3>
+                    <p><strong>4-for-3 Books for Kids</strong></p>
+                    <p>As someone who has purchased children's books from our 4-for-3 Store, you may be interested in these featured books.</p>
+                    <p class="ui-li-aside"><strong>12:47</strong>PM</p>
+                </a></li>                
+            </ul>
+        </div>
+        <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">2</div>ANNOUNCEMENTS</h2> 
+            <ul data-role="listview" data-theme="d" data-divider-theme="d" data-inset="false">                
+                <li><a href="#">
+                    <h3>Mike Taylor</h3>
+                    <p><strong>Re: This weekend in Maine</strong></p>
+                    <p>Hey little buddy, sorry but I can't make it up to vacationland this weekend. Maybe next weekend?</p>
+                    <p class="ui-li-aside"><strong>6:24</strong>AM</p>
+                </a></li>
+                <li><a href="#">
+                    <h3>Redfin</h3>
+                    <p><strong>Redfin listing updates for today</strong></p>
+                    <p>There are 3 updates for the home on your watchlist: 1 updated MLS listing and 2 homes under contract.</p>
+                    <p class="ui-li-aside"><strong>5:52</strong>AM</p>
+                </a></li>
+            </ul>
+        </div>
+        <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2> <div class="ui-btn-up-c ui-btn-corner-all custom-count-pos">3</div>ACTIVITIES</h2> 
+            <ul data-role="listview" data-theme="d" data-divider-theme="d" data-inset="false">
+                <li><a href="#">
+                    <h3>Avery Walker</h3>
+                    <p><strong>Re: Dinner Tonight</strong></p>
+                    <p>Sure, let's plan on meeting at Highland Kitchen at 8:00 tonight. Can't wait! </p>
+                    <p class="ui-li-aside"><strong>4:48</strong>PM</p>
+                </a></li>
+                <li><a href="#">
+                    <h3>Angela Smith</h3>
+                    <p><strong>Link Request</strong></p>
+                    <p>My name is Angela Smith, SEO Consultant. I've greatly enjoyed looking through your site and I was wondering if you'd be interested in providing a link.</p>
+                    <p class="ui-li-aside"><strong>6:24</strong>AM</p>
+                </a></li>
+                <li><a href="#">
+                    <h3>Mike Taylor</h3>
+                    <p><strong>This weekend in Maine</strong></p>
+                    <p>Sounds good, let me check into our plans.</p>
+                    <p class="ui-li-aside"><strong>6:24</strong>AM</p>
+                </a></li>
+            </ul>
+        </div>        
+    </div>-->
+</div>
+<script>
+    function pgmem_dvnoti_onSlideDown() {
+        //alert('slide Down');
+    }
+</script>

@@ -1,0 +1,220 @@
+<style>                        
+    #pg_firstlog {
+        -webkit-box-sizing: border-box; 
+        -moz-box-sizing: border-box;    
+        box-sizing: border-box;
+
+        top: calc(25%);
+        left: 0;
+        padding-right: -10px;
+        margin-top: -100px;                
+        border: 1px solid black;
+        padding: 10px;
+        min-height: 100px !important;
+    }
+    #statlogin {
+        font-size: 16px;
+        font-weight: bold;
+        color: red;
+    }                
+</style>
+<div data-role="page" id="pg_firstlog" data-theme="d" data-inset="false" >
+    <div data-role="header">
+        <table align="center">
+            <tr><td><img src='img/lorealsg.jpg' alt="L'Oreal Singapore" id="img_logo"></td></tr>
+        </table>
+    </div>
+    <div data-role="content" data-theme="c" data-content-theme="d">
+        <ul data-role="listview">
+            <li data-role="list-divider">One Time User Log-in Creation</li>
+            <li>                        
+                <table style="width:100%">
+                    <tr>
+                        <td><input type="text" id ="txtfirstlog" placeholder="Log-in ID"/></td>
+                    </tr>
+                    <tr>
+                        <td><div id="statlogin"></div></td>
+                    </tr>
+                    <tr>                                
+                        <td><a id="btnfirstlog" data-role="button" href="" data-theme="a" data-prefetch >Submit</a></td>
+                    </tr>
+                </table>
+            </li>
+        </ul>                   
+    </div>
+    <script>
+        $("#pg_firstlog").on("pageshow", function(event, ui) {
+            //alert("check");
+            event.stopPropagation();
+            event.preventDefault();
+            //event.preventDefault();
+            //event.stopImmediatePropagation();
+            checkSettings();
+        });
+
+        function checkSettings() { 
+            var sql = "SELECT * FROM tblsettings";
+            db.transaction(function(tx) {
+                tx.executeSql(sql, [], checkLogin, createDB);
+            }, errorTA);
+        }
+
+        function checkLogin(tx, results) {                
+            var len = results.rows.length;
+            if (len===0) {
+                createDB();
+                return false;
+            }
+            else{
+                //window.open("index.html","_self",false);
+                $.mobile.changePage('#pg_login', {transition: "slideup", reverse: false});
+                $("#pg_login").show();
+            }                    
+        }
+
+        function createDB() {
+            db.transaction(populateDB, errorCB, successCB);
+            FastClick.attach(document.body);
+            $.mobile.ajaxEnabled = true;
+        }
+
+        function populateDB() {  
+            var sql1, sql2, sql3, sql4;
+            // Settings
+            sql1 = 'CREATE TABLE IF NOT EXISTS tblsettings(vchId text,vchUsrnm text,vchPswd text,vchUType text,dtRecordAdded text)';
+            // Members
+            sql2 = 'CREATE TABLE IF NOT EXISTS tblmembers(vchMember_Code text,vchMember_Name text,dtRecordAdded text,vchHomePhone text,vchMobilePhone text,vchAddress_1 text,vchAddress_2 text,vchCity text)';
+            // Items
+            sql3 = 'CREATE TABLE IF NOT EXISTS tblitems(vchItem_Code text,vchItem_Description text,vchBarcode text, mnyPrice numeric,vbnItem_Picture none,vchItem_Category text,vchItem_ExtendedDesc text)';
+            // Appointments
+            sql4 = 'CREATE TABLE IF NOT EXISTS tblappointments(vchAppt_Code text,vchAppt_Add1 text,vchAppt_Add2 text,vchAppt_Add3 text,vchAppt_Cntry text,vchAppt_Zip text,vchAppt_Date text,vchAppt_Time text,vchRemarks text,vchCust_Name text,bitPlanned bool,bitVisited bool)';
+            db.transaction(function(tx) {
+                tx.executeSql(sql1);
+                tx.executeSql(sql2);
+                tx.executeSql(sql3);
+                tx.executeSql(sql4);
+            }, errorTA);
+        }
+
+        function errorCB(err) {
+            var errmsg = "errorCB: DB local request error . . . ";
+            $("#statlogin").text(errmsg);
+        }
+
+        function successCB() {
+        }
+
+        function errorTA(err) {
+            var errmsg = "errorTA: DB local request error . . . ";
+            $("#statlogin").text(errmsg);
+        }
+        
+        $('#btnfirstlog').click(function() {
+            var statmsg;
+            var var_accesscode = $('#txtfirstlog').val();
+            $.ajax({
+                type: "GET",
+                url: urlServer + "/verifyAccessCode",
+                async: false,
+                dataType: "json",
+                cache: false,
+                data: {accesscode: var_accesscode},
+                crossDomain: true,
+                success: function(data) {
+                    statmsg = "Initializing settings. . . ";
+                    $("#statlogin").text(statmsg);
+                    if ( data.length !== 0 ) {
+                        db.transaction(function(tx) {
+                            // Settings
+                            var p1 = data[0].vchAccessCode,
+                                p2 = data[0].vchAccessType,
+                                p3 = data[0].vchUsername,
+                                p4 = data[0].vchPassword;
+
+                            statmsg = "Loading settings. . . ";
+                            $("#statlogin").text(statmsg);
+                            tx.executeSql('INSERT INTO tblsettings (vchId,vchUsrnm,vchPswd,vchUType,dtRecordAdded) VALUES (?,?,?,?,?)', [p1, p3, p4, p2, new Date()]);
+                            
+                            if (data[0].vchAccessType==='employee'){
+                               // Members
+                                $.ajax({
+                                    type: "GET",
+                                    url: urlServer + "/getMembers",
+                                    async: false,
+                                    dataType: "json",
+                                    cache: false,
+                                    crossDomain: true,
+                                    success: function(cust) {
+                                        statmsg = "Initializing customers. . . ";
+                                        $("#statlogin").text(statmsg);
+                                        if ( cust.length !== 0 ) {                            
+                                            statmsg = "Loading customers. . . ";
+                                            $("#statlogin").text(statmsg);
+
+                                            for (i=0;i<cust.length;i++){                                                
+                                                var p1 = cust[i].vchMember_Code,
+                                                    p2 = cust[i].vchMember_Name,
+                                                    p3 = cust[i].dtRecordAdded,
+                                                    p4 = cust[i].vchHomePhone,
+                                                    p5 = cust[i].vchMobilePhone,
+                                                    p6 = cust[i].vchAddress_1,
+                                                    p7 = cust[i].vchAddress_2,
+                                                    p8 = cust[i].vchCity;
+                                                tx.executeSql('INSERT INTO tblmembers (vchMember_Code,vchMember_Name,dtRecordAdded,vchHomePhone,vchMobilePhone,vchAddress_1,vchAddress_2,vchCity) VALUES (?,?,?,?,?,?,?,?)', [p1, p2, p3, p4, p5, p6, p7, p8]);
+                                            }
+                                        }            
+                                    }
+                                }); 
+                            }
+
+                            // Items
+                            $.ajax({
+                                type: "GET",
+                                url: urlServer + "/getItems",
+                                async: false,
+                                dataType: "json",
+                                cache: false,
+                                crossDomain: true,
+                                success: function(item) {
+                                    statmsg = "Initializing items. . . ";
+                                    $("#statlogin").text(statmsg);
+                                    if ( item.length !== 0 ) {                            
+                                        statmsg = "Loading items. . . ";
+                                        $("#statlogin").text(statmsg);
+
+                                        for (i=0;i<item.length;i++){
+                                            var p1 = item[i].vchItem_Code,
+                                                p2 = item[i].vchItem_Description,
+                                                p3 = item[i].vchBarcode,
+                                                p4 = item[i].mnyCost,
+                                                p5 = item[i].vbnItem_Picture,
+                                                p6 = item[i].vchItem_Category,
+                                                p7 = item[i].vchItem_ExtendedDesc;
+                                            tx.executeSql('INSERT INTO tblitems (vchItem_Code,vchItem_Description,vchBarcode,mnyPrice,vbnItem_Picture,vchItem_Category,vchItem_ExtendedDesc) VALUES (?,?,?,?,?,?,?)', [p1, p2, p3, p4, p5, p6, p7]);
+                                        }
+                                    }            
+                                }
+                            });
+
+                            //window.open("index.html", "_self", false);
+                            $.mobile.changePage('#pg_login', {transition: "slideup", role: "none", reverse: false});
+                        });
+                    }
+                    else {
+                        statmsg = "No matching Login Id . . . ";
+                        $("#statlogin").text(statmsg);
+                    }
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    statmsg = "Error request . . . ";
+                    $("#statlogin").text(statmsg);
+                }
+            });           
+
+        });
+
+        $('#txtfirstlog').keyup(function() {
+            $("#statlogin").text("");
+        });
+    </script>
+</div>  

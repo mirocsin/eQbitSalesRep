@@ -1,0 +1,74 @@
+<!--Pop-up Dialog Search Item
+1. Inject command in index.html
+    injectPage('pop_searchitem.html', 'pgemp_poclosed', {type: 'popup'});
+    parameter 1: name of the popup html
+    parameter 2: where to show the popup and inject
+    parameter 3: [object] with property type "popup"
+2. Naming Rules:  first parameter "pop_searchitem.html" prefix "pop_searchitem" is being search inside the html file and being replaced by pgemp_poclosed
+-->
+<div data-role="popup" id="pop_searchitem" data-overlay-theme="a" data-theme="c" style="width:1000px!important;" >        
+    <div data-role="header" data-theme="a" >
+        <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+        <h1>Search Item</h1>
+    </div>
+    <div data-role="content" data-theme="d">
+        <ul data-role="listview" data-inset='true' >
+            <li data-role="content"  >
+                <table width='100%'>
+                    <tr>
+
+                        <td width='99%'>
+                            <input type="text" id ="pop_searchitem_txtsrcitm" placeholder="Search Item" class="search"/>             
+                        </td>
+                        <td width='1%'>
+                            <img id='pop_searchitem_imgnoconnection' src='img/exclaimation32.png' style='display:none' />
+                        </td>
+                    </tr>
+                </table>
+            </li>                    
+            <li>
+                <div id="pop_searchitem_dvapptlst" style="padding:10px">                         
+                </div>
+            </li>
+        </ul>
+    </div>         
+</div>
+<script>
+    $("#pop_searchitem_txtsrcitm").on("input", function(e) {
+        if (typeof window['pop_searchitem_txtsrcitm_input_before'] === 'function') {
+            window['pop_searchitem_txtsrcitm_input_before'](e);
+        }
+        var sugList = $("#pop_searchitem_dvapptlst");
+        sugList.html('');
+        if (window.navigator.onLine) {
+            var txtname = $('#pop_searchitem_txtsrcitm').val();
+            $.get(p_urlServer + "/getItemlist", {name: txtname,type: 'promo'},
+            function(results, code) {
+                var str = "";
+                for (var i = 0, len = results.Table.length; i < len; i++) {
+                    var res = results.Table;
+                    str = str + '<li data-icon="false"> <a href="#" onclick="@onclick"><h3>@vchItem_Description </h3>' + "<p>Code: @vchItem_Code &nbsp;&nbsp; Barcode: @vchBarcode &nbsp; &nbsp; Price: @mnyPrice</p><p>Category: @vchItem_Category &nbsp;&nbsp; Brand: @vchBrand</p></a></li>";
+                    str = str.replace('@onclick', "pop_searchitem_li_click('@vchItem_Code','@vchItem_Description','@vchItem_Category','@vchSize','@vchBrand')");
+                    str = str.replace('@mnyPrice', '$' + res[i].mnyPrice);                    
+                    str = p_replaceAll(str,'@vchItem_Code',res[i].vchItem_Code);
+                    str = p_replaceAll(str,'@vchItem_Description',res[i].vchItem_Description + ' ' + res[i].vchSize);
+                    str = p_replaceAll(str,'@vchItem_Category',res[i].vchItem_Category);
+                    str = p_replaceAll(str,'@vchBrand',res[i].vchBrand);
+                    str = p_replaceAll(str,'@vchSize',res[i].vchSize);
+                    str = str.replace('@vchBarcode',res[i].vchBarcode);                                        
+                }
+                str = "<ul data-role='listview' ><li data-role='list-divider' >Search Result</li>" + str + "</ul>"
+                sugList.html(str);
+                sugList.trigger('create');
+                //debugger
+                $('#pop_searchitem_imgnoconnection').attr('style', 'display:none')
+                $("#pop_searchitem").popup("reposition", {positionTo: 'window'});
+            }, "json").fail(function() {
+                $('#pop_searchitem_imgnoconnection').attr('style', '')
+            });
+        }
+        else {
+            $('#pop_searchitem_imgnoconnection').attr('style', '')
+        }
+    })
+</script>

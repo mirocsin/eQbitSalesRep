@@ -1,0 +1,572 @@
+<div data-role="page" id="pgmem_orderentry" data-theme="a" class="jpm-page">
+    <style scoped>
+        #pgmemorderentry_srccustbtn {
+            position: absolute; 
+            width:35px;
+            height:34px;            
+            top: 11px;
+            background-color: transparent; 
+            /*border: 1px solid yellow;*/
+        }
+        #pgmemorderentry_qtyinst {
+            border-radius: 0;
+            -moz-border-radius: 0;
+            -webkit-border-radius: 0;
+        }
+        #pgmemorderentry_ulitm > li .ui-li {
+            height : 58px!important;
+        }
+        #pgmemorderentry_ulitm > li .ui-btn-text a {
+            padding: .05em 15px!important;
+            max-height : 58px!important;
+            top: 0px!important;
+        }
+        #pgmemorderentry_ulitm .override-ui-screen-hidden {
+            display:block !important;   
+        }
+        .ui-widget-content {
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+        }
+        .ui-widget-content .ui-input-text:not(label) {
+            background-color: #FFF;
+        }
+        #pgmemorderentry_txtsrcitm {
+            color:black!important;
+        }        
+        .ui-widget-content, .ui-listview {
+            background: transparent!important;
+        }
+        #pgmemorderentry_dvsrc .ui-input-text:not(label) {
+            background-color: #FFF;
+        }
+    </style>
+    <div data-role="header" data-position="fixed">        
+        <a href="#" data-rel="back" data-icon="delete" onclick="l_active_memnavbar = 'pgmem_dvorder';">Cancel</a>
+        <h1>Customer Order Entry</h1>
+        <a id="pgmemorderentry_btnSave" href="#" data-icon="check" onclick="pgmem_orderentry_btnSave_click()">Save Order</a>
+        <div data-theme="a" class="ui-widget-content" data-role="content" id="pgmemorderentry_dvsrc">            
+            <input type="text" id ="pgmemorderentry_txtsrcitm" placeholder="Search Items..." class="search" style="display:block"/>
+        </div>
+    </div>
+    <div data-role="content">        
+        <div data-role="collapsible" data-theme="b" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2 id="pgmemorderentry_lidvTitle"></h2>   
+            <ul data-role="listview" data-inset="false" >
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderentry_txtpocode">Sales Order Code</label>
+                    <input type="text" id ="pgmemorderentry_txtpocode" readonly="true" class="code" style="color:graytext"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderentry_txtcustnm">Customer Name</label>
+                    <input type="text" id ="pgmemorderentry_txtcustnm" readonly="true" class="search" style="color:graytext"/>
+                    <input type="hidden" id ="pgmemorderentry_txtcustcd" />
+                    <span><a id="pgmemorderentry_srccustbtn" href='#' onclick="pgmem_orderentry_btnSrc_Click();"></a></span>     
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderentry_txtshipto">Ship To</label>
+                    <input type="text" id ="pgmemorderentry_txtshipto" placeholder="Ship To" class="address"/>
+                </li>                
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderentry_txtpodate">Sales Order Date (dd/mm/yyyy)</label>
+                    <input type="text" id ="pgmemorderentry_txtpodate" placeholder="Sales Order Date" class="date"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderentry_txtdeldate">Delivery Date (dd/mm/yyyy)</label>
+                    <input type="text" id ="pgmemorderentry_txtdeldate" placeholder="Delivery Date" class="date"/>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderentry_txtrem">Special Instructions</label>
+                    <textarea cols="40" rows="8" name="textarea" id="pgmemorderentry_txtrem"></textarea>
+                </li>
+                <li data-role="fieldcontain">
+                    <label for="pgmemorderentry_txttotamt">Total Order Amount</label>
+                    <input type="text" id ="pgmemorderentry_txttotamt" readonly="true" class="amount" value="0.00" style="color:graytext"/>
+                </li>
+            </ul>
+        </div>
+        <div id="pgmemorderentry_qtyinst" data-role="collapsible" data-theme="a" data-collapsed-icon="false" data-expanded-icon="false" data-collapsed="false" style="height:30px">
+            <h2><table align='center' width='100%' data-inset="true"><tr>
+                        <!--<td>Swipe Right for (+) qty, Swipe Left for (-) qty, Tap Hold to reset</td>-->
+                        <td>Swipe Right or Click for (+) qty, Swipe Left for (-) qty</td>
+                    </tr></table></h2>
+        </div>
+        <div id="pgmemorderentry_itmheader" data-role="collapsible" data-theme="c" data-content-theme="d" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d" data-collapsed="false">
+            <h2><table align='center' width='100%' data-inset="true"><tr>
+                        <td width='16%'>ItemCode</td>
+                        <td width='30%'>Description</td>
+                        <td width='16%'>Size</td>
+                        <td width='14%'>U/Price</td>
+                        <td width='12%'>Qty</td>
+                        <td width='12%'>Amount</td>
+                    </tr></table></h2>
+            <ul id='pgmemorderentry_ulitm' data-role="listview" data-inset="false" data-filter='true' data-filter-placeholder='Search Items...'>
+            </ul>
+        </div>        
+    </div> 
+    <script>
+        $("#pgmem_orderentry").on("pagebeforeshow", function(event, ui) {
+            pgmem_orderentry_pageInit();
+            insertDialogs(this);
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        $("#pgmem_orderentry").on("pageshow", function(event, ui) {
+            $(window).resize();
+            $(window).trigger("resize");
+        });
+        function pgmem_orderentry_pageInit() {
+            pgmem_orderentry_qryItmList();
+            if (p_orderaction === 'new') {
+                $("#pgmemorderentry_lidvTitle").find(".ui-btn-text").text("New Order");
+//                $('#pgmemorderentry_lidvTitle').text("New Order");                
+                pgmem_orderentry_qryNextPurchOrder();
+                $('#pgmemorderentry_txtcustcd').val(p_settings.vchCustCode);
+                $("#pgmemorderentry_txtcustnm").val(p_settings.vchCustName);
+                $("#pgmemorderentry_txtshipto").val(p_settings.vchCustAdd);
+                $("#pgmemorderentry_txtpodate").val(p_getDate);
+                $("#pgmemorderentry_txtdeldate").val(p_getDate);
+                $("#pgmemorderentry_txttotamt").val("0.00");
+                $("#pgmemorderentry_txtrem").val("");
+            } else {
+                if (p_orderaction === 'edit') {
+                    $("#pgmemorderentry_lidvTitle").find(".ui-btn-text").text("Edit Order");
+//                    $('#pgmemorderentry_lidvTitle').text("Edit Order");
+                    $('#pgmemorderentry_btnSave').show();
+                    pgmem_orderentry_qryNextPurchOrder();
+                } else {
+                    $("#pgmemorderentry_lidvTitle").find(".ui-btn-text").text("View Order");
+//                    $('#pgmemorderentry_lidvTitle').text("View Order");
+                    $('#pgmemorderentry_btnSave').hide();
+                }
+                pgmem_orderentry_getOrderHeader();
+            }
+            //$('#pgmemorderentry_ulitm').prev().find(".ui-input-search .ui-input-text").hide();
+            $('#pgmemorderentry_ulitm').prev().find(".ui-input-search .ui-input-text").parent().hide();
+        }
+        function pgmem_orderentry_qryNextPurchOrder(callbackFunc) {
+//            var l_date = p_getDate();
+//            var l_day = p_getdate_format(l_date, 'day'),
+//                    l_month = p_getdate_format(l_date, 'month'),
+//                    l_year = p_getdate_format(l_date, 'year');
+            // parameter: yyyy,mm,dd
+            //p_executeSql('SELECT Max(Cast(vchPO_Code as int)) as nlast FROM tblpo_headers WHERE substr(dtRecordAdded,7,4)=? AND substr(dtRecordAdded,4,2)=? AND substr(dtRecordAdded,1,2)=?', [l_year, l_month, l_day], 'pgmem_orderentry_qryNextPurchOrder')
+            p_db.transaction(function(tx) {
+                //tx.executeSql('SELECT COUNT(vchPO_Code) as nlast FROM tblpo_headers WHERE vchStatus <> "FIRST" AND substr(dtRecordAdded,7,4)=? AND substr(dtRecordAdded,4,2)=? AND substr(dtRecordAdded,1,2)=?', [l_year, l_month, l_day],
+                tx.executeSql('SELECT intPO as nlast FROM tblsettings', [],
+                        function(tx, results) {
+                            var l_date = p_getDate(),
+                                    l_pad4 = new p_padder(4);
+                            var l_day = p_getdate_format(l_date, 'day'),
+                                    l_month = p_getdate_format(l_date, 'month'),
+                                    l_year = p_getdate_format(l_date, 'year'),
+                                    l_next = 1;
+                            //debugger;
+                            if (results.rows.item(0).nlast !== null) {
+                                //l_next = parseInt(results.rows.item(0).nlast.toString().substr(8)) + 1
+                                l_next = results.rows.item(0).nlast + 1;
+                            }
+                            l_next = p_settings.vchId + '-' + l_year + l_month + l_day + l_pad4.pad(l_next);
+                            $("#pgmemorderentry_txtpocode").val(l_next);
+                            if (callbackFunc !== undefined){
+                                window[callbackFunc](l_next);
+                            }
+                            //pgmem_dvorder_dvpending_NextNumber(l_next);
+                        });
+            });
+
+//            p_db.transaction(function(tx) {
+//                tx.executeSql("SELECT Max(Cast(vchPO_Code as int)) as vchPO_Code FROM tblpo_headers", [], pgmem_orderentry_getNextItmCode, pgmem_orderentry_qryEmpty);
+//            });
+        }
+
+//        function pgmem_orderentry_qryNextPurchOrder(tx, results) {
+//            //debugger;
+//            var l_date = p_getDate(),
+//                    l_pad4 = new p_padder(4);
+//            var l_day = p_getdate_format(l_date, 'day'),
+//                    l_month = p_getdate_format(l_date, 'month'),
+//                    l_year = p_getdate_format(l_date, 'year'),
+//                    l_next = 1;
+//            //debugger;
+//            if (results.rows.item(0).nlast !== null) {
+//               l_next = parseInt(results.rows.item(0).nlast.toString().substr(8)) + 1
+//            }
+//            l_next = l_year + l_month + l_day + l_pad4.pad(l_next)
+//            $("#pgmemorderentry_txtpocode").val(l_next); 
+//            pgmem_dvorder_dvpending_NextNumber(l_next);
+//        }
+
+
+        function pgmem_orderentry_getOrderHeader() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblpo_headers WHERE vchStatus<>? AND dtype<>? AND vchPO_Code=?", ["FIRST", "DELETE", p_pocode], pgmem_orderentry_loadHeader, pgmem_orderentry_loadFail);
+            });
+        }
+        function pgmem_orderentry_loadHeader(tx, results) {
+            //debugger;
+            $("#pgmemorderentry_txtpocode").val(results.rows.item(0).vchPO_Code);
+            $("#pgmemorderentry_txtcustnm").val(results.rows.item(0).vchCust_Name);
+            $("#pgmemorderentry_txtshipto").val(results.rows.item(0).vchShipTo);
+            $("#pgmemorderentry_txtpodate").val(results.rows.item(0).vchSODate);
+            $("#pgmemorderentry_txtdeldate").val(results.rows.item(0).vchDelDate);
+            $("#pgmemorderentry_txtrem").val(results.rows.item(0).vchRemarks);
+            $("#pgmemorderentry_txttotamt").val(results.rows.item(0).mnyTotOrderAmt.toFixed(2));
+            pgmem_orderentry_getOrderDetails();
+        }
+        function pgmem_orderentry_loadFail(tx, err) {
+            alert("Error processing SQL: " + err.message);
+        }
+        function pgmem_orderentry_getOrderDetails() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblpo_details WHERE vchStatus<>? AND dtype<>? AND vchPO_Code=?", ["FIRST", "DELETE", p_pocode], pgmem_orderentry_loadDetails, pgmem_orderentry_loadFail);
+            });
+        }
+        function pgmem_orderentry_loadDetails(tx, results) {
+            for (i = 0; i < results.rows.length; i++) {
+                var l_txtqty, l_intQty, l_mnyAmount, l_mnyPrice;
+                var thisli = $("#pgmemorderentry_ulitm").find("li [data-slide='" + results.rows.item(i).vchItem_Code + "']");
+                //l_txtqty = $("#pgmemorderentry_ulitm").find("li [data-slide='" + results.rows.item(i).vchItem_Code +"']");
+                //l_intQty = thisli.find(".intQty");
+                l_txtqty = thisli.find(".pgmemorderentry_txtqty");
+                l_mnyAmount = thisli.find(".mnyAmount");
+                //l_intQty.text(results.rows.item(i).intQty.toString());
+                l_txtqty.val(results.rows.item(i).intQty);
+                l_mnyAmount.text(results.rows.item(i).mnyAmount.toFixed(2));
+            }
+        }
+//        function pgmem_orderentry_getNextItmCode(tx, results) {
+//            var l_socode = "";
+//            var pad = "0000";
+//            if (results.rows.length === 0) {
+//                l_socode = "0001";
+//            }
+//            l_socode = results.rows.item(0).vchPO_Code + 1;
+//            l_socode = pad.substring(0, pad.length - l_socode.toString.length) + l_socode;
+//            $("#pgmemorderentry_txtpocode").val(l_socode);
+//        }
+//        function pgmem_orderentry_qryEmpty() {
+//            $("#pgmemorderentry_txtpocode").val("0001");
+//        }
+        function pgmem_orderentry_qryItmList() {
+            p_db.transaction(function(tx) {
+                tx.executeSql("SELECT * FROM tblitems ORDER BY vchItem_Category, vchItem_Description", [], pgmem_orderentry_fillItmList, pgmem_orderentry_qryListItmfail);
+            });
+        }
+        function pgmem_orderentry_fillItmList(tx, results) {
+            var list = "";
+            var uls = $("#pgmemorderentry_ulitm");
+            var l_liitmcategory = "";
+            uls.text("");
+            for (i = 0; i < results.rows.length; i++) {
+                var l_filtertxt;
+                if (l_liitmcategory !== results.rows.item(i).vchItem_Category) {
+                    list = list + "<li data-role='list-divider' data-theme='b' data-filtertext='" + results.rows.item(i).vchItem_Category.trim() + "'>" + results.rows.item(i).vchItem_Category + "</li>";
+                    l_liitmcategory = results.rows.item(i).vchItem_Category;
+                }
+                l_filtertxt = results.rows.item(i).vchItem_Category.trim() + results.rows.item(i).vchItem_Code.trim() + results.rows.item(i).vchItem_Description.trim() + results.rows.item(i).vchSize.trim() + results.rows.item(i).mnyPrice.toFixed(2);
+                list = list + "<li id='pgmemorderentry_liitm" + (i + 1).toString() + "' class='pgmemorderentry_liitm' data-icon='false' data-filtertext='" + l_filtertxt + "'><a href='#' onclick=pgmem_orderentry_lstItm_click(" + (i + 1).toString() + ") data-slide='" + results.rows.item(i).vchItem_Code.trim() + "'>";
+                list = list + "<table width='100%' style='margin:0px'><tr>";
+                list = list + "<td class='vchItem_Code' width='16%'>" + results.rows.item(i).vchItem_Code.trim() + "</td>";
+                list = list + "<td class='vchItem_Description' width='30%'>" + results.rows.item(i).vchItem_Description.trim() + "</td>";
+                list = list + "<td class='vchSize' width='16%'>" + results.rows.item(i).vchSize.trim() + "</td>";
+                list = list + "<td class='mnyPrice' width='14%'>" + results.rows.item(i).mnyPrice.toFixed(2) + "</td>";
+                list = list + "<td class='intQty' width='5%'></td>";
+                list = list + "<td class='vchItem_Category' width='7%'><input type='hidden' value='" + results.rows.item(i).vchItem_Category.trim() + "'/></td>";
+                list = list + "<td class='mnyAmount' width='12%'>0.00</td>";
+                list = list + "<td class='vchBrand' style='display:none'>" + results.rows.item(i).vchBrand.trim() + "</td>";
+                list = list + "</tr></table> </a></li>";
+            }
+            uls = uls.append(list);
+            uls.listview('refresh');
+            $('#pgmemorderentry_ulitm').find('.intQty')
+                    .append("<input type='text' class='pgmemorderentry_txtqty' value='0'/>")
+                    .trigger("create");
+        }
+        $(document).on("pageshow", function(e) {
+            $(".pgmemorderentry_txtqty").on("input", function(e) {
+                var l_parent = $(this).parent().parent().parent().parent().parent().parent().parent().parent().parent();
+                var l_price = $("#" + l_parent.attr("id")).find(".mnyPrice").text();
+                //$("#"+l_parent.attr("id")).find(".intQty").text($(this).val());
+                pgmem_orderentry_computeLnAmt($("#" + l_parent.attr("id")).find(".mnyAmount"), l_price, $(this).val());
+            });
+            $('#pgmemorderentry_txtsrcitm').bind("input", function(e) {
+                $('#pgmemorderentry_ulitm').prev().find(".ui-input-search .ui-input-text").val($(this).val());
+                $('#pgmemorderentry_ulitm').prev().find(".ui-input-search .ui-input-text").trigger("input", e);
+            });
+            $('#pgmemorderentry_ulitm').prev().find(".ui-input-search .ui-input-text").bind("input", function(e) {
+                //e.preventDefault();
+                //e.stopImmediatePropagation();       
+            });
+        });
+
+        function pgmem_orderentry_lstItm_click(index) {
+            var l_price = $("#pgmemorderentry_liitm" + index).find(".mnyPrice").text();
+            var l_txtqty = $("#pgmemorderentry_liitm" + index).find(".pgmemorderentry_txtqty");
+            var l_qty = parseInt((l_txtqty.val() === "") ? 0 : l_txtqty.val()) + 1;
+            l_txtqty.val(l_qty);
+            pgmem_orderentry_computeLnAmt($("#pgmemorderentry_liitm" + index).find(".mnyAmount"), l_price, l_qty);
+        }
+        $(document).on("swipeleft swiperight taphold", "#pgmemorderentry_ulitm li.ui-li", function(event) {
+            var listitem = $(this);
+            //dir = event.type === "swipeleft" ? "left" : "right",
+            //transition = $.support.cssTransform3d ? dir : false;
+            if (event.type === "swiperight") {
+                pgmem_orderentry_plusQty(listitem);
+            } else if (event.type === "swipeleft") {
+                pgmem_orderentry_minusQty(listitem);
+            } else if (event.type === "taphold") {
+                //listitem.find(".intQty").text("0");
+                //temporary disable
+                //listitem.find(".pgmemorderentry_txtqty").val("0");
+                //listitem.find(".mnyAmount").text("0.00");
+                //pgmem_orderentry_computeTotAmt();
+            }
+        });
+        function pgmem_orderentry_plusQty(thisli) {
+            var l_price = thisli.find(".mnyPrice").text();
+            //var l_txtqty = thisli.find(".intQty").text();
+            var l_txtqty = thisli.find(".pgmemorderentry_txtqty").val();
+            var l_qty = parseInt(l_txtqty) + 1;
+            //thisli.find(".intQty").text(l_qty.toString());
+            thisli.find(".pgmemorderentry_txtqty").val(l_qty.toString());
+            pgmem_orderentry_computeLnAmt(thisli.find(".mnyAmount"), l_price, l_qty);
+        }
+        function pgmem_orderentry_minusQty(thisli) {
+            var l_price = thisli.find(".mnyPrice").text();
+            //var l_txtqty = thisli.find(".intQty").text();
+            var l_txtqty = thisli.find(".pgmemorderentry_txtqty").val();
+            if (l_txtqty === "0") {
+                return;
+            }
+            var l_qty = parseInt(l_txtqty) - 1;
+            //thisli.find(".intQty").text(l_qty.toString());
+            thisli.find(".pgmemorderentry_txtqty").val(l_qty.toString());
+            pgmem_orderentry_computeLnAmt(thisli.find(".mnyAmount"), l_price, l_qty);
+        }
+        function pgmem_orderentry_computeLnAmt(target, price, qty) {
+            try {
+                var l_amount;
+                l_amount = parseFloat(price) * parseInt(qty);
+                target.text(isNaN(l_amount) ? "0.00" : l_amount.toFixed(2));
+                pgmem_orderentry_computeTotAmt();
+            } catch (e) {
+                target.text("0.00");
+            }
+        }
+        function pgmem_orderentry_computeTotAmt() {
+            var l_totamt = 0;
+            $("#pgmemorderentry_ulitm li").each(function(index) {
+                if ($(this).find(".mnyAmount").text() !== "") {
+                    l_totamt += parseFloat($(this).find(".mnyAmount").text());
+                }
+            });
+            $("#pgmemorderentry_txttotamt").val(l_totamt.toFixed(2));
+        }
+        function pgmem_orderentry_qryListItmfail(tx, results) {
+            pgmem_orderentry_fillItmList(tx, results);
+        }
+        function pgmem_orderentry_btnSrc_Click() {
+            $('#pgmem_orderentry_pop_searchcustomer').popup('open', {transition: 'slideup'});
+        }
+        $(window).resize(function(event) {
+            pgmem_orderentry_moveLink();
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        });
+        function pgmem_orderentry_moveLink() {
+            var offset = $("#pgmemorderentry_txtcustnm").offset();
+            var xPos = offset.left - 18;
+            $("#pgmemorderentry_srccustbtn").css("left", xPos);
+        }
+        function pgmem_orderentry_btnSave_click() {
+            var headerp1 = $("#pgmemorderentry_txtpocode").val(),
+                headerp2 = $("#pgmemorderentry_txtcustnm").val(),
+                headerp3 = $("#pgmemorderentry_txtshipto").val(),
+                headerp4 = $("#pgmemorderentry_txtpodate").val(),
+                headerp5 = $("#pgmemorderentry_txtdeldate").val(),
+                headerp6 = $("#pgmemorderentry_txtrem").val(),
+                headerp7 = $("#pgmemorderentry_txttotamt").val(),
+                headerp8 = $("#pgmemorderentry_txtcustcd").val();
+            var dtTime = p_getDateTime();
+            // Pad the dates
+            headerp4 = p_padDate(headerp4);
+            headerp5 = p_padDate(headerp5);
+
+            if (headerp2 === "" || headerp3 === "" || headerp4 === "" || headerp5 === "" || headerp7 === "0.00") {
+                commonDialog('Save Order', 'There are some blank fields in the entry.',
+                             'Important fields are Customer Name, Ship To, Order Date, Delivery Date and Order Amount',
+                             'exclamation', 'pop');
+                return;
+            } else {
+                var l_sqlcmd, l_param1, l_param2,l_salesman;
+                l_salesman = "";
+                if (p_orderaction === "new") {
+                    l_sqlcmd = "INSERT INTO tblpo_headers(vchStatus,dtype,vchPO_Code,vchCust_Name,vchShipTo,vchPODate,vchDelDate,vchRemarks,mnyTotOrderAmt,dtRecordAdded,dtRecordModed,vchCust_Code) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    l_param1 = ["FIRST", "NEW", headerp1, headerp2, headerp3, headerp4, headerp5, headerp6, headerp7, dtTime, dtTime, headerp8];
+                    l_param2 = ["PENDING", "NEW", headerp1, headerp2, headerp3, headerp4, headerp5, headerp6, headerp7, dtTime, dtTime, headerp8];
+                    p_executeSql(l_sqlcmd, l_param1, "pgmem_orderentry_SaveHeaderV1");
+                    // Update the settings
+                    p_executeSql("Update tblsettings set intPO = COALESCE(intPO,0) + 1");
+                } else {
+                    l_sqlcmd = "UPDATE tblpo_headers SET dtype=?,vchCust_Name=?,vchShipTo=?,vchPODate=?,vchDelDate=?,vchRemarks=?,mnyTotOrderAmt=?,dtRecordModed=?,vchCust_Code=? WHERE vchPO_Code=? AND vchStatus<>?";
+                    l_param2 = ["EDIT", headerp2, headerp3, headerp4, headerp5, headerp6, headerp7, dtTime, headerp8, headerp1, "FIRST"];
+                }
+                p_executeSql(l_sqlcmd, l_param2, "pgmem_orderentry_SaveHeaderV2");
+            }
+        }
+        function pgmem_orderentry_SaveHeaderV2_sqlSuccess(tx, results) {
+            if (p_orderaction === "new") {
+                pgmem_orderentry_SaveNewDetails(tx, results);
+            } else if (p_orderaction === "edit") {
+                pgmem_orderentry_SaveEditDetails(tx, results);
+            }
+            $.mobile.changePage('#pg_memmain', {transition: "slide", reverse: false});
+        }
+        function pgmem_orderentry_SaveNewDetails(tx, results) {
+            pgmem_orderentry_SaveDetails("new");
+        }
+        function pgmem_orderentry_SaveDetails(dtype) {
+            var detailp1, detailp2, detailp3, detailp4, detailp5, detailp6, detailp7, detailp8, detailp9;
+            $("#pgmemorderentry_ulitm li").each(function(index) {
+                var l_sqlcmd, l_param1, l_param2;
+                l_sqlcmd = "INSERT INTO tblpo_details(vchStatus,dtype,vchPO_Code,vchItem_Category,vchItem_Code,vchItem_Description,vchSize,mnyPrice,intQty,mnyAmount,vchBrand) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                if ($(this).find(".mnyAmount").text() !== "") {
+                    if ($(this).find(".mnyAmount").text() !== "0.00") {
+                        detailp1 = $("#pgmemorderentry_txtpocode").val();
+                        detailp2 = $(this).find(".vchItem_Category input").val();
+                        detailp3 = $(this).find(".vchItem_Code").text();
+                        detailp4 = $(this).find(".vchItem_Description").text();
+                        detailp5 = $(this).find(".vchSize").text();
+                        detailp6 = $(this).find(".mnyPrice").text();
+                        detailp7 = $(this).find(".pgmemorderentry_txtqty").val();
+                        //detailp7 = $(this).find(".intQty").text();
+                        detailp8 = $(this).find(".mnyAmount").text();
+                        detailp9 = $(this).find(".vchBrand").text();
+                        if (dtype === "new") {
+                            l_param1 = ["FIRST", "NEW", detailp1, detailp2, detailp3, detailp4, detailp5, detailp6, detailp7, detailp8, detailp9];
+                            p_executeSql(l_sqlcmd, l_param1, "pgmem_orderentry_SaveDetail");
+                            l_param2 = ["PENDING", "NEW", detailp1, detailp2, detailp3, detailp4, detailp5, detailp6, detailp7, detailp8, detailp9];
+                        } else {
+                            l_param2 = ["PENDING", "NEW", detailp1, detailp2, detailp3, detailp4, detailp5, detailp6, detailp7, detailp8, detailp9];
+                        }
+                        p_executeSql(l_sqlcmd, l_param2, "pgmem_orderentry_SaveDetail");
+                    }
+                }
+            });
+        }
+        function pgmem_orderentry_SaveEditDetails(tx, results) {
+            p_executeSql("DELETE FROM tblpo_details WHERE vchStatus<>? AND vchPO_Code=?", ["FIRST", p_pocode], "pgmem_orderentry_SaveDetail");
+            pgmem_orderentry_SaveDetails("edit");
+        }
+
+        function pgmem_orderentry_pop_searchcustomer_txtsrccust_input_before(e) {
+            //debugger;
+            if (e.target.value === "") {
+                $('#pgmemorderentry_txtcustcd').val("");
+            }
+        }
+        function pgmem_orderentry_pop_searchcustomer_li_click(code) {
+            var strcusname = $('#hidcuname' + code).val();
+            var straddress = $('#hidcuadr' + code).val();
+            $('#pgmemorderentry_txtcustnm').val(strcusname);
+            $('#pgmemorderentry_txtcustcd').val(code);
+            $('#pgmemorderentry_txtshipto').val(straddress);
+            $('#pgmem_orderentry_pop_searchcustomer').popup('close', {transition: 'slidedown'});
+        }
+        $('#pgmemorderentry_txtcustnm').on("input", function(e) {
+            $('#pgmemorderentry_txtcustcd').val("");
+        });
+
+    </script>
+</div>
+
+
+<!--reserved: to remove
+//        function pgmem_orderentry_qryApptList() {
+//            p_db.transaction(function(tx) {
+//                tx.executeSql("SELECT * FROM tblappointments WHERE dtype<>? and dtype=? and vchStatus=? ORDER BY dtRecordModed DESC LIMIT 20", ['DELETE', 'EDIT', 'IN'], pgmem_orderentry_fillApptList, pgmem_orderentry_qryListApptfail);
+//            });
+//        }
+//        function pgmem_orderentry_fillApptList(tx, results) {
+//            var ultag, ulopentag, ulclosetag;
+//            var list = "";
+//            var liheader = "";
+//
+//            $('#pgmemorderentry_dvapptlst').text("");
+//            var uls = $();
+//            ulopentag = "<ul id='pgmemorderentry_ulappt' data-role='listview' >";
+//            liheader = "<li data-role='list-divider'><table align='center' column='5' width='100%'><tr>";
+//            liheader = liheader + "<td width='10%'>Appt.Code</td>";
+//            liheader = liheader + "<td width='21%'>Date/Time</td>";
+//            liheader = liheader + "<td width='25%'>Customer</td>";
+//            liheader = liheader + "<td width='35%'>Address</td>";
+//            liheader = liheader + "<td width='9%'>Status</td>";
+//            liheader = liheader + "</tr></table></li>";
+//            ulclosetag = "</ul>";
+//
+//            if (results.rows.hasOwnProperty("length")) {
+//                l_address = "";
+//                l_datetime = "";
+//                for (i = 0; i < results.rows.length; i++) {
+//                    //debugger;
+//                    l_address = results.rows.item(i).vchAppt_Add1.trim() +
+//                            (results.rows.item(i).vchAppt_Add2.trim() === "" ? "" : ", " + results.rows.item(i).vchAppt_Add2.trim()) +
+//                            (results.rows.item(i).vchAppt_Cntry.trim() === "" ? "" : ", " + results.rows.item(i).vchAppt_Cntry.trim()) +
+//                            ", " + results.rows.item(i).vchAppt_Zip.trim();
+//                    l_datetime = results.rows.item(i).vchAppt_Date.trim() + " " + results.rows.item(i).vchAppt_Time.trim();
+//                    list = list + "<li id='pgmemorderentry_liappt" + (i + 1).toString() + "' class='pgmemorderentry_liappt' data-icon='false'><a href='#' onclick=pgmem_orderentry_lstAppt_click('" + results.rows.item(i).vchAppt_Code.toString() + "'," + (i + 1).toString() + ")>";
+//                    list = list + "<table width='100%'><tr>";
+//                    list = list + "<td class='vchAppt_Code' width='10%'>" + results.rows.item(i).vchAppt_Code.trim();
+//                    list = list + "<td class='vchAppt_DateTime' width='21%'>" + l_datetime + "</td>";
+//                    list = list + "<td class='vchCust_Name' width='25%'>" + results.rows.item(i).vchCust_Name.trim() + "</td>";
+//                    list = list + "<td class='vchAppt_Add' width='35%'>" + l_address + "</td>";
+//                    list = list + "<td class='vchStatus' width='9%'>" + results.rows.item(i).vchStatus.trim() + "</td>";
+//                    list = list + "</tr></table> </a></li>";
+//                }
+//            }
+//            ultag = ulopentag + liheader + list + ulclosetag;
+//            uls = uls.add(ultag);
+//            $('#pgmemorderentry_dvapptlst').append(uls);
+//            uls.listview();
+//        }
+//        function pgmem_orderentry_lstAppt_click(code, index) {
+//            //debugger;
+//            $('#pgmemorderentry_ulappt').find('li').removeClass('ui-btn-active');
+//            $('#' + $('#pgmemorderentry_ulappt').children()[index].id).addClass('ui-btn-active');
+//            $("#hid_srccustfrappt").val(code);
+//        }
+//        function pgmem_orderentry_qryListApptfail(tx, results) {
+//            pgmem_orderentry_fillItmList(tx, results);
+//        }
+//        function pgmem_orderentry_loadAppt(tx, results) {
+//            //debugger;            
+//            var l_shipto;
+//            l_shipto = results.rows.item(0).vchAppt_Add1.trim() +
+//                    (results.rows.item(0).vchAppt_Add2.trim() === "" ? "" : ", " + results.rows.item(0).vchAppt_Add2.trim()) +
+//                    (results.rows.item(0).vchAppt_Cntry.trim() === "" ? "" : ", " + results.rows.item(0).vchAppt_Cntry.trim()) +
+//                    ", " + results.rows.item(0).vchAppt_Zip.trim();
+//            $("#pgmemorderentry_txtcustnm").val(results.rows.item(0).vchCust_Name);
+//            $("#pgmemorderentry_txtshipto").val(l_shipto);
+//        }
+//        function pgmem_orderentry_loadApptFail(tx, err) {
+//            alert("Error processing SQL: " + err.message);
+//        }
+//        function pgmem_orderentry_getCustFrAppt() {
+//            p_db.transaction(function(tx) {
+//                tx.executeSql("SELECT * FROM tblappointments WHERE dtype<>? AND vchAppt_Code=?", ["DELETE", $("#hid_srccustfrappt").val()], pgmem_orderentry_loadAppt, pgmem_orderentry_loadApptFail);
+//            });
+//        }
+//        $('#popup_srccustfrappt').on('popupbeforeposition', function(event, ui) {
+//            //pgmem_orderentry_qryApptList();
+//        });
+
+//        $("#pgmemorderentry_ulitm").listview('option', 'filterCallback', function (text, searchValue) { 
+//            $("li[data-groupoptions]").removeClass('override-ui-screen-hidden');
+//            $("li[data-groupoptions="+searchValue.toLowerCase()+"]").addClass('override-ui-screen-hidden');
+//            return text.toLowerCase().indexOf( searchValue ) === -1;
+//        });
+        //pgmemorderentry_txtsrcitm
+
+-->
