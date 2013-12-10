@@ -41,6 +41,20 @@
         <script src="js/commondiag.js"></script>
         <script src="js/html5sql.js"></script>
         <script src="js/jquery.autocomplete.min.js"></script>
+        
+         <!--Code is disabled on debugging-->
+        <script>
+            //Android
+            if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
+                document.write("<script src='js/cordova-2.9.0_android.js'><\/script>");
+            }
+            // IOS
+            else if (navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+                document.write("<script src='js/cordova-2.9.0_ios.js'><\/script>");
+            }
+        </script>
+        
+        
         <script>
             //p_urlServer = 'http://nkftp.dyndns.org:81/loreal/eService.asmx',
             //http://localhost:64619/eService.asmx
