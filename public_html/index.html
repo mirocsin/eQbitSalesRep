@@ -84,8 +84,7 @@
             })
 
             // Trigger for mobile apps
-            function onDeviceReady() {
-                alert('Welcome to eQbitSalesRep');
+            function onDeviceReady() {             
                 initPages()
             }
 
@@ -279,6 +278,7 @@
             }
             function errorTA_settings(err) {
                 alert("Error processing SQL: " + err.code);
+                createDataStru();
             }
 
             function error_settings(err) {
