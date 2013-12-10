@@ -1,10 +1,7 @@
-function createDataStru() {
-    //alert("check");
+function createDataStru() {    
     var M = new Migrator(p_db);   
-    alert('createDataStru');
     // Version 1    
-    M.migration(1, function(t) {   
-        alert('create table migration v.1');
+    M.migration(1, function(t) {           
         t.executeSql("CREATE TABLE IF NOT EXISTS tblsettings(vchId text,vchUsrnm text,vchPswd text,vchUType text,vchCustCode text,vchCustName text,vchCustAdd text,dtRecordAdded text,intSO numeric, intPO numeric, intCust numeric,bitLogin,vchMainpg text, vchSalesman_Code text, mnyCustMinOrderAmt numeric,intNotiIntrval integer, intNotiExprIntrval integer)");
         t.executeSql("CREATE TABLE IF NOT EXISTS tblappointments(vchAppt_Code text,vchAppt_Add1 text,vchAppt_Add2 text,vchAppt_Add3 text,vchAppt_Cntry text,vchAppt_Zip text,vchAppt_Date text,vchAppt_Time text,vchRemarks text,vchCust_Name text,vchStatus text,dtype text,dtRecordModed text,vchIcon text)");        
         t.executeSql("CREATE TABLE IF NOT EXISTS tblcustomers(vchCust_Code text,vchCust_Name text,vchCust_Add1 text,vchCust_Add2 text,vchCust_Add3 text,vchCust_Cntry text,vchCust_Zip text,vchHomePhone text,vchMobilePhone text,vchEmail text,dtype text,dtRecordModed text,vchSalesman_Code text)");
