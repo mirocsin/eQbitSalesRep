@@ -2,7 +2,7 @@
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.coolappz.eQbitSalesRep" version="1.0.0">
     <name>eQbitSalesRep</name>
     <description>PhoneGap Application</description>
-  
+      
     <author email="info@com.coolappz" href="http://www.coolappz.com">michael</author>
     <icon gap:platform="android" height="96" src="res/icon/android/icon-96-xhdpi.png" width="96"/>
     <icon gap:platform="ios" height="144" src="res/icon/ios/icon-72-2x.png" width="144"/>
@@ -32,4 +32,5 @@
     <preference name="fullscreen" value="false"/>
     <preference name="DisallowOverscroll" value="true"/>
     <access origin="*"/>
+    <access uri="*"/>
 </widget>

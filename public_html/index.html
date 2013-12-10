@@ -56,6 +56,9 @@
         
         
         <script>
+            $.support.cors = true; 
+            document.addEventListener("deviceready", onDeviceReady, false);
+            
             //p_urlServer = 'http://nkftp.dyndns.org:81/loreal/eService.asmx',
             //http://localhost:64619/eService.asmx
             // Global vars
@@ -86,7 +89,9 @@
 //                $.mobile.hidePageLoadingMsg();
 //            });
 
-            $(document).ready(function() {
+            //$(document).ready(function() {
+            function onDeviceReady() {
+                //alert('Device Ready');
                 // Notes: Donot refresh page in the main page, this will cause some problems e.g. the main page will be gone if there is a popup
                 $.mobile.popup.prototype.options.history = false;
 
@@ -156,7 +161,9 @@
                 p_doch = $(this).height();
 
 
-            });
+//            }); // End of Document.Read
+            }
+            
             // Global functions
             function p_getDate() {
                 var l_Date = new Date();
@@ -399,12 +406,12 @@
                 // In getting the image list:
                 // 1. From the Netbeans file manager list on the left side, highlight all the files from the img folder 
                 // 2. then click property and you may copy paste all the image values
-                var imgs = 'appointment.png, closedorder.png, companylogo.jpg, cordova.png, customers.png, delivery.png, edited.png, exclaimation.png, exclaimation32.png, information.png, items.png, logo.png, lorealsg.jpg, more.png, new.png, notifications.png, olcustomer.png, order.png, orderapprov.png, orderclosed.png, orderentry.png, orderpending.png, pendingorder.png, pendingorderedit.png, question.png, reports.png, settings.png, sync.png, urgent.png, visited.png';
-                for (x in imgs.split(','))
-                {
-                    //$("body").append($("<img style='display:none' src='img/" + imgs.split(',')[x].trim() + "' id=img_" + x + "></img>"));
-                    $("body").append($("<img src='img/" + imgs.split(',')[x].trim() + "' id=img_" + x + "></img>"));
-                }
+//                var imgs = 'appointment.png, closedorder.png, companylogo.jpg, cordova.png, customers.png, delivery.png, edited.png, exclaimation.png, exclaimation32.png, information.png, items.png, logo.png, lorealsg.jpg, more.png, new.png, notifications.png, olcustomer.png, order.png, orderapprov.png, orderclosed.png, orderentry.png, orderpending.png, pendingorder.png, pendingorderedit.png, question.png, reports.png, settings.png, sync.png, urgent.png, visited.png';
+//                for (x in imgs.split(','))
+//                {
+//                    //$("body").append($("<img style='display:none' src='img/" + imgs.split(',')[x].trim() + "' id=img_" + x + "></img>"));
+//                    $("body").append($("<img src='img/" + imgs.split(',')[x].trim() + "' id=img_" + x + "></img>"));
+//                }
             }
             function l_loadSettings() {
                 p_executeSql_cb('SELECT * FROM tblsettings', [], {},
